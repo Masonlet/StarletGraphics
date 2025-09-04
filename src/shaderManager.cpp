@@ -20,7 +20,7 @@ bool ShaderManager::useProgram(const std::string& name) const {
 }
 bool ShaderManager::createProgramFromPaths(const std::string& name, const std::string& vertPath, const std::string& fragPath) {
 	Shader shader{};
-	if (!loader.createProgramFromPaths(shader, vertPath, fragPath))
+	if (!loader.createProgramFromPaths(shader, basePath + vertPath, basePath + fragPath))
 		return error("ShaderManager", "createProgramFromPaths", "Failed creating program for: " + name);
 
 	std::map<std::string, Shader>::iterator it = nameToShaders.find(name);
