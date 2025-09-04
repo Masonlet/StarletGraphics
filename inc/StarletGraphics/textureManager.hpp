@@ -8,7 +8,7 @@
 class TextureManager {
 public:
 	TextureManager() = default;
-	~TextureManager() { nameToTextures.clear(); }
+	~TextureManager();
 
 	void setBasePath(const std::string& path) { basePath = path; }
 

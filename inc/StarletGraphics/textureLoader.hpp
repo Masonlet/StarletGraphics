@@ -5,6 +5,8 @@ struct Texture;
 #include <array>
 
 struct TextureLoader {
+	void unloadTexture(Texture& texture);
+
 	bool loadTexture2D(const std::string& path, Texture& outTexture);
 	bool loadCubeFaces(const std::string(&facePaths)[6], Texture facesOut[6]);
 

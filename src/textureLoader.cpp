@@ -4,7 +4,15 @@
 #include "starletparsers/utils/log.hpp"
 #include <glad/glad.h>
 
-bool TextureLoader::loadTexture2D(const std::string & path, Texture & outTexture) {
+void TextureLoader::unloadTexture(Texture& texture) {
+  if (texture.id) { 
+    glDeleteTextures(1, &texture.id);
+    texture.id = 0;
+  }
+  texture.freePixels();
+}
+
+bool TextureLoader::loadTexture2D(const std::string& path, Texture& outTexture) {
   if (!outTexture.empty()) return error("TextureLoader", "loadTexture2D", "Attempting to load non-empty texture object: " + path);
 
   if (!parseBMP(path.c_str(), outTexture))

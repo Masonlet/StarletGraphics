@@ -1,6 +1,10 @@
 #include "starletgraphics/textureManager.hpp"
 #include "starletparsers/utils/log.hpp"
 
+TextureManager::~TextureManager() {
+  for (std::map<std::string, Texture>::iterator it = nameToTextures.begin(); it != nameToTextures.end(); ++it) 
+    loader.unloadTexture(it->second);
+}
 bool TextureManager::findTexture(const std::string& name) const {
   return nameToTextures.find(name) != nameToTextures.end();
 }
