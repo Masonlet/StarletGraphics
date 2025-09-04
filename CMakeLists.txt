@@ -38,4 +38,3 @@ endif()
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "External")
-set_target_properties(StarletParsers PROPERTIES FOLDER "External")
