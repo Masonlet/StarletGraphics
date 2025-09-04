@@ -10,7 +10,7 @@ bool MeshManager::addMesh(const std::string& path) {
   if (findMesh(path)) return true;
 
   Mesh mesh;
-  if(!loader.loadMesh(basePath + "/meshes/" + path, mesh))
+  if(!loader.loadMesh(basePath + "/models/" + path, mesh))
     return error("MeshManager", "addMesh", "Could not load mesh from " + path);
 
   if (!loader.uploadMesh(mesh))
