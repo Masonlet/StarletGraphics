@@ -10,6 +10,8 @@ public:
 	TextureManager() = default;
 	~TextureManager() { nameToTextures.clear(); }
 
+	void setBasePath(const std::string& path) { basePath = path; }
+
 	bool addTexture(const std::string& name, const std::string& filePath);
 	bool addCubeTexture(const std::string& name, const std::string(&facePaths)[6]);
 
@@ -20,6 +22,5 @@ public:
 private:
 	TextureLoader loader;
 	std::string basePath;
-
 	std::map<std::string, Texture> nameToTextures;
 };

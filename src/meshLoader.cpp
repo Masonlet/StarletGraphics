@@ -6,9 +6,10 @@
 
 bool MeshLoader::loadMesh(const std::string& path, Mesh& mesh) {
   if (!mesh.empty()) return error("MeshLoader", "loadMesh", "Loading non-empty mesh: " + path);
-    if (!parsePlyMesh(path, mesh))
-      return error("MeshLoader", "loadMesh", "Failed to parse mesh file: " + path);
-  
+
+  if (!parsePlyMesh(path, mesh)) 
+    return error("MeshLoader", "loadMesh", "Failed to parse mesh file: " + path);
+
   return true;
 }
 
@@ -41,16 +42,21 @@ bool MeshLoader::uploadMesh(Mesh& mesh) {
   glEnableVertexAttribArray(3);
   glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoord));
 
-  glBindVertexArray(0);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+  glBindVertexArray(0);
 
   GLenum err = glGetError();
-  if (err != GL_NO_ERROR) return error("MeshManager", "UploadToGPU", "OpenGL error " + std::to_string(err));
+  if (err != GL_NO_ERROR) return error("MeshLoader", "UploadToGPU", "OpenGL error " + std::to_string(err));
 
-  delete[] mesh.vertices;
-  mesh.vertices = nullptr;
-  delete[] mesh.indices;
-  mesh.indices = nullptr;
+  delete[] mesh.vertices; mesh.vertices = nullptr;
+  delete[] mesh.indices;  mesh.indices = nullptr;
   return true;
+}
+
+void MeshLoader::unloadMesh(Mesh& mesh) {
+  if (glIsVertexArray(mesh.VAOID))     glDeleteVertexArrays(1, &mesh.VAOID);
+  if (glIsBuffer(mesh.VertexBufferID)) glDeleteBuffers(1, &mesh.VertexBufferID);
+  if (glIsBuffer(mesh.IndexBufferID))  glDeleteBuffers(1, &mesh.IndexBufferID);
+  mesh.VAOID = mesh.VertexBufferID = mesh.IndexBufferID = 0;
+  mesh.numVertices = mesh.numIndices = 0;
 }

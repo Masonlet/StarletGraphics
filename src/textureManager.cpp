@@ -1,8 +1,8 @@
 #include "starletgraphics/textureManager.hpp"
 #include "starletparsers/utils/log.hpp"
 
-bool TextureManager::findTexture(const std::string& path) const {
-  return nameToTextures.find(path) != nameToTextures.end();
+bool TextureManager::findTexture(const std::string& name) const {
+  return nameToTextures.find(name) != nameToTextures.end();
 }
 bool TextureManager::getTexture(const std::string& name, Texture*& data) {
   std::map<std::string, Texture>::iterator it = nameToTextures.find(name);
@@ -19,12 +19,13 @@ bool TextureManager::addTexture(const std::string& name, const std::string& file
   if (findTexture(name)) return true;
 
   Texture texture;
-  if (!loader.loadTexture2D(filePath, texture))
-    return error("TextureManager", "addTexture", "Failed load: " + filePath);
+  if (!loader.loadTexture2D(basePath + filePath, texture))
+    return error("TextureManager", "addTexture", "Failed load: " + basePath + filePath);
 
   if (!loader.uploadTexture2D(texture, true))
     return error("TextureManager", "addTexture", "Failed upload: " + name);
 
+	texture.freePixels();
   nameToTextures[name] = std::move(texture);
   return true;
 }
@@ -32,13 +33,16 @@ bool TextureManager::addTexture(const std::string& name, const std::string& file
 bool TextureManager::addCubeTexture(const std::string& name, const std::string(&facePaths)[6]) {
   if (findTexture(name)) return true;
 
+  std::string fullPaths[6];
+  for (int i = 0; i < 6; ++i) fullPaths[i] = basePath + facePaths[i];
+
   Texture faces[6];
-  if (!loader.loadCubeFaces(facePaths, faces))
-    return error("TextureManager", "addCubeTexture", "Failed to load cube map faces for: " + name);
+  if (!loader.loadCubeFaces(fullPaths, faces))
+    return error("TextureManager", "addCubeTexture", "Failed to load: " + name);
 
   Texture cube;
   if (!loader.uploadTextureCube(faces, cube, true))
-    return error("TextureManager", "addCubeTexture", "Failed to upload cube map: " + name);
+    return error("TextureManager", "addCubeTexture", "Failed to upload: " + name);
 
   for (int i = 0; i < 6; ++i) faces[i].freePixels();
   nameToTextures[name] = std::move(cube);
