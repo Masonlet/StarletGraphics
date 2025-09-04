@@ -1,14 +1,5 @@
 #include "starletgraphics/textureManager.hpp"
 #include "starletparsers/utils/log.hpp"
-#include <glad/glad.h>
-  
-TextureManager::~TextureManager() {
-  for (std::map<std::string, Texture>::iterator it = nameToTextures.begin(); it != nameToTextures.end(); ++it) {
-    unsigned int& id = it->second.id;
-    if (id) { glDeleteTextures(1, &id); id = 0; }
-  }
-  nameToTextures.clear();
-}
 
 bool TextureManager::findTexture(const std::string& path) const {
   return nameToTextures.find(path) != nameToTextures.end();
