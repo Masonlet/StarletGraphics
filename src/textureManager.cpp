@@ -19,8 +19,8 @@ bool TextureManager::addTexture(const std::string& name, const std::string& file
   if (findTexture(name)) return true;
 
   Texture texture;
-  if (!loader.loadTexture2D(basePath + '/' + filePath, texture))
-    return error("TextureManager", "addTexture", "Failed load: " + basePath + '/' + filePath);
+  if (!loader.loadTexture2D(basePath + "/textures/" + filePath, texture))
+    return error("TextureManager", "addTexture", "Failed load: " + basePath + "/textures/" + filePath);
 
   if (!loader.uploadTexture2D(texture, true))
     return error("TextureManager", "addTexture", "Failed upload: " + name);
@@ -34,7 +34,7 @@ bool TextureManager::addCubeTexture(const std::string& name, const std::string(&
   if (findTexture(name)) return true;
 
   std::string fullPaths[6];
-  for (int i = 0; i < 6; ++i) fullPaths[i] = basePath + '/' + facePaths[i];
+  for (int i = 0; i < 6; ++i) fullPaths[i] = basePath + "/textures/" + facePaths[i];
 
   Texture faces[6];
   if (!loader.loadCubeFaces(fullPaths, faces))
