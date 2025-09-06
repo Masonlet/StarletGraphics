@@ -1,5 +1,5 @@
-#include "starletgraphics/meshManager.hpp"
-#include "starletparsers/utils/log.hpp"
+#include "StarletGraphics/meshManager.hpp"
+#include "StarletParsers/utils/log.hpp"
 
 MeshManager::~MeshManager() {
   for (std::map<std::string, Mesh>::iterator it = pathToMeshes.begin(); it != pathToMeshes.end(); ++it) 

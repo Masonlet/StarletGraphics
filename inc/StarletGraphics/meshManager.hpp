@@ -1,6 +1,6 @@
 #pragma once
 
-#include "starletparsers/meshes/mesh.hpp"
+#include "StarletParsers/meshes/mesh.hpp"
 #include "meshLoader.hpp"
 #include <string>	
 #include <map>

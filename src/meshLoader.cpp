@@ -1,7 +1,7 @@
-#include "starletparsers/meshes/mesh.hpp"
-#include "starletgraphics/meshLoader.hpp"
-#include "starletparsers/meshes/plyParser.hpp"
-#include "starletparsers/utils/log.hpp"
+#include "StarletParsers/meshes/mesh.hpp"
+#include "StarletGraphics/meshLoader.hpp"
+#include "StarletParsers/meshes/plyParser.hpp"
+#include "StarletParsers/utils/log.hpp"
 #include <glad/glad.h>
 
 bool MeshLoader::loadMesh(const std::string& path, Mesh& mesh) {

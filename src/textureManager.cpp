@@ -1,5 +1,5 @@
-#include "starletgraphics/textureManager.hpp"
-#include "starletparsers/utils/log.hpp"
+#include "StarletGraphics/textureManager.hpp"
+#include "StarletParsers/utils/log.hpp"
 
 TextureManager::~TextureManager() {
   for (std::map<std::string, Texture>::iterator it = nameToTextures.begin(); it != nameToTextures.end(); ++it) 

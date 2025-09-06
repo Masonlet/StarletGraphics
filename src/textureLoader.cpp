@@ -1,7 +1,7 @@
-#include "starletgraphics/textureLoader.hpp"
-#include "starletparsers/textures/texture.hpp"
-#include "starletparsers/textures/bmpParser.hpp"
-#include "starletparsers/utils/log.hpp"
+#include "StarletGraphics/textureLoader.hpp"
+#include "StarletParsers/textures/texture.hpp"
+#include "StarletParsers/textures/bmpParser.hpp"
+#include "StarletParsers/utils/log.hpp"
 #include <glad/glad.h>
 
 void TextureLoader::unloadTexture(Texture& texture) {
