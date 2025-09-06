@@ -34,7 +34,7 @@ bool MeshManager::createTriangle(const std::string& name, const Vec2& size, cons
 	Mesh info;
 
 	info.numVertices = 3;
-	info.vertices = new Vertex[3];
+	info.vertices.resize(3);
 	info.vertices[0].pos = { -0.5f * size.x, -0.5f * size.y, 0.0f };
 	info.vertices[1].pos = { 0.5f * size.x, -0.5f * size.y, 0.0f };
 	info.vertices[2].pos = { 0.0f,           0.5f * size.y, 0.0f };
@@ -42,7 +42,7 @@ bool MeshManager::createTriangle(const std::string& name, const Vec2& size, cons
 
 	info.numIndices = 3;
 	info.numTriangles = 1;
-	info.indices = new unsigned int[3];
+	info.indices.resize(3);
 	info.indices[0] = 0;
 	info.indices[1] = 1;
 	info.indices[2] = 2;
@@ -55,8 +55,8 @@ bool MeshManager::createSquare(const std::string& name, const Vec2& size) {
 	info.numIndices = 6;
 	info.numTriangles = 2;
 
-	info.vertices = new Vertex[6];
-	info.indices = new unsigned int[6];
+	info.vertices.resize(6);
+	info.indices.resize(6);
 
 	const float halfX = 0.5f * size.x;
 	const float halfY = 0.5f * size.y;
@@ -86,8 +86,8 @@ bool MeshManager::createCube(const std::string& name, const Vec3& size) {
 	info.numIndices = vertexCount;
 	info.numTriangles = 12;
 
-	info.vertices = new Vertex[vertexCount];
-	info.indices = new unsigned int[vertexCount];
+	info.vertices.resize(vertexCount);
+	info.indices.resize(vertexCount);
 
 	float x = 0.5f * size.x;
 	float y = 0.5f * size.y;

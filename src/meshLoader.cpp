@@ -48,8 +48,8 @@ bool MeshLoader::uploadMesh(Mesh& mesh) {
   GLenum err = glGetError();
   if (err != GL_NO_ERROR) return error("MeshLoader", "UploadToGPU", "OpenGL error " + std::to_string(err));
 
-  delete[] mesh.vertices; mesh.vertices = nullptr;
-  delete[] mesh.indices;  mesh.indices = nullptr;
+  mesh.vertices.clear();
+  mesh.indices.clear();
   return true;
 }
 
