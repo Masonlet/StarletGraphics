@@ -23,12 +23,12 @@ bool MeshLoader::uploadMesh(Mesh& mesh) {
   //Now ANY state that is related to vertex or index buffer and vertex attribute layout, is stored in the 'state' of the VAO
   glGenBuffers(1, &(mesh.VertexBufferID));
   glBindBuffer(GL_ARRAY_BUFFER, mesh.VertexBufferID);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * mesh.numVertices, mesh.vertices, GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * mesh.numVertices, mesh.vertices.data(), GL_STATIC_DRAW);
 
   //Copy the index buffer into the video card to create an index buffer
   glGenBuffers(1, &(mesh.IndexBufferID));
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.IndexBufferID);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * mesh.numIndices, mesh.indices, GL_STATIC_DRAW);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * mesh.numIndices, mesh.indices.data(), GL_STATIC_DRAW);
 
   glEnableVertexAttribArray(0);
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, pos));

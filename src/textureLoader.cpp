@@ -37,7 +37,7 @@ bool TextureLoader::uploadTexture2D(Texture& texture, bool generateMIPMap) {
 
   const GLenum src = (texture.pixelSize == 4) ? GL_RGBA : GL_RGB;
   const GLint  internal = (texture.pixelSize == 4) ? GL_RGBA8 : GL_RGB8;
-  glTexImage2D(GL_TEXTURE_2D, 0, internal, texture.width, texture.height, 0, src, GL_UNSIGNED_BYTE, texture.pixels);
+  glTexImage2D(GL_TEXTURE_2D, 0, internal, texture.width, texture.height, 0, src, GL_UNSIGNED_BYTE, texture.pixels.data());
 
   if (generateMIPMap) glGenerateMipmap(GL_TEXTURE_2D);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, generateMIPMap ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
@@ -59,7 +59,7 @@ bool TextureLoader::uploadTextureCube(const Texture faces[6], Texture& cubeOut, 
   const int w = faces[0].width, h = faces[0].height; 
   const uint8_t bpp = faces[0].pixelSize;
   for (int i = 0; i < 6; ++i)
-    if (!faces[i].pixels || faces[i].width != w || faces[i].height != h || faces[i].pixelSize != bpp)
+    if (faces[i].pixels.empty() || faces[i].width != w || faces[i].height != h || faces[i].pixelSize != bpp)
       return error("TextureLoader", "uploadTextureCube", "Inconsistent cube faces");
 
   glGenTextures(1, &cubeOut.id);
@@ -75,7 +75,7 @@ bool TextureLoader::uploadTextureCube(const Texture faces[6], Texture& cubeOut, 
   };
 
   for (int i = 0; i < 6; ++i)
-    glTexImage2D(targets[i], 0, internal, w, h, 0, src, GL_UNSIGNED_BYTE, faces[i].pixels);
+    glTexImage2D(targets[i], 0, internal, w, h, 0, src, GL_UNSIGNED_BYTE, faces[i].pixels.data());
 
   if (generateMIPMap) glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
   glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, generateMIPMap ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
