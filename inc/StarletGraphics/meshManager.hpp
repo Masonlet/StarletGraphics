@@ -1,9 +1,6 @@
 #pragma once
 
-struct Mesh;
-struct Vec2;
-struct Vec3;
-struct Vec4;
+#include "mesh.hpp"
 #include "meshLoader.hpp"
 #include <string>	
 #include <map>

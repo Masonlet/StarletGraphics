@@ -1,6 +1,6 @@
 #pragma once
 
-struct Texture;
+#include "texture.hpp"
 #include "textureLoader.hpp"
 #include <string>
 #include <map>
