@@ -31,6 +31,7 @@ FetchContent_Declare(StarletParsers GIT_REPOSITORY https://github.com/masonlet/s
 FetchContent_MakeAvailable(StarletParsers)
 
 target_link_libraries(StarletGraphics PUBLIC StarletParsers)
+
 if(TARGET glad)
   target_link_libraries(StarletGraphics PRIVATE glad)
   set_target_properties(glad PROPERTIES FOLDER "External")

@@ -1,6 +1,6 @@
-#include "StarletParsers/meshes/mesh.hpp"
+#include "StarletGraphics/mesh.hpp"
 #include "StarletGraphics/meshLoader.hpp"
-#include "StarletParsers/meshes/plyParser.hpp"
+#include "StarletGraphics/parsers/plyParser.hpp"
 #include "StarletParsers/utils/log.hpp"
 #include <glad/glad.h>
 

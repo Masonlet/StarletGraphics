@@ -1,6 +1,9 @@
 #pragma once
 
-#include "StarletParsers/meshes/mesh.hpp"
+struct Mesh;
+struct Vec2;
+struct Vec3;
+struct Vec4;
 #include "meshLoader.hpp"
 #include <string>	
 #include <map>

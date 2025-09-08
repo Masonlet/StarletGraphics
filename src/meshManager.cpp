@@ -1,3 +1,4 @@
+#include "StarletGraphics/mesh.hpp"
 #include "StarletGraphics/meshManager.hpp"
 #include "StarletParsers/utils/log.hpp"
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "StarletParsers/textures/texture.hpp"
+struct Texture;
 #include "textureLoader.hpp"
 #include <string>
 #include <map>

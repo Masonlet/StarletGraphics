@@ -1,6 +1,6 @@
 #include "StarletGraphics/shader.hpp"
 #include "StarletGraphics/shaderLoader.hpp"
-#include "StarletParsers/common/fileParser.hpp"
+#include "StarletParsers/fileParser.hpp"
 #include "StarletParsers/utils/log.hpp"
 #include <glad/glad.h>
 

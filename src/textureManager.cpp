@@ -1,3 +1,4 @@
+#include "StarletGraphics/texture.hpp"
 #include "StarletGraphics/textureManager.hpp"
 #include "StarletParsers/utils/log.hpp"
 
