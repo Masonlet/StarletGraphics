@@ -30,7 +30,7 @@ bool MeshManager::addMesh(const std::string& path, Mesh& mesh) {
   return true;
 }
 
-bool MeshManager::createTriangle(const std::string& name, const Vec2& size, const Vec4& vertexColour) {
+bool MeshManager::createTriangle(const std::string& name, const Vec2<float>& size, const Vec4& vertexColour) {
 	Mesh info;
 
 	info.numVertices = 3;
@@ -49,7 +49,7 @@ bool MeshManager::createTriangle(const std::string& name, const Vec2& size, cons
 
 	return addMesh(name, info) ? true : error("Primitive", "createTriangle", "Failed to create triangle " + name);
 }
-bool MeshManager::createSquare(const std::string& name, const Vec2& size) {
+bool MeshManager::createSquare(const std::string& name, const Vec2<float>& size) {
 	Mesh info;
 	info.numVertices = 6;
 	info.numIndices = 6;
