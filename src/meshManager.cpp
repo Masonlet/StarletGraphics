@@ -2,32 +2,32 @@
 #include "StarletParsers/utils/log.hpp"
 
 MeshManager::~MeshManager() {
-  for (std::map<std::string, Mesh>::iterator it = pathToMeshes.begin(); it != pathToMeshes.end(); ++it) 
+	for (std::map<std::string, Mesh>::iterator it = pathToMeshes.begin(); it != pathToMeshes.end(); ++it)
 		loader.unloadMesh(it->second);
 }
 
 bool MeshManager::addMesh(const std::string& path) {
-  if (findMesh(path)) return true;
+	if (findMesh(path)) return true;
 
-  Mesh mesh;
-  if(!loader.loadMesh(basePath + "/models/" + path, mesh))
-    return error("MeshManager", "addMesh", "Could not load mesh from " + path);
+	Mesh mesh;
+	if (!loader.loadMesh(basePath + "/models/" + path, mesh))
+		return error("MeshManager", "addMesh", "Could not load mesh from " + path);
 
-  if (!loader.uploadMesh(mesh))
-    return error("MeshManager", "addMesh", "Could not upload mesh from: " + path);
-
-  pathToMeshes[path] = std::move(mesh);
-  return true;
-}
-bool MeshManager::addMesh(const std::string& path, Mesh& mesh) {
-  if (findMesh(path)) return true;
-  if (mesh.empty()) return error("MeshManager", "addMesh", "Trying to add an empty mesh");
-  
 	if (!loader.uploadMesh(mesh))
 		return error("MeshManager", "addMesh", "Could not upload mesh from: " + path);
 
-  pathToMeshes[path] = std::move(mesh);
-  return true;
+	pathToMeshes[path] = std::move(mesh);
+	return true;
+}
+bool MeshManager::addMesh(const std::string& path, Mesh& mesh) {
+	if (findMesh(path)) return true;
+	if (mesh.empty()) return error("MeshManager", "addMesh", "Trying to add an empty mesh");
+
+	if (!loader.uploadMesh(mesh))
+		return error("MeshManager", "addMesh", "Could not upload mesh from: " + path);
+
+	pathToMeshes[path] = std::move(mesh);
+	return true;
 }
 
 bool MeshManager::createTriangle(const std::string& name, const Vec2<float>& size, const Vec4& vertexColour) {
@@ -49,7 +49,7 @@ bool MeshManager::createTriangle(const std::string& name, const Vec2<float>& siz
 
 	return addMesh(name, info) ? true : error("Primitive", "createTriangle", "Failed to create triangle " + name);
 }
-bool MeshManager::createSquare(const std::string& name, const Vec2<float>& size) {
+bool MeshManager::createSquare(const std::string& name, const Vec2<float>& size, const Vec4& vertexColour) {
 	Mesh info;
 	info.numVertices = 6;
 	info.numIndices = 6;
@@ -72,13 +72,13 @@ bool MeshManager::createSquare(const std::string& name, const Vec2<float>& size)
 	info.vertices[5].pos = { -halfX,  halfY, 0.0f };
 
 	for (int i = 0; i < 6; ++i) {
-		info.vertices[i].col = { 1.0f, 1.0f, 1.0f, 1.0f };
+		info.vertices[i].col = vertexColour;
 		info.indices[i] = i;
 	}
 
 	return addMesh(name, info) ? true : error("Primitive", "createSquare", "Failed to create square " + name);
 }
-bool MeshManager::createCube(const std::string& name, const Vec3& size) {
+bool MeshManager::createCube(const std::string& name, const Vec3& size, const Vec4& vertexColour) {
 	Mesh info;
 	constexpr int vertexCount = 36;
 
@@ -112,7 +112,7 @@ bool MeshManager::createCube(const std::string& name, const Vec3& size) {
 			int idx = i * 6 + j;
 
 			info.vertices[idx].pos = positions[faces[i][j]];
-			info.vertices[idx].col = { 1.0f, 1.0f, 1.0f, 1.0f };
+			info.vertices[idx].col = vertexColour;
 			info.indices[idx] = idx;
 		}
 	}
@@ -124,10 +124,10 @@ bool MeshManager::findMesh(const std::string& name) const {
 	return pathToMeshes.find(name) != pathToMeshes.end();
 }
 bool MeshManager::getMesh(const std::string& name, Mesh*& data) {
-  std::map<std::string, Mesh>::iterator it = pathToMeshes.find(name);
-  if (it == pathToMeshes.end()) return false;
-  data = &it->second;
-  return true;
+	std::map<std::string, Mesh>::iterator it = pathToMeshes.find(name);
+	if (it == pathToMeshes.end()) return false;
+	data = &it->second;
+	return true;
 }
 bool MeshManager::getMesh(const std::string& name, const Mesh*& data) const {
 	std::map<std::string, Mesh>::const_iterator it = pathToMeshes.find(name);
