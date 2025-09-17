@@ -1,39 +1,32 @@
 cmake_minimum_required(VERSION 3.23)
-project(StarletGraphics LANGUAGES C CXX)
 
+set (GRAPHICS_NAME StarletGraphics)
+set (GRAPHICS_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
+set (GRAPHICS_INC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/inc")
+
+project(${GRAPHICS_NAME} LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_SUPPRESS_REGENERATION ON)
 
-add_library(StarletGraphics STATIC)
+add_library(${GRAPHICS_NAME} STATIC)
 
-file(GLOB_RECURSE GRAPHICS_SRC CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
-file(GLOB_RECURSE GRAPHICS_HEADERS CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/inc/StarletGraphics/*.hpp)
+file(GLOB_RECURSE GRAPHICS_SRC CONFIGURE_DEPENDS ${GRAPHICS_SRC_DIR}/*.cpp)
+file(GLOB_RECURSE GRAPHICS_HEADERS CONFIGURE_DEPENDS ${GRAPIHCS_INC_DIR}/StarletGraphics/*.hpp)
 
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src PREFIX "Source Files" FILES ${GRAPHICS_SRC})
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/inc PREFIX "Header Files" FILES ${GRAPHICS_HEADERS})
+source_group(TREE ${GRAPHICS_SRC_DIR} PREFIX "Source Files" FILES ${GRAPHICS_SRC})
+source_group(TREE ${GRAPHICS_INC_DIR} PREFIX "Header Files" FILES ${GRAPHICS_HEADERS})
 
-target_sources(StarletGraphics
-  PRIVATE ${GRAPHICS_SRC}
-  PUBLIC
-    FILE_SET HEADERS
-    BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/inc
-    FILES ${GRAPHICS_HEADERS}
-)
+target_sources(${GRAPHICS_NAME} PUBLIC ${GRAPHICS_HEADERS} PRIVATE ${GRAPHICS_SRC})
 
-target_include_directories(StarletGraphics PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
-  $<INSTALL_INTERFACE:include>
-)
+target_include_directories(${GRAPHICS_NAME} PUBLIC $<BUILD_INTERFACE:${GRAPHICS_INC_DIR}> $<INSTALL_INTERFACE:include>)
 
 include(FetchContent)
-
 FetchContent_Declare(StarletParsers GIT_REPOSITORY https://github.com/masonlet/starletparsers.git GIT_TAG main)
 FetchContent_MakeAvailable(StarletParsers)
-
-target_link_libraries(StarletGraphics PUBLIC StarletParsers)
+target_link_libraries(${GRAPHICS_NAME} PUBLIC StarletParsers)
 
 if(TARGET glad)
-  target_link_libraries(StarletGraphics PRIVATE glad)
+  target_link_libraries(${GRAPHICS_NAME} PRIVATE glad)
   set_target_properties(glad PROPERTIES FOLDER "External")
 endif()
 
