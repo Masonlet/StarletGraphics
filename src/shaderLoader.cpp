@@ -4,22 +4,12 @@
 #include "StarletParsers/utils/log.hpp"
 #include <glad/glad.h>
 
-void ShaderLoader::unloadShader(Shader& shader) {
-	if (shader.programID && glIsProgram(shader.programID)) glDeleteProgram(shader.programID);
-	if (shader.vertexID && glIsShader(shader.vertexID))   glDeleteShader(shader.vertexID);
-	if (shader.fragmentID && glIsShader(shader.fragmentID)) glDeleteShader(shader.fragmentID);
-	shader.programID = shader.vertexID = shader.fragmentID = 0;
-	shader.linked = false;
-}
-
-bool ShaderLoader::loadAndCompileShader(unsigned int& outShaderID, int glShaderType, const std::string& path) {
+bool ShaderLoader::loadSource(std::string& outSource, const std::string& path) {
 	std::string source;
 	if (!loadFile(source, path))
 		return error("ShaderLoader", "createProgramFromPaths", "Failed to load vertex shader file");
 
-	if (!compileShader(outShaderID, glShaderType, source))
-		return error("ShaderLoader", "createProgramFromPaths", "Failed to compile vertex shader");
-
+	outSource = std::move(source);
 	return true;
 }
 
@@ -86,4 +76,12 @@ bool ShaderLoader::linkProgram(unsigned int& outProgramID, unsigned int vertID, 
 	glDeleteProgram(outProgramID);
 	outProgramID = 0;
 	return error("ShaderLoader", "linkProgram", std::string("Program link failed:\n") + log);
+}
+
+void ShaderLoader::unloadShader(Shader& shader) {
+	if (shader.programID && glIsProgram(shader.programID))  glDeleteProgram(shader.programID);
+	if (shader.vertexID && glIsShader(shader.vertexID))     glDeleteShader(shader.vertexID);
+	if (shader.fragmentID && glIsShader(shader.fragmentID)) glDeleteShader(shader.fragmentID);
+	shader.programID = shader.vertexID = shader.fragmentID = 0;
+	shader.linked = false;
 }

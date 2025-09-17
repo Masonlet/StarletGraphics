@@ -16,8 +16,8 @@ public:
 	bool addMesh(const std::string& path, Mesh& mesh);
 
 	bool createTriangle(const std::string& name, const Vec2<float>& size, const Vec4& vertexColour);
-	bool createSquare  (const std::string& name, const Vec2<float>& size, const Vec4& vertexColour);
-	bool createCube    (const std::string& name, const Vec3&        size, const Vec4& vertexColour);
+	bool createSquare(const std::string& name, const Vec2<float>& size, const Vec4& vertexColour);
+	bool createCube(const std::string& name, const Vec3& size, const Vec4& vertexColour);
 
 	bool findMesh(const std::string& path) const;
 	bool getMesh(const std::string& path, Mesh*& dataOut);

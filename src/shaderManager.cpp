@@ -26,12 +26,20 @@ bool ShaderManager::createProgramFromPaths(const std::string& name, const std::s
 	}
 
 	Shader shader{};
-	if (!loader.loadAndCompileShader(shader.vertexID, GL_VERTEX_SHADER, basePath + "/shaders/" + vertPath))
-		return error("ShaderLoader", "createProgramFromPaths", "Failed to load/compile vertex shader");
 
-	if (!loader.loadAndCompileShader(shader.fragmentID, GL_FRAGMENT_SHADER, basePath + "/shaders/" + fragPath)) {
+	std::string vertexSource, fragmentSource;
+	if (!loader.loadSource(vertexSource, basePath + "/shaders/" + vertPath))
+		return error("ShaderLoader", "createProgramFromPaths", "Failed to load vertex shader source");
+
+	if (!loader.loadSource(fragmentSource, basePath + "/shaders/" + fragPath))
+		return error("ShaderLoader", "createProgramFromPaths", "Failed to load fragment shader source");
+
+	if (!loader.compileShader(shader.vertexID, GL_VERTEX_SHADER, vertexSource))
+		return error("ShaderLoader", "createProgramFromPaths", "Failed to compile vertex shader");
+
+	if (!loader.compileShader(shader.fragmentID, GL_FRAGMENT_SHADER, fragmentSource)) {
 		loader.unloadShader(shader);
-		return error("ShaderLoader", "createProgramFromPaths", "Failed to load/compile fragment shader");
+		return error("ShaderLoader", "createProgramFromPaths", "Failed to compile fragment shader");
 	}
 
 	if (!loader.linkProgram(shader.programID, shader.vertexID, shader.fragmentID)) {

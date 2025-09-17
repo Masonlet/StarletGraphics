@@ -5,6 +5,8 @@ struct Mesh;
 
 struct MeshLoader {
 	bool loadMesh(const std::string& path, Mesh& mesh);
+
 	bool uploadMesh(Mesh& mesh);
+
 	void unloadMesh(Mesh& mesh);
-};	
+};

@@ -3,7 +3,7 @@
 #include "StarletParsers/utils/log.hpp"
 
 TextureManager::~TextureManager() {
-  for (std::map<std::string, Texture>::iterator it = nameToTextures.begin(); it != nameToTextures.end(); ++it) 
+  for (std::map<std::string, Texture>::iterator it = nameToTextures.begin(); it != nameToTextures.end(); ++it)
     loader.unloadTexture(it->second);
 }
 bool TextureManager::findTexture(const std::string& name) const {
@@ -30,7 +30,7 @@ bool TextureManager::addTexture(const std::string& name, const std::string& file
   if (!loader.uploadTexture2D(texture, true))
     return error("TextureManager", "addTexture", "Failed upload: " + name);
 
-	texture.freePixels();
+  texture.freePixels();
   nameToTextures[name] = std::move(texture);
   return true;
 }

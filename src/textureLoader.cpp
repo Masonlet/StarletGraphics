@@ -4,14 +4,6 @@
 #include "StarletParsers/utils/log.hpp"
 #include <glad/glad.h>
 
-void TextureLoader::unloadTexture(Texture& texture) {
-  if (texture.id) { 
-    glDeleteTextures(1, &texture.id);
-    texture.id = 0;
-  }
-  texture.freePixels();
-}
-
 bool TextureLoader::loadTexture2D(const std::string& path, Texture& outTexture) {
   if (!outTexture.empty()) return error("TextureLoader", "loadTexture2D", "Attempting to load non-empty texture object: " + path);
 
@@ -56,7 +48,7 @@ bool TextureLoader::uploadTexture2D(Texture& texture, bool generateMIPMap) {
   return true;
 }
 bool TextureLoader::uploadTextureCube(const Texture faces[6], Texture& cubeOut, bool generateMIPMap) {
-  const int w = faces[0].width, h = faces[0].height; 
+  const int w = faces[0].width, h = faces[0].height;
   const uint8_t bpp = faces[0].pixelSize;
   for (int i = 0; i < 6; ++i)
     if (faces[i].pixels.empty() || faces[i].width != w || faces[i].height != h || faces[i].pixelSize != bpp)
@@ -66,7 +58,7 @@ bool TextureLoader::uploadTextureCube(const Texture faces[6], Texture& cubeOut, 
   glBindTexture(GL_TEXTURE_CUBE_MAP, cubeOut.id);
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-  const GLenum src      = (bpp == 4) ? GL_RGBA : GL_RGB;
+  const GLenum src = (bpp == 4) ? GL_RGBA : GL_RGB;
   const GLint  internal = (bpp == 4) ? GL_RGBA8 : GL_RGB8;
   const GLenum targets[6] = {
     GL_TEXTURE_CUBE_MAP_POSITIVE_X, GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
@@ -92,6 +84,14 @@ bool TextureLoader::uploadTextureCube(const Texture faces[6], Texture& cubeOut, 
   }
 
   cubeOut.width = w; cubeOut.height = h; cubeOut.pixelSize = bpp;
-  cubeOut.freePixels(); 
+  cubeOut.freePixels();
   return true;
+}
+
+void TextureLoader::unloadTexture(Texture& texture) {
+  if (texture.id) {
+    glDeleteTextures(1, &texture.id);
+    texture.id = 0;
+  }
+  texture.freePixels();
 }

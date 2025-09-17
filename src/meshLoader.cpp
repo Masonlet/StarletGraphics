@@ -7,7 +7,7 @@
 bool MeshLoader::loadMesh(const std::string& path, Mesh& mesh) {
   if (!mesh.empty()) return error("MeshLoader", "loadMesh", "Loading non-empty mesh: " + path);
 
-  if (!parsePlyMesh(path, mesh)) 
+  if (!parsePlyMesh(path, mesh))
     return error("MeshLoader", "loadMesh", "Failed to parse mesh file: " + path);
 
   return true;
