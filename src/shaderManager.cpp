@@ -10,21 +10,39 @@ ShaderManager::~ShaderManager() {
 
 bool ShaderManager::useProgram(const std::string& name) const {
 	std::map<std::string, Shader>::const_iterator it = nameToShaders.find(name);
-	if (it == nameToShaders.end()) 
+	if (it == nameToShaders.end())
 		return error("ShaderManager", "useProgram", "Shader not found: " + name);
-	if (!it->second.linked || it->second.programID == 0) 
+	if (!it->second.linked || it->second.programID == 0)
 		return error("ShaderManager", "useProgram", "Shader not linked, or has invalid id: " + name);
 
 	glUseProgram(it->second.programID);
 	return true;
 }
 bool ShaderManager::createProgramFromPaths(const std::string& name, const std::string& vertPath, const std::string& fragPath) {
+	if (findShader(name)) {
+		std::map<std::string, Shader>::iterator it = nameToShaders.find(name);
+		loader.unloadShader(it->second);
+		nameToShaders.erase(it);
+	}
+
 	Shader shader{};
-	if (!loader.createProgramFromPaths(shader, basePath + "/shaders/" + vertPath, basePath + "/shaders/" + fragPath))
-		return error("ShaderManager", "createProgramFromPaths", "Failed creating program for: " + name);
+	if (!loader.loadAndCompileShader(shader.vertexID, GL_VERTEX_SHADER, basePath + "/shaders/" + vertPath))
+		return error("ShaderLoader", "createProgramFromPaths", "Failed to load/compile vertex shader");
+
+	if (!loader.loadAndCompileShader(shader.fragmentID, GL_FRAGMENT_SHADER, basePath + "/shaders/" + fragPath)) {
+		loader.unloadShader(shader);
+		return error("ShaderLoader", "createProgramFromPaths", "Failed to load/compile fragment shader");
+	}
+
+	if (!loader.linkProgram(shader.programID, shader.vertexID, shader.fragmentID)) {
+		loader.unloadShader(shader);
+		return error("ShaderLoader", "createProgramFromPaths", "Failed to link program");
+	}
+
+	shader.linked = true;
 
 	std::map<std::string, Shader>::iterator it = nameToShaders.find(name);
-	if (it != nameToShaders.end()) 
+	if (it != nameToShaders.end())
 		loader.unloadShader(it->second);
 
 	nameToShaders[name] = std::move(shader);

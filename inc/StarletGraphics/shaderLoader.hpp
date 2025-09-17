@@ -5,9 +5,9 @@ struct Shader;
 
 struct ShaderLoader {
 	void unloadShader(Shader& shader);
-	bool createProgramFromPaths(Shader& out, const std::string& vertPath, const std::string& fragPath);
+	bool loadAndCompileShader(unsigned int& outShaderID, int glShaderType, const std::string& path);
+	bool linkProgram(unsigned int& outProgramID, unsigned int vertID, unsigned int fragID);
 
 private:
 	bool compileShader(unsigned int& outShaderID, int glShaderType, const std::string& source);
-	bool linkProgram(unsigned int& outProgramID, unsigned int vertID, unsigned int fragID);
 };

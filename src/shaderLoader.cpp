@@ -5,37 +5,21 @@
 #include <glad/glad.h>
 
 void ShaderLoader::unloadShader(Shader& shader) {
-	if (shader.programID  && glIsProgram(shader.programID)) glDeleteProgram(shader.programID);
-	if (shader.vertexID   && glIsShader(shader.vertexID))   glDeleteShader(shader.vertexID);
+	if (shader.programID && glIsProgram(shader.programID)) glDeleteProgram(shader.programID);
+	if (shader.vertexID && glIsShader(shader.vertexID))   glDeleteShader(shader.vertexID);
 	if (shader.fragmentID && glIsShader(shader.fragmentID)) glDeleteShader(shader.fragmentID);
 	shader.programID = shader.vertexID = shader.fragmentID = 0;
 	shader.linked = false;
 }
-bool ShaderLoader::createProgramFromPaths(Shader& out, const std::string& vertPath, const std::string& fragPath) {
-	std::string vertSource, fragSource;
-	if (!loadFile(vertSource, vertPath)) return error("ShaderLoader", "createProgramFromPaths", "Failed to load vertex shader file");
-	if (!loadFile(fragSource, fragPath)) return error("ShaderLoader", "createProgramFromPaths", "Failed to load fragment shader file");
 
-	unsigned int vertID = 0;
-	if (!compileShader(vertID, GL_VERTEX_SHADER, vertSource)) return error("ShaderLoader", "createProgramFromPaths", "Failed to compile vertex shader");
+bool ShaderLoader::loadAndCompileShader(unsigned int& outShaderID, int glShaderType, const std::string& path) {
+	std::string source;
+	if (!loadFile(source, path))
+		return error("ShaderLoader", "createProgramFromPaths", "Failed to load vertex shader file");
 
-	unsigned int fragID = 0;
-	if (!compileShader(fragID, GL_FRAGMENT_SHADER, fragSource)) {
-		if (vertID) glDeleteShader(vertID);
-		return error("ShaderLoader", "createProgramFromPaths", "Failed to compile fragment shader");
-	}
+	if (!compileShader(outShaderID, glShaderType, source))
+		return error("ShaderLoader", "createProgramFromPaths", "Failed to compile vertex shader");
 
-	unsigned int programID = 0;
-	if (!linkProgram(programID, vertID, fragID)) {
-		if (vertID) glDeleteShader(vertID);
-		if (fragID) glDeleteShader(fragID);
-		return error("ShaderLoader", "createProgramFromPaths", "Failed to link program");
-	}
-
-	out.programID = programID;
-	out.vertexID = vertID;
-	out.fragmentID = fragID;
-	out.linked = true;
 	return true;
 }
 
@@ -65,10 +49,10 @@ bool ShaderLoader::compileShader(unsigned int& outShaderID, int glShaderType, co
 	glDeleteShader(outShaderID);
 	outShaderID = 0;
 
-	const std::string shaderType = 
-		 (glShaderType == GL_VERTEX_SHADER   ? "VERTEX"
-		: glShaderType == GL_FRAGMENT_SHADER ? "FRAGMENT"
-		                                     : "UNKNOWN");
+	const std::string shaderType =
+		(glShaderType == GL_VERTEX_SHADER ? "VERTEX"
+			: glShaderType == GL_FRAGMENT_SHADER ? "FRAGMENT"
+			: "UNKNOWN");
 	return error("ShaderLoader", "compileShader", "Shader compilation failed (type=" + shaderType + "):\n" + log);
 }
 

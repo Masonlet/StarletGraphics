@@ -7,7 +7,7 @@
 #include <string>
 
 class ShaderManager {
-public:		
+public:
 	ShaderManager() = default;
 	~ShaderManager();
 
