@@ -19,16 +19,3 @@ source_group(TREE ${GRAPHICS_INC_DIR} PREFIX "Header Files" FILES ${GRAPHICS_HEA
 target_sources(${GRAPHICS_NAME} PUBLIC ${GRAPHICS_HEADERS} PRIVATE ${GRAPHICS_SRC})
 
 target_include_directories(${GRAPHICS_NAME} PUBLIC $<BUILD_INTERFACE:${GRAPHICS_INC_DIR}> $<INSTALL_INTERFACE:include>)
-
-include(FetchContent)
-FetchContent_Declare(StarletParsers GIT_REPOSITORY https://github.com/masonlet/starletparsers.git GIT_TAG main)
-FetchContent_MakeAvailable(StarletParsers)
-target_link_libraries(${GRAPHICS_NAME} PUBLIC StarletParsers)
-
-if(TARGET glad)
-  target_link_libraries(${GRAPHICS_NAME} PRIVATE glad)
-  set_target_properties(glad PROPERTIES FOLDER "External")
-endif()
-
-set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "External")
