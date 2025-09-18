@@ -1,5 +1,5 @@
-#include "StarletGraphics/mesh.hpp"
-#include "StarletGraphics/parsers/plyParser.hpp"
+#include "StarletGraphics/mesh/mesh.hpp"
+#include "StarletGraphics/mesh/parsers/plyParser.hpp"
 #include "StarletParsers/parserUtils.hpp"
 #include "StarletParsers/fileParser.hpp"
 #include "StarletParsers/utils/log.hpp"

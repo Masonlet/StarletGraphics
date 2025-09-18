@@ -1,4 +1,4 @@
-#include "StarletGraphics/shaderManager.hpp"
+#include "StarletGraphics/shader/shaderManager.hpp"
 #include "StarletParsers/utils/log.hpp"
 #include <glad/glad.h>
 #include <sstream>

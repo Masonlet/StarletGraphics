@@ -4,31 +4,14 @@ set (GRAPHICS_NAME StarletGraphics)
 set (GRAPHICS_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 set (GRAPHICS_INC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/inc")
 
-project(${GRAPHICS_NAME} LANGUAGES C CXX)
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_SUPPRESS_REGENERATION ON)
-
 add_library(${GRAPHICS_NAME} STATIC)
 
 file(GLOB_RECURSE GRAPHICS_SRC CONFIGURE_DEPENDS ${GRAPHICS_SRC_DIR}/*.cpp)
-file(GLOB_RECURSE GRAPHICS_HEADERS CONFIGURE_DEPENDS ${GRAPIHCS_INC_DIR}/StarletGraphics/*.hpp)
+file(GLOB_RECURSE GRAPHICS_HEADERS CONFIGURE_DEPENDS ${GRAPHICS_INC_DIR}/StarletGraphics/*.hpp)
 
 source_group(TREE ${GRAPHICS_SRC_DIR} PREFIX "Source Files" FILES ${GRAPHICS_SRC})
 source_group(TREE ${GRAPHICS_INC_DIR} PREFIX "Header Files" FILES ${GRAPHICS_HEADERS})
 
 target_sources(${GRAPHICS_NAME} PUBLIC ${GRAPHICS_HEADERS} PRIVATE ${GRAPHICS_SRC})
-
 target_include_directories(${GRAPHICS_NAME} PUBLIC $<BUILD_INTERFACE:${GRAPHICS_INC_DIR}> $<INSTALL_INTERFACE:include>)
-
-include(FetchContent)
-FetchContent_Declare(StarletParsers GIT_REPOSITORY https://github.com/masonlet/starletparsers.git GIT_TAG main)
-FetchContent_MakeAvailable(StarletParsers)
-target_link_libraries(${GRAPHICS_NAME} PUBLIC StarletParsers)
-
-if(TARGET glad)
-  target_link_libraries(${GRAPHICS_NAME} PRIVATE glad)
-  set_target_properties(glad PROPERTIES FOLDER "External")
-endif()
-
-set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "External")
+target_link_libraries(${GRAPHICS_NAME} PUBLIC StarletParsers StarletScene glad)
