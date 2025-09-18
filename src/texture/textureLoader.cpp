@@ -1,6 +1,6 @@
-#include "StarletGraphics/textureLoader.hpp"
-#include "StarletGraphics/texture.hpp"
-#include "StarletGraphics/parsers/bmpParser.hpp"
+#include "StarletGraphics/texture/textureLoader.hpp"
+#include "StarletGraphics/texture/texture.hpp"
+#include "StarletGraphics/texture/parsers/bmpParser.hpp"
 #include "StarletParsers/utils/log.hpp"
 #include <glad/glad.h>
 

@@ -1,10 +1,10 @@
 #include <glad/glad.h>
-#include "StarletGraphics/shaderManager.hpp"
-#include "StarletGraphics/textureManager.hpp"
-#include "StarletGraphics/meshManager.hpp"
+#include "StarletGraphics/shader/shaderManager.hpp"
+#include "StarletGraphics/texture/textureManager.hpp"
+#include "StarletGraphics/mesh/meshManager.hpp"
 #include "StarletScene/objects/model.hpp"
 #include "StarletMath/mat4.hpp"
-#include "StarletEngine/renderer.hpp"
+#include "StarletGraphics/renderer.hpp"
 #include "StarletParsers/utils/log.hpp"
 #include "StarletScene/objects/light.hpp"
 

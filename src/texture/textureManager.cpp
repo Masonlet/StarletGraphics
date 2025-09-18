@@ -1,5 +1,5 @@
-#include "StarletGraphics/texture.hpp"
-#include "StarletGraphics/textureManager.hpp"
+#include "StarletGraphics/texture/texture.hpp"
+#include "StarletGraphics/texture/textureManager.hpp"
 #include "StarletParsers/utils/log.hpp"
 
 TextureManager::~TextureManager() {
