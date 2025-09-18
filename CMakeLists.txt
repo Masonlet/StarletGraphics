@@ -14,4 +14,4 @@ source_group(TREE ${GRAPHICS_INC_DIR} PREFIX "Header Files" FILES ${GRAPHICS_HEA
 
 target_sources(${GRAPHICS_NAME} PUBLIC ${GRAPHICS_HEADERS} PRIVATE ${GRAPHICS_SRC})
 target_include_directories(${GRAPHICS_NAME} PUBLIC $<BUILD_INTERFACE:${GRAPHICS_INC_DIR}> $<INSTALL_INTERFACE:include>)
-target_link_libraries(${GRAPHICS_NAME} PUBLIC StarletParsers glad)
+target_link_libraries(${GRAPHICS_NAME} PUBLIC StarletParsers StarletScene glad)
