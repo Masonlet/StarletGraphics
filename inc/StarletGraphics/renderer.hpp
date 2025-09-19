@@ -49,12 +49,15 @@ public:
 	bool addTexture(const std::string& name, const std::string& filePath);
 	bool addTextureCube(const std::string& name, const std::string(&facePaths)[6]);
 
+	void toggleWireframe();
+
 private:
 	ShaderManager shaderManager;
 	MeshManager meshManager;
 	TextureManager textureManager;
 
 	unsigned int program{ 0 };
+	bool wireframe{ false };
 
 	int modelLocation{ -1 };
 	int modelViewLocation{ -1 }, modelProjectionLocation{ -1 };

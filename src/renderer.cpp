@@ -258,3 +258,8 @@ bool Renderer::addTexture(const std::string& name, const std::string& filePath) 
 bool Renderer::addTextureCube(const std::string& name, const std::string(&facePaths)[6]) {
 	return textureManager.addTextureCube(name, facePaths) ? true : error("Renderer", "addTexture", "Failed to add texture cube: " + name);
 }
+
+void Renderer::toggleWireframe() {
+	wireframe = !wireframe;
+	glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
+}
