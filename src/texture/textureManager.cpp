@@ -35,7 +35,7 @@ bool TextureManager::addTexture(const std::string& name, const std::string& file
   return true;
 }
 
-bool TextureManager::addCubeTexture(const std::string& name, const std::string(&facePaths)[6]) {
+bool TextureManager::addTextureCube(const std::string& name, const std::string(&facePaths)[6]) {
   if (findTexture(name)) return true;
 
   std::string fullPaths[6];

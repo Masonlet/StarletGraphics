@@ -13,7 +13,7 @@ public:
 	void setBasePath(const std::string& path) { basePath = path; }
 
 	bool addTexture(const std::string& name, const std::string& filePath);
-	bool addCubeTexture(const std::string& name, const std::string(&facePaths)[6]);
+	bool addTextureCube(const std::string& name, const std::string(&facePaths)[6]);
 
 	bool findTexture(const std::string& name) const;
 	bool getTexture(const std::string& name, Texture*& dataOut);

@@ -10,7 +10,7 @@ public:
 	MeshManager() = default;
 	~MeshManager();
 
-	void setBasePath(const std::string& path) { basePath = path; }
+	void setBasePath(const char* path) { basePath = path; }
 
 	bool addMesh(const std::string& path);
 	bool addMesh(const std::string& path, Mesh& mesh);

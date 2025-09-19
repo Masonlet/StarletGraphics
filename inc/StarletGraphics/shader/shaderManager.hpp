@@ -11,7 +11,7 @@ public:
 	ShaderManager() = default;
 	~ShaderManager();
 
-	void setBasePath(const std::string& path) { basePath = path; }
+	void setBasePath(const char* path) { basePath = path; }
 
 	bool useProgram(const std::string& name) const;
 	bool createProgramFromPaths(const std::string& name, const std::string& vertPath, const std::string& fragPath);

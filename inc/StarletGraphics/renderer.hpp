@@ -1,12 +1,12 @@
 #pragma once
 
+#include "StarletGraphics/shader/shaderManager.hpp"
+#include "StarletGraphics/mesh/meshManager.hpp"
+#include "StarletGraphics/texture/textureManager.hpp"
 #include <map>
 #include <string>
 #include <vector>
 
-class ShaderManager;
-class MeshManager;
-class TextureManager;
 struct Vec3;
 struct Mat4;
 struct Mesh;
@@ -17,10 +17,28 @@ constexpr int SKYBOX_TU{ 20 };
 
 class Renderer {
 public:
+	void setAssetPaths(const char* path);
+
+	bool createProgramFromPaths(const std::string& name, const std::string& vertPath, const std::string& fragPath);
 	bool setProgram(unsigned int program);
 	unsigned int getProgram() const { return program; }
+	unsigned int getProgramID(const std::string& name) const;
+
+	bool createTriangle(const std::string& name, const Vec2<float>& size, const Vec4& vertexColour);
+	bool createSquare(const std::string& name, const Vec2<float>& size, const Vec4& vertexColour);
+	bool createCube(const std::string& name, const Vec3& size, const Vec4& vertexColour);
+
+	bool addMesh(const std::string& path);
+	bool addMesh(const std::string& path, Mesh& mesh);
+	bool getMesh(const std::string& path, Mesh*& dataOut);
+	bool getMesh(const std::string& path, const Mesh*& dataOut);
 
 	void updateModelUniforms(const Model& instance, const Mesh& data) const;
+	bool drawModel(const Model& instance) const;
+
+	void bindSkyboxTexture(unsigned int texture) const;
+	void setModelIsSkybox(bool isSkybox) const;
+	bool drawSkybox(const Model& skybox, const Vec3& cameraPos) const;
 
 	void updateCameraUniforms(const Vec3& eye, const Mat4& view, const Mat4& projection) const;
 
@@ -28,14 +46,14 @@ public:
 	void updateLightUniforms(const std::map<std::string, Light>& lights) const;
 	void updateLightCount(int count) const;
 
-	bool drawModel(MeshManager& meshManager, TextureManager& textureManager, const Model& instance) const;
-	bool drawSkybox(MeshManager& meshManager, TextureManager& textureManager, const Model& skybox, const Vec3& cameraPos) const;
-
-	void setModelIsSkybox(bool isSkybox) const;
-
-	void bindSkyboxTexture(unsigned int texture) const;
+	bool addTexture(const std::string& name, const std::string& filePath);
+	bool addTextureCube(const std::string& name, const std::string(&facePaths)[6]);
 
 private:
+	ShaderManager shaderManager;
+	MeshManager meshManager;
+	TextureManager textureManager;
+
 	unsigned int program{ 0 };
 
 	int modelLocation{ -1 };
