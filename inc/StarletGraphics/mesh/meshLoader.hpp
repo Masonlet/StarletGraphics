@@ -1,12 +1,11 @@
 #pragma once
 
-struct Mesh;
+struct MeshCPU;
+struct MeshGPU;
 #include <string>
 
 struct MeshLoader {
-	bool loadMesh(const std::string& path, Mesh& mesh);
-
-	bool uploadMesh(Mesh& mesh);
-
-	void unloadMesh(Mesh& mesh);
+	bool loadMesh(const std::string& path, MeshCPU& mesh);
+	bool uploadMesh(MeshCPU& meshData, MeshGPU& meshOut);
+	void unloadMesh(MeshGPU& mesh);
 };

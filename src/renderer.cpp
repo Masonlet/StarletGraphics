@@ -53,6 +53,32 @@ bool Renderer::cacheTextureUniforms() {
 
 	return ok;
 }
+bool Renderer::cacheCameraUniforms() {
+	return getUniformLocation(eyeLocation, "eyePos");
+}
+bool Renderer::cacheModelUniforms() {
+	bool ok = true;
+	ok &= getUniformLocation(modelUL.isSkybox, "bIsSkybox");
+	ok &= getUniformLocation(modelUL.model, "mModel");
+	ok &= getUniformLocation(modelUL.modelView, "mView");
+	ok &= getUniformLocation(modelUL.modelProj, "mProj");
+	ok &= getUniformLocation(modelUL.modelInverseTranspose, "mModel_InverseTranspose");
+	ok &= getUniformLocation(modelUL.colourMode, "colourMode");
+	ok &= getUniformLocation(modelUL.hasVertexColour, "hasVertexColour");
+	ok &= getUniformLocation(modelUL.colourOverride, "colourOverride");
+	ok &= getUniformLocation(modelUL.specular, "vertSpecular");
+	ok &= getUniformLocation(modelUL.yMinMax, "yMin_yMax");
+	ok &= getUniformLocation(modelUL.seed, "seed");
+	ok &= getUniformLocation(modelUL.isLit, "bIsLit");
+	return ok;
+}
+bool Renderer::cacheLightUniforms() {
+	bool ok = true;
+	ok &= getUniformLocation(lightCountLocation, "lightCount");
+	ok &= getUniformLocation(ambientLightLocation, "ambientLight");
+	glUniform4f(ambientLightLocation, 1.0, 1.0, 1.0, 1.0);
+	return ok;
+}
 
 bool Renderer::createPrimitiveMesh(const Primitive& primitive) {
 	switch (primitive.type) {
@@ -78,48 +104,30 @@ bool Renderer::createGridMesh(const Grid& grid, const std::string& meshName) {
 }
 
 bool Renderer::createTriangle(const std::string& name, const Vec2<float>& size, const Vec4& vertexColour) {
-	return meshManager.createTriangle(name, size, vertexColour) ? true : error("Renderer", "createTriangle", "Failed to create triangle: " + name);
+	return meshManager.createTriangle(name, size, vertexColour)
+		? debugLog("Renderer", "createTriangle", "Created triangle: " + name, true)
+		: error("Renderer", "createTriangle", "Failed to create triangle: " + name);
 }
 bool Renderer::createSquare(const std::string& name, const Vec2<float>& size, const Vec4& vertexColour) {
-	return meshManager.createSquare(name, size, vertexColour) ? true : error("Renderer", "createSquare", "Failed to create square: " + name);
+	return meshManager.createSquare(name, size, vertexColour)
+		? debugLog("Renderer", "createSquare", "Created square: " + name, true)
+		: error("Renderer", "createSquare", "Failed to create square: " + name);
 }
 bool Renderer::createCube(const std::string& name, const Vec3& size, const Vec4& vertexColour) {
-	return meshManager.createCube(name, size, vertexColour) ? true : error("Renderer", "createCube", "Failed to create cube: " + name);
-}
-
-bool Renderer::cacheCameraUniforms() {
-	return getUniformLocation(eyeLocation, "eyePos");
-}
-bool Renderer::cacheModelUniforms() {
-	bool ok = true;
-	ok &= getUniformLocation(modelUL.isSkybox, "bIsSkybox");
-	ok &= getUniformLocation(modelUL.model, "mModel");
-	ok &= getUniformLocation(modelUL.modelView, "mView");
-	ok &= getUniformLocation(modelUL.modelProj, "mProj");
-	ok &= getUniformLocation(modelUL.modelInverseTranspose, "mModel_InverseTranspose");
-	ok &= getUniformLocation(modelUL.colourMode, "colourMode");
-	ok &= getUniformLocation(modelUL.hasVertexColour, "hasVertexColour");
-	ok &= getUniformLocation(modelUL.colourOverride, "colourOverride");
-	ok &= getUniformLocation(modelUL.specular, "vertSpecular");
-	ok &= getUniformLocation(modelUL.yMinMax, "yMin_yMax");
-	ok &= getUniformLocation(modelUL.seed, "seed");
-	ok &= getUniformLocation(modelUL.isLit, "bIsLit");
-	return ok;
-}
-bool Renderer::cacheLightUniforms() {
-	bool ok = true;
-	ok &= getUniformLocation(lightCountLocation, "lightCount");
-	ok &= getUniformLocation(ambientLightLocation, "ambientLight");
-	glUniform4f(ambientLightLocation, 1.0, 1.0, 1.0, 1.0);
-
-	return ok;
+	return meshManager.createCube(name, size, vertexColour)
+		? debugLog("Renderer", "createCube", "Created cube: " + name, true)
+		: error("Renderer", "createCube", "Failed to create cube: " + name);
 }
 
 bool Renderer::loadAndAddMesh(const std::string& path) {
-	return meshManager.loadAndAddMesh(path) ? true : error("Renderer", "addMesh", "Failed to add mesh: " + path);
+	return meshManager.loadAndAddMesh(path) 
+		? debugLog("Renderer", "loadAndAddMesh", "Added mesh: " + path, true)
+		: error("Renderer", "loadAndAddMesh", "Failed to add mesh: " + path);
 }
-bool Renderer::addMesh(const std::string& path, Mesh& mesh) {
-	return meshManager.addMesh(path, mesh) ? true : error("Renderer", "addMesh", "Failed to add mesh: " + path);
+bool Renderer::addMesh(const std::string& path, MeshCPU& mesh) {
+	return meshManager.addMesh(path, mesh) 
+		? debugLog("Renderer", "addMesh", "Added mesh: " + path, true)
+		: error("Renderer", "addMesh", "Failed to add mesh: " + path);
 }
 bool Renderer::addMeshes(const std::map<std::string, Model>& models) {
 	for (const std::pair<const std::string, Model>& model : models)
@@ -129,14 +137,14 @@ bool Renderer::addMeshes(const std::map<std::string, Model>& models) {
 	return true;
 }
 
-bool Renderer::getMesh(const std::string& path, Mesh*& dataOut) {
-	return meshManager.getMesh(path, dataOut);
+bool Renderer::getMesh(const std::string& path, MeshGPU*& dataOut) {
+	return meshManager.getMeshGPU(path, dataOut);
 }
-bool Renderer::getMesh(const std::string& path, const Mesh*& dataOut) {
-	return meshManager.getMesh(path, dataOut);
+bool Renderer::getMesh(const std::string& path, const MeshGPU*& dataOut) {
+	return meshManager.getMeshGPU(path, dataOut);
 }
 
-void Renderer::updateModelUniforms(const Model& instance, const Mesh& data) const {
+void Renderer::updateModelUniforms(const Model& instance, const MeshCPU& data) const {
 	const Mat4 modelMat = Mat4::modelMatrix(instance.transform);
 	glUniformMatrix4fv(modelUL.model, 1, GL_FALSE, modelMat.models);
 	glUniformMatrix4fv(modelUL.modelInverseTranspose, 1, GL_FALSE, modelMat.inverse().transpose().models);
@@ -165,11 +173,11 @@ void Renderer::updateModelUniforms(const Model& instance, const Mesh& data) cons
 bool Renderer::drawModel(const Model& instance) const {
 	if (!instance.isVisible) return true;
 
-	const Mesh* data{};
-	if (!meshManager.getMesh(instance.meshPath, data))
+	const MeshCPU* cpuMesh{};
+	if (!meshManager.getMeshCPU(instance.meshPath, cpuMesh))
 		return error("Renderer", "drawModel", "Could not find mesh: " + instance.meshPath);
 
-	updateModelUniforms(instance, *data);
+	updateModelUniforms(instance, *cpuMesh);
 
 	if (instance.useTextures) {
 		glUniform4f(modelUL.texMixRatios, instance.textureMixRatio[0], instance.textureMixRatio[1], instance.textureMixRatio[2], instance.textureMixRatio[3]);
@@ -188,9 +196,13 @@ bool Renderer::drawModel(const Model& instance) const {
 
 	glUniform1i(modelUL.isLit, instance.isLighted ? 1 : 0);
 
+	const MeshGPU* gpuMesh{};
+	if (!meshManager.getMeshGPU(instance.meshPath, gpuMesh))
+		return error("Renderer", "drawModel", "Could not find mesh: " + instance.meshPath);
+
 	if (instance.colour.w < 1.0f)	glDepthMask(GL_FALSE);
-	glBindVertexArray(data->VAOID);
-	glDrawElements(GL_TRIANGLES, data->numIndices, GL_UNSIGNED_INT, 0);
+	glBindVertexArray(gpuMesh->VAOID);
+	glDrawElements(GL_TRIANGLES, gpuMesh->numIndices, GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
 	if (instance.colour.w < 1.0f) glDepthMask(GL_TRUE);
 
@@ -310,10 +322,14 @@ bool Renderer::getUniformLocation(int& location, const char* name) const {
 }
 
 bool Renderer::addTexture(const std::string& name, const std::string& filePath) {
-	return textureManager.addTexture(name, filePath) ? true : error("Renderer", "addTexture", "Failed to add texture: " + name);
+	return textureManager.addTexture(name, filePath)
+		? debugLog("Renderer", "addTexture", "Added texture: " + filePath)
+		: error("Renderer", "addTexture", "Failed to add texture: " + filePath);
 }
 bool Renderer::addTextureCube(const std::string& name, const std::string(&facePaths)[6]) {
-	return textureManager.addTextureCube(name, facePaths) ? true : error("Renderer", "addTexture", "Failed to add texture cube: " + name);
+	return textureManager.addTextureCube(name, facePaths) 
+		? debugLog("Renderer", "addTextureCube", "Added texture cube: " + name)
+		: error("Renderer", "addTexture", "Failed to add texture cube: " + name);
 }
 bool Renderer::addTextures(const std::map<std::string, TextureData>& textures) {
 	for (const std::pair<const std::string, TextureData>& textureData : textures) {

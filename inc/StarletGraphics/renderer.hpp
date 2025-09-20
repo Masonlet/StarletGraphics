@@ -64,13 +64,13 @@ public:
 	bool createCube(const std::string& name, const Vec3& size, const Vec4& vertexColour);
 
 	bool loadAndAddMesh(const std::string& path);
-	bool addMesh(const std::string& path, Mesh& mesh);
+	bool addMesh(const std::string& path, MeshCPU& mesh);
 	bool addMeshes(const std::map<std::string, Model>& models);
 
-	bool getMesh(const std::string& path, Mesh*& dataOut);
-	bool getMesh(const std::string& path, const Mesh*& dataOut);
+	bool getMesh(const std::string& path, MeshGPU*& dataOut);
+	bool getMesh(const std::string& path, const MeshGPU*& dataOut);
 
-	void updateModelUniforms(const Model& instance, const Mesh& data) const;
+	void updateModelUniforms(const Model& instance, const MeshCPU& data) const;
 	bool drawModel(const Model& instance) const;
 	bool drawModels(const std::map<std::string, Model>& instance, const Vec3& eye) const;
 

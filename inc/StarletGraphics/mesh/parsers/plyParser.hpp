@@ -3,4 +3,4 @@
 struct Mesh;
 #include <string>
 
-bool parsePlyMesh(const std::string& path, Mesh& drawInfo);
+bool parsePlyMesh(const std::string& path, MeshCPU& drawInfo);

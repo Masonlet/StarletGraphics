@@ -48,7 +48,7 @@ static bool readHeader(const unsigned char* p, size_t fileSize, int32_t& height,
 	return true;
 }
 
-bool parseBMP(const char* path, Texture& out) {
+bool parseBMP(const char* path, TextureCPU& out) {
 	out.freePixels();
 	out.width = out.height = 0;
 

@@ -2,36 +2,69 @@
 #include "StarletParsers/utils/log.hpp"
 
 MeshManager::~MeshManager() {
-	for (std::map<std::string, Mesh>::iterator it = pathToMeshes.begin(); it != pathToMeshes.end(); ++it)
+	for (std::map<std::string, MeshGPU>::iterator it = pathToGPUMeshes.begin(); it != pathToGPUMeshes.end(); ++it)
 		loader.unloadMesh(it->second);
 }
 
 bool MeshManager::loadAndAddMesh(const std::string& path) {
 	if (findMesh(path)) return true;
 
-	Mesh mesh;
-	if (!loader.loadMesh(basePath + "/models/" + path, mesh))
+	MeshCPU cpuMesh;
+	if (!loader.loadMesh(basePath + "/models/" + path, cpuMesh))
 		return error("MeshManager", "loadAndAddMesh", "Could not load mesh from " + path);
 
-	if (!loader.uploadMesh(mesh))
+	MeshGPU gpuMesh;
+	if (!loader.uploadMesh(cpuMesh, gpuMesh))
 		return error("MeshManager", "loadAndAddMesh", "Could not upload mesh from: " + path);
 
-	pathToMeshes[path] = std::move(mesh);
+	pathToCPUMeshes[path] = std::move(cpuMesh);
+	pathToGPUMeshes[path] = std::move(gpuMesh);
 	return true;
 }
-bool MeshManager::addMesh(const std::string& path, Mesh& mesh) {
+bool MeshManager::addMesh(const std::string& path, MeshCPU& meshCPU) {
 	if (findMesh(path)) return true;
-	if (mesh.empty()) return error("MeshManager", "addMesh", "Trying to add an empty mesh");
+	if (meshCPU.empty()) return error("MeshManager", "addMesh", "Trying to add an empty mesh");
 
-	if (!loader.uploadMesh(mesh))
+	MeshGPU meshGPU;
+	if (!loader.uploadMesh(meshCPU, meshGPU))
 		return error("MeshManager", "addMesh", "Could not upload mesh from: " + path);
 
-	pathToMeshes[path] = std::move(mesh);
+	pathToGPUMeshes[path] = std::move(meshGPU);
+	pathToCPUMeshes[path] = std::move(meshCPU);
+	return true;
+}
+
+bool MeshManager::findMesh(const std::string& name) const {
+	return pathToGPUMeshes.find(name) != pathToGPUMeshes.end() || pathToCPUMeshes.find(name) != pathToCPUMeshes.end();
+}
+bool MeshManager::getMeshGPU(const std::string& name, MeshGPU*& data) {
+	std::map<std::string, MeshGPU>::iterator it = pathToGPUMeshes.find(name);
+	if (it == pathToGPUMeshes.end()) return false;
+	data = &it->second;
+	return true;
+}
+bool MeshManager::getMeshGPU(const std::string& name, const MeshGPU*& data) const {
+	std::map<std::string, MeshGPU>::const_iterator it = pathToGPUMeshes.find(name);
+	if (it == pathToGPUMeshes.end()) return false;
+	data = &it->second;
+	return true;
+}
+
+bool MeshManager::getMeshCPU(const std::string& name, MeshCPU*& data) {
+	std::map<std::string, MeshCPU>::iterator it = pathToCPUMeshes.find(name);
+	if (it == pathToCPUMeshes.end()) return false;
+	data = &it->second;
+	return true;
+}
+bool MeshManager::getMeshCPU(const std::string& name, const MeshCPU*& data) const {
+	std::map<std::string, MeshCPU>::const_iterator it = pathToCPUMeshes.find(name);
+	if (it == pathToCPUMeshes.end()) return false;
+	data = &it->second;
 	return true;
 }
 
 bool MeshManager::createTriangle(const std::string& name, const Vec2<float>& size, const Vec4& vertexColour) {
-	Mesh info;
+	MeshCPU info;
 
 	info.numVertices = 3;
 	info.vertices.resize(3);
@@ -50,7 +83,7 @@ bool MeshManager::createTriangle(const std::string& name, const Vec2<float>& siz
 	return addMesh(name, info) ? true : error("Primitive", "createTriangle", "Failed to create triangle " + name);
 }
 bool MeshManager::createSquare(const std::string& name, const Vec2<float>& size, const Vec4& vertexColour) {
-	Mesh info;
+	MeshCPU info;
 	info.numVertices = 6;
 	info.numIndices = 6;
 	info.numTriangles = 2;
@@ -79,7 +112,7 @@ bool MeshManager::createSquare(const std::string& name, const Vec2<float>& size,
 	return addMesh(name, info) ? true : error("Primitive", "createSquare", "Failed to create square " + name);
 }
 bool MeshManager::createCube(const std::string& name, const Vec3& size, const Vec4& vertexColour) {
-	Mesh info;
+	MeshCPU info;
 	constexpr int vertexCount = 36;
 
 	info.numVertices = vertexCount;
@@ -118,20 +151,4 @@ bool MeshManager::createCube(const std::string& name, const Vec3& size, const Ve
 	}
 
 	return addMesh(name, info) ? true : error("Primitive", "createCube", "Failed to create cube " + name);
-}
-
-bool MeshManager::findMesh(const std::string& name) const {
-	return pathToMeshes.find(name) != pathToMeshes.end();
-}
-bool MeshManager::getMesh(const std::string& name, Mesh*& data) {
-	std::map<std::string, Mesh>::iterator it = pathToMeshes.find(name);
-	if (it == pathToMeshes.end()) return false;
-	data = &it->second;
-	return true;
-}
-bool MeshManager::getMesh(const std::string& name, const Mesh*& data) const {
-	std::map<std::string, Mesh>::const_iterator it = pathToMeshes.find(name);
-	if (it == pathToMeshes.end()) return false;
-	data = &it->second;
-	return true;
 }

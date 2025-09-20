@@ -2,4 +2,4 @@
 
 struct Texture;
 
-bool parseBMP(const char* path, Texture& out);
+bool parseBMP(const char* path, TextureCPU& out);

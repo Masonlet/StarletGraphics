@@ -98,7 +98,7 @@ static bool parsePlyHeader(const unsigned char*& p, unsigned int& numVerticesOut
 	return error("plyParser", "parsePlyHeader", "Failed, end of buffer reached");
 }
 
-static bool parseVertices(const unsigned char*& p, Mesh& drawInfo) {
+static bool parseVertices(const unsigned char*& p, MeshCPU& drawInfo) {
 	if (!p) return error("PlyParser", "parseVertices", "Input pointer is null\n");
 	if (!drawInfo.numVertices) return error("PlyParser", "parseVertices", "No vertices declared in header\n");
 
@@ -205,7 +205,7 @@ static bool parseVertices(const unsigned char*& p, Mesh& drawInfo) {
 	return true;
 }
 
-static bool parseIndices(const unsigned char*& p, Mesh& drawInfo) {
+static bool parseIndices(const unsigned char*& p, MeshCPU& drawInfo) {
 	if (!p) return error("PlyParser", "parseIndices", "Input pointer is null");
 	if (drawInfo.indices.empty() || drawInfo.numIndices == 0) return error("PlyParser", "parseIndices", "Index buffer not allocated");
 
@@ -253,7 +253,7 @@ static bool parseIndices(const unsigned char*& p, Mesh& drawInfo) {
 	return true;
 }
 
-bool parsePlyMesh(const std::string& path, Mesh& drawInfo) {
+bool parsePlyMesh(const std::string& path, MeshCPU& drawInfo) {
 	std::vector<unsigned char> file;
 	if (!loadBinaryFile(file, path))
 		return false;

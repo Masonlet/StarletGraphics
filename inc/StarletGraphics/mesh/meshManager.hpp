@@ -13,18 +13,21 @@ public:
 	void setBasePath(const char* path) { basePath = path; }
 
 	bool loadAndAddMesh(const std::string& path);
-	bool addMesh(const std::string& path, Mesh& mesh);
+	bool addMesh(const std::string& path, MeshCPU& mesh);
 
 	bool createTriangle(const std::string& name, const Vec2<float>& size, const Vec4& vertexColour);
 	bool createSquare(const std::string& name, const Vec2<float>& size, const Vec4& vertexColour);
 	bool createCube(const std::string& name, const Vec3& size, const Vec4& vertexColour);
 
 	bool findMesh(const std::string& path) const;
-	bool getMesh(const std::string& path, Mesh*& dataOut);
-	bool getMesh(const std::string& path, const Mesh*& dataOut) const;
+	bool getMeshCPU(const std::string& path, MeshCPU*& dataOut);
+	bool getMeshCPU(const std::string& path, const MeshCPU*& dataOut) const;
+	bool getMeshGPU(const std::string& path, MeshGPU*& dataOut);
+	bool getMeshGPU(const std::string& path, const MeshGPU*& dataOut) const;
 
 private:
 	MeshLoader loader;
 	std::string basePath;
-	std::map<std::string, Mesh> pathToMeshes;
+	std::map<std::string, MeshCPU> pathToCPUMeshes;
+	std::map<std::string, MeshGPU> pathToGPUMeshes;
 };

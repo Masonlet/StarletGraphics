@@ -4,15 +4,12 @@
 #include "StarletParsers/utils/log.hpp"
 #include <glad/glad.h>
 
-bool TextureLoader::loadTexture2D(const std::string& path, Texture& outTexture) {
+bool TextureLoader::loadTexture2D(const std::string& path, TextureCPU& outTexture) {
   if (!outTexture.empty()) return error("TextureLoader", "loadTexture2D", "Attempting to load non-empty texture object: " + path);
 
-  if (!parseBMP(path.c_str(), outTexture))
-    return error("TextureLoader", "loadTexture2D", "Failed to parse BMP: " + path);
-
-  return true;
+  return parseBMP(path.c_str(), outTexture) ? true : error("TextureLoader", "loadTexture2D", "Failed to parse BMP: " + path);
 }
-bool TextureLoader::loadCubeFaces(const std::string(&facePaths)[6], Texture facesOut[6]) {
+bool TextureLoader::loadCubeFaces(const std::string(&facePaths)[6], TextureCPU(&facesOut)[6]) {
   for (int i = 0; i < 6; ++i)
     if (!parseBMP((facePaths[i]).c_str(), facesOut[i]))
       return error("TextureLoader", "loadCubeFaces", "Failed face[" + std::to_string(i) + "]: " + facePaths[i]);
@@ -20,16 +17,16 @@ bool TextureLoader::loadCubeFaces(const std::string(&facePaths)[6], Texture face
   return true;
 }
 
-bool TextureLoader::uploadTexture2D(Texture& texture, bool generateMIPMap) {
-  if (texture.empty()) return error("TextureLoader", "uploadTexture2D", "Attempting to upload empty texture");
+bool TextureLoader::uploadTexture2D(TextureCPU& cpuTexture, TextureGPU& gpuTexture, bool generateMIPMap) {
+  if (cpuTexture.empty()) return error("TextureLoader", "uploadTexture2D", "Attempting to upload empty texture");
 
-  glGenTextures(1, &texture.id);
-  glBindTexture(GL_TEXTURE_2D, texture.id);
+  glGenTextures(1, &gpuTexture.id);
+  glBindTexture(GL_TEXTURE_2D, gpuTexture.id);
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-  const GLenum src = (texture.pixelSize == 4) ? GL_RGBA : GL_RGB;
-  const GLint  internal = (texture.pixelSize == 4) ? GL_RGBA8 : GL_RGB8;
-  glTexImage2D(GL_TEXTURE_2D, 0, internal, texture.width, texture.height, 0, src, GL_UNSIGNED_BYTE, texture.pixels.data());
+  const GLenum src = (cpuTexture.pixelSize == 4) ? GL_RGBA : GL_RGB;
+  const GLint  internal = (cpuTexture.pixelSize == 4) ? GL_RGBA8 : GL_RGB8;
+  glTexImage2D(GL_TEXTURE_2D, 0, internal, cpuTexture.width, cpuTexture.height, 0, src, GL_UNSIGNED_BYTE, cpuTexture.pixels.data());
 
   if (generateMIPMap) glGenerateMipmap(GL_TEXTURE_2D);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, generateMIPMap ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
@@ -40,14 +37,13 @@ bool TextureLoader::uploadTexture2D(Texture& texture, bool generateMIPMap) {
 
   GLenum err = glGetError();
   if (err != GL_NO_ERROR) {
-    if (texture.id) glDeleteTextures(1, &texture.id);
+    if (gpuTexture.id) glDeleteTextures(1, &gpuTexture.id);
     return error("TextureLoader", "uploadTexture2D", "OpenGL error " + std::to_string(err));
   }
 
-  texture.freePixels();
   return true;
 }
-bool TextureLoader::uploadTextureCube(const Texture faces[6], Texture& cubeOut, bool generateMIPMap) {
+bool TextureLoader::uploadTextureCube(TextureCPU(&faces)[6], TextureGPU& cubeOut, bool generateMIPMap) {
   const int w = faces[0].width, h = faces[0].height;
   const uint8_t bpp = faces[0].pixelSize;
   for (int i = 0; i < 6; ++i)
@@ -83,15 +79,12 @@ bool TextureLoader::uploadTextureCube(const Texture faces[6], Texture& cubeOut, 
     return error("TextureLoader", "uploadTextureCube", "OpenGL error " + std::to_string(err));
   }
 
-  cubeOut.width = w; cubeOut.height = h; cubeOut.pixelSize = bpp;
-  cubeOut.freePixels();
   return true;
 }
 
-void TextureLoader::unloadTexture(Texture& texture) {
+void TextureLoader::unloadTexture(TextureGPU& texture) {
   if (texture.id) {
     glDeleteTextures(1, &texture.id);
     texture.id = 0;
   }
-  texture.freePixels();
 }

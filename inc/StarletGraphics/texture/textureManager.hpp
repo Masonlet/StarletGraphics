@@ -16,11 +16,10 @@ public:
 	bool addTextureCube(const std::string& name, const std::string(&facePaths)[6]);
 
 	bool findTexture(const std::string& name) const;
-	bool getTexture(const std::string& name, Texture*& dataOut);
 	unsigned int getTextureID(const std::string& name) const;
 
 private:
 	TextureLoader loader;
 	std::string basePath;
-	std::map<std::string, Texture> nameToTextures;
+	std::map<std::string, TextureGPU> nameToGPUTextures;
 };
