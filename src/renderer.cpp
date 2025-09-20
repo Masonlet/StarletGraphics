@@ -6,6 +6,7 @@
 #include "StarletScene/objects/textureConnection.hpp"
 #include "StarletScene/objects/model.hpp"
 #include "StarletScene/objects/primitive.hpp"
+#include "StarletScene/objects/grid.hpp"
 #include "StarletMath/mat4.hpp"
 #include "StarletGraphics/renderer.hpp"
 #include "StarletParsers/utils/log.hpp"
@@ -65,6 +66,17 @@ bool Renderer::createPrimitiveMesh(const Primitive& primitive) {
 		return error("Renderer", "loadScenePrimitives", "Invalid primitive: " + primitive.name);
 	}
 }
+bool Renderer::createGridMesh(const Grid& grid, const std::string& meshName) {
+	switch (grid.type) {
+	case GridType::Square:
+		return createSquare(meshName, { grid.transform.size.x, grid.transform.size.y }, grid.colour);
+	case GridType::Cube:
+		return createCube(meshName, grid.transform.size, grid.colour);
+	default:
+		return error("Renderer", "createGridMesh", "Invalid grid: " + grid.name + ", mesh: " + meshName);
+	}
+}
+
 bool Renderer::createTriangle(const std::string& name, const Vec2<float>& size, const Vec4& vertexColour) {
 	return meshManager.createTriangle(name, size, vertexColour) ? true : error("Renderer", "createTriangle", "Failed to create triangle: " + name);
 }

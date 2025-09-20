@@ -11,8 +11,9 @@ struct Vec3;
 struct Mat4;
 struct Mesh;
 struct Model;
-struct Primitive;
 struct Light;
+struct Primitive;
+struct Grid;
 struct TextureData;
 
 constexpr int SKYBOX_TU{ 20 };
@@ -56,6 +57,8 @@ public:
 	unsigned int getProgramID(const std::string& name) const;
 
 	bool createPrimitiveMesh(const Primitive& primitive);
+	bool createGridMesh(const Grid& grid, const std::string& meshName);
+
 	bool createTriangle(const std::string& name, const Vec2<float>& size, const Vec4& vertexColour);
 	bool createSquare(const std::string& name, const Vec2<float>& size, const Vec4& vertexColour);
 	bool createCube(const std::string& name, const Vec3& size, const Vec4& vertexColour);
