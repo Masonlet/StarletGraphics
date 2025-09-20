@@ -91,7 +91,7 @@ public:
 
 	void toggleWireframe();
 
-	void renderFrame(const Camera& cam, const float aspect, const std::map<std::string, Light>& lights, const std::map<std::string, Model>& models) const;
+	void renderFrame(const Camera& cam, const float aspect, const std::map<std::string, Light>& lights, const std::map<std::string, Model>& models, const Model& skyBox) const;
 
 private:
 	ShaderManager shaderManager;

@@ -352,13 +352,15 @@ void Renderer::toggleWireframe() {
 	glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
 }
 
-void Renderer::renderFrame(const Camera& cam, const float aspect, const std::map<std::string, Light>& lights, const std::map<std::string, Model>& models) const {
+void Renderer::renderFrame(const Camera& cam, const float aspect, const std::map<std::string, Light>& lights, const std::map<std::string, Model>& models, const Model& skyBox) const {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	updateCameraUniforms(cam.pos, Mat4::lookAt(cam.pos, cam.front), Mat4::perspective(cam.fov, aspect, cam.nearPlane, cam.farPlane));
 
 	updateLightUniforms(lights);
+
 	drawModels(models, cam.pos);
+	drawSkybox(skyBox, cam.pos);
 
 	glBindVertexArray(0);
 }
