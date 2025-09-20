@@ -11,6 +11,7 @@ struct Vec3;
 struct Mat4;
 struct Mesh;
 struct Model;
+struct Camera;
 struct Light;
 struct Primitive;
 struct Grid;
@@ -89,6 +90,8 @@ public:
 	bool addTextures(const std::map<std::string, TextureData>& textures);
 
 	void toggleWireframe();
+
+	void renderFrame(const Camera& cam, const float aspect, const std::map<std::string, Light>& lights, const std::map<std::string, Model>& models) const;
 
 private:
 	ShaderManager shaderManager;

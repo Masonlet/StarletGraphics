@@ -5,6 +5,7 @@
 #include "StarletScene/objects/textureData.hpp"
 #include "StarletScene/objects/textureConnection.hpp"
 #include "StarletScene/objects/model.hpp"
+#include "StarletScene/Objects/camera.hpp"
 #include "StarletScene/objects/primitive.hpp"
 #include "StarletScene/objects/grid.hpp"
 #include "StarletMath/mat4.hpp"
@@ -49,7 +50,7 @@ bool Renderer::cacheTextureUniforms() {
 	ok &= getUniformLocation(modelUL.useTextures, "bUseTextures");
 	ok &= getUniformLocation(modelUL.texMixRatios, "texMixRatios");
 	ok &= getUniformLocation(skyboxTextureLocation, "skyboxCubeTexture");
-	glUniform1i(skyboxTextureLocation, SKYBOX_TU);
+	if (skyboxTextureLocation != -1) glUniform1i(skyboxTextureLocation, SKYBOX_TU);
 
 	return ok;
 }
@@ -349,4 +350,15 @@ bool Renderer::addTextures(const std::map<std::string, TextureData>& textures) {
 void Renderer::toggleWireframe() {
 	wireframe = !wireframe;
 	glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
+}
+
+void Renderer::renderFrame(const Camera& cam, const float aspect, const std::map<std::string, Light>& lights, const std::map<std::string, Model>& models) const {
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	updateCameraUniforms(cam.pos, Mat4::lookAt(cam.pos, cam.front), Mat4::perspective(cam.fov, aspect, cam.nearPlane, cam.farPlane));
+
+	updateLightUniforms(lights);
+	drawModels(models, cam.pos);
+
+	glBindVertexArray(0);
 }
