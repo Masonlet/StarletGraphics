@@ -12,7 +12,7 @@ public:
 
 	void setBasePath(const char* path) { basePath = path; }
 
-	bool addMesh(const std::string& path);
+	bool loadAndAddMesh(const std::string& path);
 	bool addMesh(const std::string& path, Mesh& mesh);
 
 	bool createTriangle(const std::string& name, const Vec2<float>& size, const Vec4& vertexColour);

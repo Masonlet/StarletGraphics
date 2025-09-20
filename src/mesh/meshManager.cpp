@@ -6,15 +6,15 @@ MeshManager::~MeshManager() {
 		loader.unloadMesh(it->second);
 }
 
-bool MeshManager::addMesh(const std::string& path) {
+bool MeshManager::loadAndAddMesh(const std::string& path) {
 	if (findMesh(path)) return true;
 
 	Mesh mesh;
 	if (!loader.loadMesh(basePath + "/models/" + path, mesh))
-		return error("MeshManager", "addMesh", "Could not load mesh from " + path);
+		return error("MeshManager", "loadAndAddMesh", "Could not load mesh from " + path);
 
 	if (!loader.uploadMesh(mesh))
-		return error("MeshManager", "addMesh", "Could not upload mesh from: " + path);
+		return error("MeshManager", "loadAndAddMesh", "Could not upload mesh from: " + path);
 
 	pathToMeshes[path] = std::move(mesh);
 	return true;
