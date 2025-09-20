@@ -323,12 +323,12 @@ bool Renderer::getUniformLocation(int& location, const char* name) const {
 
 bool Renderer::addTexture(const std::string& name, const std::string& filePath) {
 	return textureManager.addTexture(name, filePath)
-		? debugLog("Renderer", "addTexture", "Added texture: " + filePath)
+		? debugLog("Renderer", "addTexture", "Added texture: " + filePath, true)
 		: error("Renderer", "addTexture", "Failed to add texture: " + filePath);
 }
 bool Renderer::addTextureCube(const std::string& name, const std::string(&facePaths)[6]) {
 	return textureManager.addTextureCube(name, facePaths) 
-		? debugLog("Renderer", "addTextureCube", "Added texture cube: " + name)
+		? debugLog("Renderer", "addTextureCube", "Added texture cube: " + name, true)
 		: error("Renderer", "addTexture", "Failed to add texture cube: " + name);
 }
 bool Renderer::addTextures(const std::map<std::string, TextureData>& textures) {
