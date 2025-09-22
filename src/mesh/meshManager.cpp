@@ -63,7 +63,7 @@ bool MeshManager::getMeshCPU(const std::string& name, const MeshCPU*& data) cons
 	return true;
 }
 
-bool MeshManager::createTriangle(const std::string& name, const Vec2<float>& size, const Vec4& vertexColour) {
+bool MeshManager::createTriangle(const std::string& name, const Vec2<float>& size, const Vec4<float>& vertexColour) {
 	MeshCPU info;
 
 	info.numVertices = 3;
@@ -82,7 +82,7 @@ bool MeshManager::createTriangle(const std::string& name, const Vec2<float>& siz
 
 	return addMesh(name, info) ? true : error("Primitive", "createTriangle", "Failed to create triangle " + name);
 }
-bool MeshManager::createSquare(const std::string& name, const Vec2<float>& size, const Vec4& vertexColour) {
+bool MeshManager::createSquare(const std::string& name, const Vec2<float>& size, const Vec4<float>& vertexColour) {
 	MeshCPU info;
 	info.numVertices = 6;
 	info.numIndices = 6;
@@ -111,7 +111,7 @@ bool MeshManager::createSquare(const std::string& name, const Vec2<float>& size,
 
 	return addMesh(name, info) ? true : error("Primitive", "createSquare", "Failed to create square " + name);
 }
-bool MeshManager::createCube(const std::string& name, const Vec3& size, const Vec4& vertexColour) {
+bool MeshManager::createCube(const std::string& name, const Vec3<float>& size, const Vec4<float>& vertexColour) {
 	MeshCPU info;
 	constexpr int vertexCount = 36;
 
@@ -126,7 +126,7 @@ bool MeshManager::createCube(const std::string& name, const Vec3& size, const Ve
 	float y = 0.5f * size.y;
 	float z = 0.5f * size.z;
 
-	Vec3 positions[8] = {
+	Vec3<float> positions[8] = {
 		{-x, -y, -z}, { x, -y, -z}, { x,  y, -z}, { -x,  y, -z}, // Back
 		{-x, -y,  z}, { x, -y,  z}, { x,  y,  z}, { -x,  y,  z}  // Front
 	};

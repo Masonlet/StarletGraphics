@@ -104,17 +104,17 @@ bool Renderer::createGridMesh(const Grid& grid, const std::string& meshName) {
 	}
 }
 
-bool Renderer::createTriangle(const std::string& name, const Vec2<float>& size, const Vec4& vertexColour) {
+bool Renderer::createTriangle(const std::string& name, const Vec2<float>& size, const Vec4<float>& vertexColour) {
 	return meshManager.createTriangle(name, size, vertexColour)
 		? debugLog("Renderer", "createTriangle", "Created triangle: " + name, true)
 		: error("Renderer", "createTriangle", "Failed to create triangle: " + name);
 }
-bool Renderer::createSquare(const std::string& name, const Vec2<float>& size, const Vec4& vertexColour) {
+bool Renderer::createSquare(const std::string& name, const Vec2<float>& size, const Vec4<float>& vertexColour) {
 	return meshManager.createSquare(name, size, vertexColour)
 		? debugLog("Renderer", "createSquare", "Created square: " + name, true)
 		: error("Renderer", "createSquare", "Failed to create square: " + name);
 }
-bool Renderer::createCube(const std::string& name, const Vec3& size, const Vec4& vertexColour) {
+bool Renderer::createCube(const std::string& name, const Vec3<float>& size, const Vec4<float>& vertexColour) {
 	return meshManager.createCube(name, size, vertexColour)
 		? debugLog("Renderer", "createCube", "Created cube: " + name, true)
 		: error("Renderer", "createCube", "Failed to create cube: " + name);
@@ -209,7 +209,7 @@ bool Renderer::drawModel(const Model& instance) const {
 
 	return true;
 }
-bool Renderer::drawModels(const std::map<std::string, Model>& instance, const Vec3& eye) const {
+bool Renderer::drawModels(const std::map<std::string, Model>& instance, const Vec3<float>& eye) const {
 	std::vector<const Model*> transparentInstances;
 	for (const std::pair<const std::string, Model>& model : instance) {
 		const Model& instance = model.second;
@@ -221,8 +221,8 @@ bool Renderer::drawModels(const std::map<std::string, Model>& instance, const Ve
 
 	for (size_t i = 0; i < transparentInstances.size(); ++i) {
 		for (size_t j = 0; j < transparentInstances.size() - i - 1; ++j) {
-			const Vec4& a = transparentInstances[j]->transform.pos;
-			const Vec4& b = transparentInstances[j + 1]->transform.pos;
+			const Vec4<float>& a = transparentInstances[j]->transform.pos;
+			const Vec4<float>& b = transparentInstances[j + 1]->transform.pos;
 			float distA = (a.x - eye.x) * (a.x - eye.x) + (a.y - eye.y) * (a.y - eye.y) + (a.z - eye.z) * (a.z - eye.z);
 			float distB = (b.x - eye.x) * (b.x - eye.x) + (b.y - eye.y) * (b.y - eye.y) + (b.z - eye.z) * (b.z - eye.z);
 			if (distA < distB) {
@@ -240,7 +240,7 @@ bool Renderer::drawModels(const std::map<std::string, Model>& instance, const Ve
 	return true;
 }
 
-bool Renderer::drawSkybox(const Model& skybox, const Vec3& cameraPos) const {
+bool Renderer::drawSkybox(const Model& skybox, const Vec3<float>& cameraPos) const {
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_FRONT);
 	glDepthMask(GL_FALSE);
@@ -305,7 +305,7 @@ void Renderer::updateLightUniforms(const std::map<std::string, Light>& lights) c
 		else if (lightUL[i].param2 != -1) glUniform4f(lightUL[i].param2, 0.0f, 0.0f, 0.0f, 0.0f);
 	}
 }
-void Renderer::updateCameraUniforms(const Vec3& eye, const Mat4& view, const Mat4& projection) const {
+void Renderer::updateCameraUniforms(const Vec3<float>& eye, const Mat4& view, const Mat4& projection) const {
 	glUniform3f(eyeLocation, eye.x, eye.y, eye.z);
 	glUniformMatrix4fv(modelUL.modelView, 1, GL_FALSE, view.ptr());
 	glUniformMatrix4fv(modelUL.modelProj, 1, GL_FALSE, projection.ptr());

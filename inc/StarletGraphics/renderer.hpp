@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-struct Vec3;
+template <typename T> struct Vec3;
 struct Mat4;
 struct Mesh;
 struct Model;
@@ -60,9 +60,9 @@ public:
 	bool createPrimitiveMesh(const Primitive& primitive);
 	bool createGridMesh(const Grid& grid, const std::string& meshName);
 
-	bool createTriangle(const std::string& name, const Vec2<float>& size, const Vec4& vertexColour);
-	bool createSquare(const std::string& name, const Vec2<float>& size, const Vec4& vertexColour);
-	bool createCube(const std::string& name, const Vec3& size, const Vec4& vertexColour);
+	bool createTriangle(const std::string& name, const Vec2<float>& size, const Vec4<float>& vertexColour);
+	bool createSquare(const std::string& name, const Vec2<float>& size, const Vec4<float>& vertexColour);
+	bool createCube(const std::string& name, const Vec3<float>& size, const Vec4<float>& vertexColour);
 
 	bool loadAndAddMesh(const std::string& path);
 	bool addMesh(const std::string& path, MeshCPU& mesh);
@@ -73,13 +73,13 @@ public:
 
 	void updateModelUniforms(const Model& instance, const MeshCPU& data) const;
 	bool drawModel(const Model& instance) const;
-	bool drawModels(const std::map<std::string, Model>& instance, const Vec3& eye) const;
+	bool drawModels(const std::map<std::string, Model>& instance, const Vec3<float>& eye) const;
 
 	void bindSkyboxTexture(const unsigned int texture) const;
 	void setModelIsSkybox(const bool isSkybox) const;
-	bool drawSkybox(const Model& skybox, const Vec3& cameraPos) const;
+	bool drawSkybox(const Model& skybox, const Vec3<float>& cameraPos) const;
 
-	void updateCameraUniforms(const Vec3& eye, const Mat4& view, const Mat4& projection) const;
+	void updateCameraUniforms(const Vec3<float>& eye, const Mat4& view, const Mat4& projection) const;
 
 	void cacheLightUniformLocations(const int maxLights);
 	void updateLightUniforms(const std::map<std::string, Light>& lights) const;
