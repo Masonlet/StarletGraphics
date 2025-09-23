@@ -66,14 +66,14 @@ public:
 
 	bool loadAndAddMesh(const std::string& path);
 	bool addMesh(const std::string& path, MeshCPU& mesh);
-	bool addMeshes(const std::map<std::string, Model>& models);
+	bool addMeshes(const std::vector<Model*>& models);
 
 	bool getMesh(const std::string& path, MeshGPU*& dataOut);
 	bool getMesh(const std::string& path, const MeshGPU*& dataOut);
 
 	void updateModelUniforms(const Model& instance, const MeshCPU& data) const;
 	bool drawModel(const Model& instance) const;
-	bool drawModels(const std::map<std::string, Model>& instance, const Vec3<float>& eye) const;
+	bool drawModels(const std::vector<Model*>& instance, const Vec3<float>& eye) const;
 
 	void bindSkyboxTexture(const unsigned int texture) const;
 	void setModelIsSkybox(const bool isSkybox) const;
@@ -82,16 +82,16 @@ public:
 	void updateCameraUniforms(const Vec3<float>& eye, const Mat4& view, const Mat4& projection) const;
 
 	void cacheLightUniformLocations(const int maxLights);
-	void updateLightUniforms(const std::map<std::string, Light>& lights) const;
+	void updateLightUniforms(const std::vector<Light*>& lights) const;
 	void updateLightCount(const int count) const;
 
 	bool addTexture(const std::string& name, const std::string& filePath);
 	bool addTextureCube(const std::string& name, const std::string(&facePaths)[6]);
-	bool addTextures(const std::map<std::string, TextureData>& textures);
+	bool addTextures(const std::vector<TextureData*>& textures);
 
 	void toggleWireframe();
 
-	void renderFrame(const Camera& cam, const float aspect, const std::map<std::string, Light>& lights, const std::map<std::string, Model>& models, const Model& skyBox) const;
+	void renderFrame(const Camera& cam, const float aspect, const std::vector<Light*>& lights, const std::vector<Model*>& models, const Model& skyBox) const;
 
 private:
 	ShaderManager shaderManager;

@@ -2,16 +2,16 @@
 #include "StarletGraphics/shader/shaderManager.hpp"
 #include "StarletGraphics/texture/textureManager.hpp"
 #include "StarletGraphics/mesh/meshManager.hpp"
-#include "StarletScene/objects/textureData.hpp"
-#include "StarletScene/objects/textureConnection.hpp"
-#include "StarletScene/objects/model.hpp"
-#include "StarletScene/Objects/camera.hpp"
-#include "StarletScene/objects/primitive.hpp"
-#include "StarletScene/objects/grid.hpp"
+#include "StarletScene/components/textureData.hpp"
+#include "StarletScene/components/textureConnection.hpp"
+#include "StarletScene/components/model.hpp"
+#include "StarletScene/components/camera.hpp"
+#include "StarletScene/components/primitive.hpp"
+#include "StarletScene/components/grid.hpp"
 #include "StarletMath/mat4.hpp"
 #include "StarletGraphics/renderer.hpp"
 #include "StarletParsers/utils/log.hpp"
-#include "StarletScene/objects/light.hpp"
+#include "StarletScene/components/light.hpp"
 
 void Renderer::setAssetPaths(const char* path) {
 	shaderManager.setBasePath(path);
@@ -130,10 +130,10 @@ bool Renderer::addMesh(const std::string& path, MeshCPU& mesh) {
 		? debugLog("Renderer", "addMesh", "Added mesh: " + path, true)
 		: error("Renderer", "addMesh", "Failed to add mesh: " + path);
 }
-bool Renderer::addMeshes(const std::map<std::string, Model>& models) {
-	for (const std::pair<const std::string, Model>& model : models)
-		if (!loadAndAddMesh(model.second.meshPath))
-			return error("Renderer", "addMeshes", "Failed to load/add mesh: " + model.second.meshPath);
+bool Renderer::addMeshes(const std::vector<Model*>& models) {
+	for (const Model* model : models)
+		if (!loadAndAddMesh(model->meshPath))
+			return error("Renderer", "addMeshes", "Failed to load/add mesh: " + model->meshPath);
 
 	return true;
 }
@@ -209,14 +209,13 @@ bool Renderer::drawModel(const Model& instance) const {
 
 	return true;
 }
-bool Renderer::drawModels(const std::map<std::string, Model>& instance, const Vec3<float>& eye) const {
+bool Renderer::drawModels(const std::vector<Model*>& instance, const Vec3<float>& eye) const {
 	std::vector<const Model*> transparentInstances;
-	for (const std::pair<const std::string, Model>& model : instance) {
-		const Model& instance = model.second;
-		if (instance.name == "skybox") continue;
+	for (const Model* model : instance) {
+		if (model->name == "skybox") continue;
 
-		if (instance.colour.w >= 1.0f) drawModel(instance);
-		else                           transparentInstances.push_back(&instance);
+		if (model->colour.w >= 1.0f) drawModel(*model);
+		else                         transparentInstances.push_back(model);
 	}
 
 	for (size_t i = 0; i < transparentInstances.size(); ++i) {
@@ -285,24 +284,23 @@ void Renderer::updateLightCount(int count) const {
 	if (lightCountLocation != -1) glUniform1i(lightCountLocation, count);
 }
 
-void Renderer::updateLightUniforms(const std::map<std::string, Light>& lights) const {
+void Renderer::updateLightUniforms(const std::vector<Light*>& lights) const {
 	const int n = static_cast<int>(lights.size());
 	const int maxCached = static_cast<int>(lightUL.size());
 
 	updateLightCount(n);
 
-	std::map<std::string, Light>::const_iterator it = lights.begin();
-	for (int i = 0; i < maxCached; ++i) {
-		if (it != lights.end()) {
-			const Light& L = it->second;
-			if (lightUL[i].position != -1)    glUniform4f(lightUL[i].position, L.pos.x, L.pos.y, L.pos.z, 1.0f);
-			if (lightUL[i].diffuse != -1)     glUniform4f(lightUL[i].diffuse, L.diffuse.r, L.diffuse.g, L.diffuse.b, L.diffuse.a);
-			if (lightUL[i].attenuation != -1) glUniform4f(lightUL[i].attenuation, L.attenuation.r, L.attenuation.g, L.attenuation.b, L.attenuation.a);
-			if (lightUL[i].direction != -1)   glUniform4f(lightUL[i].direction, L.direction.r, L.direction.g, L.direction.b, 1.0f);
-			if (lightUL[i].param1 != -1)			glUniform4f(lightUL[i].param1, static_cast<float>(L.type), L.param1.x, L.param1.y, 0.0f);
-			if (lightUL[i].param2 != -1)			glUniform4f(lightUL[i].param2, L.enabled ? 1.0f : 0.0f, 0.0f, 0.0f, 0.0f);
+	for (const Light* light : lights) {
+		if(light->enabled) {
+			if (light->position_UL != -1)    glUniform4f(light->position_UL, light->pos.x, light->pos.y, light->pos.z, 1.0f);
+			if (light->diffuse_UL != -1)     glUniform4f(light->diffuse_UL, light->diffuse.r, light->diffuse.g, light->diffuse.b, light->diffuse.a);
+			if (light->attenuation_UL != -1) glUniform4f(light->attenuation_UL, light->attenuation.r, light->attenuation.g, light->attenuation.b, light->attenuation.a);
+			if (light->direction_UL != -1)   glUniform4f(light->direction_UL, light->direction.r, light->direction.g, light->direction.b, 1.0f);
+			if (light->param1_UL != -1)			glUniform4f(light->param1_UL, static_cast<float>(light->type), light->param1.x, light->param1.y, 0.0f);
+			if (light->param2_UL != -1)			glUniform4f(light->param2_UL, light->enabled ? 1.0f : 0.0f, 0.0f, 0.0f, 0.0f);
+			break;
 		}
-		else if (lightUL[i].param2 != -1) glUniform4f(lightUL[i].param2, 0.0f, 0.0f, 0.0f, 0.0f);
+		else if (light->param2_UL != -1) glUniform4f(light->param2_UL, 0.0f, 0.0f, 0.0f, 0.0f);
 	}
 }
 void Renderer::updateCameraUniforms(const Vec3<float>& eye, const Mat4& view, const Mat4& projection) const {
@@ -332,16 +330,14 @@ bool Renderer::addTextureCube(const std::string& name, const std::string(&facePa
 		? debugLog("Renderer", "addTextureCube", "Added texture cube: " + name, true)
 		: error("Renderer", "addTexture", "Failed to add texture cube: " + name);
 }
-bool Renderer::addTextures(const std::map<std::string, TextureData>& textures) {
-	for (const std::pair<const std::string, TextureData>& textureData : textures) {
-		const TextureData& texture = textureData.second;
-
-		if (!texture.isCube) {
-			if(!addTexture(texture.name, texture.faces[0]))
-				return error("Renderer", "loadSceneTextures", "Failed to load 2D texture: " + texture.name);
+bool Renderer::addTextures(const std::vector<TextureData*>& textures) {
+	for (const TextureData* texture : textures) {
+		if (!texture->isCube) {
+			if(!addTexture(texture->name, texture->faces[0]))
+				return error("Renderer", "loadSceneTextures", "Failed to load 2D texture: " + texture->name);
 		} 
-		else if (!addTextureCube(texture.name, texture.faces))
-				return error("Renderer", "loadSceneTextures", "Failed to load cube map: " + texture.name);
+		else if (!addTextureCube(texture->name, texture->faces))
+				return error("Renderer", "loadSceneTextures", "Failed to load cube map: " + texture->name);
 	}
 
 	return true;
@@ -352,7 +348,7 @@ void Renderer::toggleWireframe() {
 	glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
 }
 
-void Renderer::renderFrame(const Camera& cam, const float aspect, const std::map<std::string, Light>& lights, const std::map<std::string, Model>& models, const Model& skyBox) const {
+void Renderer::renderFrame(const Camera& cam, const float aspect, const std::vector<Light*>& lights, const std::vector<Model*>& models, const Model& skyBox) const {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	updateCameraUniforms(cam.pos, Mat4::lookAt(cam.pos, cam.front), Mat4::perspective(cam.fov, aspect, cam.nearPlane, cam.farPlane));
