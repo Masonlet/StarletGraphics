@@ -7,7 +7,7 @@ MeshManager::~MeshManager() {
 }
 
 bool MeshManager::loadAndAddMesh(const std::string& path) {
-	if (findMesh(path)) return true;
+	if (findMesh(path)) return debugLog("MeshManager", "addMesh", "Mesh already exists: " + path);
 
 	MeshCPU cpuMesh;
 	if (!loader.loadMesh(basePath + "/models/" + path, cpuMesh))
@@ -19,7 +19,7 @@ bool MeshManager::loadAndAddMesh(const std::string& path) {
 
 	pathToCPUMeshes[path] = std::move(cpuMesh);
 	pathToGPUMeshes[path] = std::move(gpuMesh);
-	return true;
+	return debugLog("MeshManager", "addMesh", "Added mesh: " + path);
 }
 bool MeshManager::addMesh(const std::string& path, MeshCPU& meshCPU) {
 	if (findMesh(path)) return true;
@@ -31,7 +31,7 @@ bool MeshManager::addMesh(const std::string& path, MeshCPU& meshCPU) {
 
 	pathToGPUMeshes[path] = std::move(meshGPU);
 	pathToCPUMeshes[path] = std::move(meshCPU);
-	return true;
+	return debugLog("MeshManager", "addMesh", "Added mesh: " + path);
 }
 
 bool MeshManager::findMesh(const std::string& name) const {
@@ -80,7 +80,9 @@ bool MeshManager::createTriangle(const std::string& name, const Vec2<float>& siz
 	info.indices[1] = 1;
 	info.indices[2] = 2;
 
-	return addMesh(name, info) ? true : error("Primitive", "createTriangle", "Failed to create triangle " + name);
+	return addMesh(name, info) 
+		? debugLog("Primitive", "createTriangle", "Added triangle: " + name)
+		: error("Primitive", "createTriangle", "Failed to create triangle " + name);
 }
 bool MeshManager::createSquare(const std::string& name, const Vec2<float>& size, const Vec4<float>& vertexColour) {
 	MeshCPU info;
@@ -109,7 +111,9 @@ bool MeshManager::createSquare(const std::string& name, const Vec2<float>& size,
 		info.indices[i] = i;
 	}
 
-	return addMesh(name, info) ? true : error("Primitive", "createSquare", "Failed to create square " + name);
+	return addMesh(name, info) 
+		? debugLog("Primitive", "createSquare", "Added square: " + name)
+		: error("Primitive", "createSquare", "Failed to create square " + name);
 }
 bool MeshManager::createCube(const std::string& name, const Vec3<float>& size, const Vec4<float>& vertexColour) {
 	MeshCPU info;
@@ -150,5 +154,7 @@ bool MeshManager::createCube(const std::string& name, const Vec3<float>& size, c
 		}
 	}
 
-	return addMesh(name, info) ? true : error("Primitive", "createCube", "Failed to create cube " + name);
+	return addMesh(name, info) 
+		? debugLog("Primitive", "createCube", "Added cube: " + name)
+		: error("Primitive", "createCube", "Failed to create cube " + name);
 }

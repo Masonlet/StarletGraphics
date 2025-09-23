@@ -19,19 +19,22 @@ void Renderer::setAssetPaths(const char* path) {
 	textureManager.setBasePath(path);
 }
 
+
+
 bool Renderer::createProgramFromPaths(const std::string& name, const std::string& vertPath, const std::string& fragPath) {
-	return shaderManager.createProgramFromPaths(name, vertPath, fragPath) ? true : error("Renderer", "createProgramFromPaths", "Failed to create program");
+	return shaderManager.createProgramFromPaths(name, vertPath, fragPath);
 }
 bool Renderer::setProgram(unsigned int program) {
 	if (program == 0) return error("Renderer", "setProgram", "Program is 0");
 	this->program = program;
 	glUseProgram(program);
-
-	return cacheUniformLocations() && debugLog("Renderer", "setProgram", "Successfully set shader program and located uniforms", true);
+	return true;
 }
 unsigned int Renderer::getProgramID(const std::string& name) const {
 	return shaderManager.getProgramID(name);
 }
+
+
 
 bool Renderer::cacheUniformLocations() {
 	return cacheTextureUniforms()
@@ -40,6 +43,11 @@ bool Renderer::cacheUniformLocations() {
 		&& cacheLightUniforms();
 }
 
+bool Renderer::getUniformLocation(int& location, const char* name) const {
+	location = glGetUniformLocation(program, name);
+	if (location < 0) return error("Renderer", "getUniformLocation", std::string("Could not find uniform: ") + name);
+	return true;
+}
 bool Renderer::cacheTextureUniforms() {
 	glUniform1i(glGetUniformLocation(program, "textSampler2D_00"), 0);
 	glUniform1i(glGetUniformLocation(program, "textSampler2D_01"), 1);
@@ -81,6 +89,8 @@ bool Renderer::cacheLightUniforms() {
 	return ok;
 }
 
+
+
 bool Renderer::createPrimitiveMesh(const Primitive& primitive) {
 	switch (primitive.type) {
 	case PrimitiveType::Triangle:
@@ -103,41 +113,31 @@ bool Renderer::createGridMesh(const Grid& grid, const std::string& meshName) {
 		return error("Renderer", "createGridMesh", "Invalid grid: " + grid.name + ", mesh: " + meshName);
 	}
 }
-
 bool Renderer::createTriangle(const std::string& name, const Vec2<float>& size, const Vec4<float>& vertexColour) {
-	return meshManager.createTriangle(name, size, vertexColour)
-		? debugLog("Renderer", "createTriangle", "Created triangle: " + name, true)
-		: error("Renderer", "createTriangle", "Failed to create triangle: " + name);
+	return meshManager.createTriangle(name, size, vertexColour);
 }
 bool Renderer::createSquare(const std::string& name, const Vec2<float>& size, const Vec4<float>& vertexColour) {
-	return meshManager.createSquare(name, size, vertexColour)
-		? debugLog("Renderer", "createSquare", "Created square: " + name, true)
-		: error("Renderer", "createSquare", "Failed to create square: " + name);
+	return meshManager.createSquare(name, size, vertexColour);
 }
 bool Renderer::createCube(const std::string& name, const Vec3<float>& size, const Vec4<float>& vertexColour) {
-	return meshManager.createCube(name, size, vertexColour)
-		? debugLog("Renderer", "createCube", "Created cube: " + name, true)
-		: error("Renderer", "createCube", "Failed to create cube: " + name);
+	return meshManager.createCube(name, size, vertexColour);
 }
 
+
+
 bool Renderer::loadAndAddMesh(const std::string& path) {
-	return meshManager.loadAndAddMesh(path) 
-		? debugLog("Renderer", "loadAndAddMesh", "Added mesh: " + path, true)
-		: error("Renderer", "loadAndAddMesh", "Failed to add mesh: " + path);
+	return meshManager.loadAndAddMesh(path);
 }
 bool Renderer::addMesh(const std::string& path, MeshCPU& mesh) {
-	return meshManager.addMesh(path, mesh) 
-		? debugLog("Renderer", "addMesh", "Added mesh: " + path, true)
-		: error("Renderer", "addMesh", "Failed to add mesh: " + path);
+	return meshManager.addMesh(path, mesh);
 }
 bool Renderer::addMeshes(const std::vector<Model*>& models) {
 	for (const Model* model : models)
-		if (!loadAndAddMesh(model->meshPath))
+		if (!loadAndAddMesh(model->meshPath)) 
 			return error("Renderer", "addMeshes", "Failed to load/add mesh: " + model->meshPath);
 
-	return true;
+	return debugLog("Renderer", "addMeshes", "Added " + std::to_string(models.size()) + " meshes", true);
 }
-
 bool Renderer::getMesh(const std::string& path, MeshGPU*& dataOut) {
 	return meshManager.getMeshGPU(path, dataOut);
 }
@@ -145,12 +145,39 @@ bool Renderer::getMesh(const std::string& path, const MeshGPU*& dataOut) {
 	return meshManager.getMeshGPU(path, dataOut);
 }
 
+
+
+bool Renderer::addTexture(const std::string& name, const std::string& filePath) {
+	return textureManager.addTexture(name, filePath);
+}
+bool Renderer::addTextureCube(const std::string& name, const std::string(&facePaths)[6]) {
+	return textureManager.addTextureCube(name, facePaths);
+}
+bool Renderer::addTextures(const std::vector<TextureData*>& textures) {
+	for (const TextureData* texture : textures) {
+		if (!texture->isCube) {
+			if (!addTexture(texture->name, texture->faces[0]))
+				return error("Renderer", "loadSceneTextures", "Failed to load 2D texture: " + texture->name);
+		}
+		else if (!addTextureCube(texture->name, texture->faces))
+			return error("Renderer", "loadSceneTextures", "Failed to load cube map: " + texture->name);
+	}
+
+	return debugLog("Renderer", "addTextures", "Added " + std::to_string(textures.size()) + " textures", true);
+}
+void Renderer::bindSkyboxTexture(unsigned int textureID) const {
+	glActiveTexture(GL_TEXTURE0 + SKYBOX_TU);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+}
+
+
+
 void Renderer::updateModelUniforms(const Model& instance, const MeshCPU& data) const {
 	const Mat4 modelMat = Mat4::modelMatrix(instance.transform);
 	glUniformMatrix4fv(modelUL.model, 1, GL_FALSE, modelMat.models);
 	glUniformMatrix4fv(modelUL.modelInverseTranspose, 1, GL_FALSE, modelMat.inverse().transpose().models);
 
-	glUniform1i(modelUL.colourMode , static_cast<int>(instance.colourMode));
+	glUniform1i(modelUL.colourMode, static_cast<int>(instance.colourMode));
 	glUniform4fv(modelUL.colourOverride, 1, &instance.colour.x);
 	glUniform1i(modelUL.hasVertexColour, data.hasColours ? 1 : 0);
 	glUniform4fv(modelUL.specular, 1, &instance.specular.x);
@@ -171,6 +198,36 @@ void Renderer::updateModelUniforms(const Model& instance, const MeshCPU& data) c
 
 	glUniform1i(modelUL.useTextures, instance.useTextures ? 1 : 0);
 }
+void Renderer::setModelIsSkybox(bool isSkybox) const {
+	glUniform1i(modelUL.isSkybox, isSkybox ? 1 : 0);
+}
+void Renderer::updateCameraUniforms(const Vec3<float>& eye, const Mat4& view, const Mat4& projection) const {
+	glUniform3f(eyeLocation, eye.x, eye.y, eye.z);
+	glUniformMatrix4fv(modelUL.modelView, 1, GL_FALSE, view.ptr());
+	glUniformMatrix4fv(modelUL.modelProj, 1, GL_FALSE, projection.ptr());
+}
+void Renderer::updateLightUniforms(const std::vector<Light*>& lights) const {
+	updateLightCount(static_cast<int>(lights.size()));
+
+	for (const Light* light : lights) {
+		if (light->enabled) {
+			if (light->position_UL != -1)    glUniform4f(light->position_UL, light->pos.x, light->pos.y, light->pos.z, 1.0f);
+			if (light->diffuse_UL != -1)     glUniform4f(light->diffuse_UL, light->diffuse.r, light->diffuse.g, light->diffuse.b, light->diffuse.a);
+			if (light->attenuation_UL != -1) glUniform4f(light->attenuation_UL, light->attenuation.r, light->attenuation.g, light->attenuation.b, light->attenuation.a);
+			if (light->direction_UL != -1)   glUniform4f(light->direction_UL, light->direction.r, light->direction.g, light->direction.b, 1.0f);
+			if (light->param1_UL != -1)			glUniform4f(light->param1_UL, static_cast<float>(light->type), light->param1.x, light->param1.y, 0.0f);
+			if (light->param2_UL != -1)			glUniform4f(light->param2_UL, light->enabled ? 1.0f : 0.0f, 0.0f, 0.0f, 0.0f);
+			break;
+		}
+		else if (light->param2_UL != -1) glUniform4f(light->param2_UL, 0.0f, 0.0f, 0.0f, 0.0f);
+	}
+}
+void Renderer::updateLightCount(int count) const {
+	if (lightCountLocation != -1) glUniform1i(lightCountLocation, count);
+}
+
+
+
 bool Renderer::drawModel(const Model& instance) const {
 	if (!instance.isVisible) return true;
 
@@ -238,7 +295,6 @@ bool Renderer::drawModels(const std::vector<Model*>& instance, const Vec3<float>
 
 	return true;
 }
-
 bool Renderer::drawSkybox(const Model& skybox, const Vec3<float>& cameraPos) const {
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_FRONT);
@@ -258,96 +314,6 @@ bool Renderer::drawSkybox(const Model& skybox, const Vec3<float>& cameraPos) con
 	return true;
 }
 
-void Renderer::setModelIsSkybox(bool isSkybox) const {
-	glUniform1i(modelUL.isSkybox, isSkybox ? 1 : 0);
-}
-
-void Renderer::cacheLightUniformLocations(int maxLights) {
-	if (maxLights <= 0) {
-		lightUL.clear();
-		return;
-	}
-	lightUL.resize(static_cast<size_t>(maxLights));
-
-	for (int i = 0; i < maxLights; ++i) {
-		std::string base = "theLights[" + std::to_string(i) + "].";
-		lightUL[i].position = glGetUniformLocation(program, (base + "position").c_str());
-		lightUL[i].diffuse = glGetUniformLocation(program, (base + "diffuse").c_str());
-		lightUL[i].attenuation = glGetUniformLocation(program, (base + "attenuation").c_str());
-		lightUL[i].direction = glGetUniformLocation(program, (base + "direction").c_str());
-		lightUL[i].param1 = glGetUniformLocation(program, (base + "param1").c_str());
-		lightUL[i].param2 = glGetUniformLocation(program, (base + "param2").c_str());
-	}
-}
-
-void Renderer::updateLightCount(int count) const {
-	if (lightCountLocation != -1) glUniform1i(lightCountLocation, count);
-}
-
-void Renderer::updateLightUniforms(const std::vector<Light*>& lights) const {
-	const int n = static_cast<int>(lights.size());
-	const int maxCached = static_cast<int>(lightUL.size());
-
-	updateLightCount(n);
-
-	for (const Light* light : lights) {
-		if(light->enabled) {
-			if (light->position_UL != -1)    glUniform4f(light->position_UL, light->pos.x, light->pos.y, light->pos.z, 1.0f);
-			if (light->diffuse_UL != -1)     glUniform4f(light->diffuse_UL, light->diffuse.r, light->diffuse.g, light->diffuse.b, light->diffuse.a);
-			if (light->attenuation_UL != -1) glUniform4f(light->attenuation_UL, light->attenuation.r, light->attenuation.g, light->attenuation.b, light->attenuation.a);
-			if (light->direction_UL != -1)   glUniform4f(light->direction_UL, light->direction.r, light->direction.g, light->direction.b, 1.0f);
-			if (light->param1_UL != -1)			glUniform4f(light->param1_UL, static_cast<float>(light->type), light->param1.x, light->param1.y, 0.0f);
-			if (light->param2_UL != -1)			glUniform4f(light->param2_UL, light->enabled ? 1.0f : 0.0f, 0.0f, 0.0f, 0.0f);
-			break;
-		}
-		else if (light->param2_UL != -1) glUniform4f(light->param2_UL, 0.0f, 0.0f, 0.0f, 0.0f);
-	}
-}
-void Renderer::updateCameraUniforms(const Vec3<float>& eye, const Mat4& view, const Mat4& projection) const {
-	glUniform3f(eyeLocation, eye.x, eye.y, eye.z);
-	glUniformMatrix4fv(modelUL.modelView, 1, GL_FALSE, view.ptr());
-	glUniformMatrix4fv(modelUL.modelProj, 1, GL_FALSE, projection.ptr());
-}
-
-void Renderer::bindSkyboxTexture(unsigned int textureID) const {
-	glActiveTexture(GL_TEXTURE0 + SKYBOX_TU);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
-}
-
-bool Renderer::getUniformLocation(int& location, const char* name) const {
-	location = glGetUniformLocation(program, name);
-	if (location < 0) return error("Renderer", "getUniformLocation", std::string("Could not find uniform: ") + name);
-	return true;
-}
-
-bool Renderer::addTexture(const std::string& name, const std::string& filePath) {
-	return textureManager.addTexture(name, filePath)
-		? debugLog("Renderer", "addTexture", "Added texture: " + filePath, true)
-		: error("Renderer", "addTexture", "Failed to add texture: " + filePath);
-}
-bool Renderer::addTextureCube(const std::string& name, const std::string(&facePaths)[6]) {
-	return textureManager.addTextureCube(name, facePaths) 
-		? debugLog("Renderer", "addTextureCube", "Added texture cube: " + name, true)
-		: error("Renderer", "addTexture", "Failed to add texture cube: " + name);
-}
-bool Renderer::addTextures(const std::vector<TextureData*>& textures) {
-	for (const TextureData* texture : textures) {
-		if (!texture->isCube) {
-			if(!addTexture(texture->name, texture->faces[0]))
-				return error("Renderer", "loadSceneTextures", "Failed to load 2D texture: " + texture->name);
-		} 
-		else if (!addTextureCube(texture->name, texture->faces))
-				return error("Renderer", "loadSceneTextures", "Failed to load cube map: " + texture->name);
-	}
-
-	return true;
-}
-
-void Renderer::toggleWireframe() {
-	wireframe = !wireframe;
-	glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
-}
-
 void Renderer::renderFrame(const Camera& cam, const float aspect, const std::vector<Light*>& lights, const std::vector<Model*>& models, const Model& skyBox) const {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -359,4 +325,11 @@ void Renderer::renderFrame(const Camera& cam, const float aspect, const std::vec
 	drawSkybox(skyBox, cam.pos);
 
 	glBindVertexArray(0);
+}
+
+
+
+void Renderer::toggleWireframe() {
+	wireframe = !wireframe;
+	glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
 }
