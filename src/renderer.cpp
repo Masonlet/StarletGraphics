@@ -21,6 +21,31 @@ void Renderer::setAssetPaths(const char* path) {
 
 
 
+bool Renderer::setupShaders() {
+	if (!createProgramFromPaths("shader1", "vertex_shader.glsl", "fragment_shader.glsl"))
+		return error("Renderer", "setupShaders", "Failed to create shader program from file");
+
+	if (!setProgram(getProgramID("shader1")))
+		return error("Renderer", "setupShaders", "Failed to set program to shader1");
+
+	if (!cacheUniformLocations())
+		return error("Renderer", "setupShaders", "Failed to cache uniform locations");
+
+	setGLStateDefault();
+	return debugLog("Renderer", "setupShaders", "Finished");
+}
+void Renderer::setGLStateDefault() {
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+}
+
+
+
 bool Renderer::createProgramFromPaths(const std::string& name, const std::string& vertPath, const std::string& fragPath) {
 	return shaderManager.createProgramFromPaths(name, vertPath, fragPath);
 }
@@ -136,7 +161,7 @@ bool Renderer::addMeshes(const std::vector<Model*>& models) {
 		if (!loadAndAddMesh(model->meshPath)) 
 			return error("Renderer", "addMeshes", "Failed to load/add mesh: " + model->meshPath);
 
-	return debugLog("Renderer", "addMeshes", "Added " + std::to_string(models.size()) + " meshes", true);
+	return debugLog("Renderer", "addMeshes", "Added " + std::to_string(models.size()) + " meshes");
 }
 bool Renderer::getMesh(const std::string& path, MeshGPU*& dataOut) {
 	return meshManager.getMeshGPU(path, dataOut);
@@ -163,7 +188,7 @@ bool Renderer::addTextures(const std::vector<TextureData*>& textures) {
 			return error("Renderer", "loadSceneTextures", "Failed to load cube map: " + texture->name);
 	}
 
-	return debugLog("Renderer", "addTextures", "Added " + std::to_string(textures.size()) + " textures", true);
+	return debugLog("Renderer", "addTextures", "Added " + std::to_string(textures.size()) + " textures");
 }
 void Renderer::bindSkyboxTexture(unsigned int textureID) const {
 	glActiveTexture(GL_TEXTURE0 + SKYBOX_TU);

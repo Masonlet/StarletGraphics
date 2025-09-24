@@ -43,6 +43,9 @@ class Renderer {
 public:
 	void setAssetPaths(const char* path);
 
+	bool setupShaders();
+	void setGLStateDefault();
+
 	bool createProgramFromPaths(const std::string& name, const std::string& vertPath, const std::string& fragPath);
 	bool setProgram(const unsigned int program);
 	unsigned int getProgram() const { return program; }
