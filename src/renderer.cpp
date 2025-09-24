@@ -1,17 +1,23 @@
-#include <glad/glad.h>
 #include "StarletGraphics/shader/shaderManager.hpp"
 #include "StarletGraphics/texture/textureManager.hpp"
 #include "StarletGraphics/mesh/meshManager.hpp"
+#include "StarletGraphics/renderer.hpp"
+#include "StarletParsers/utils/log.hpp"
+
+#include "StarletScene/scene.hpp"
+#include "StarletScene/components/transform.hpp"
 #include "StarletScene/components/textureData.hpp"
 #include "StarletScene/components/textureConnection.hpp"
 #include "StarletScene/components/model.hpp"
+#include "StarletScene/components/light.hpp"
 #include "StarletScene/components/camera.hpp"
 #include "StarletScene/components/primitive.hpp"
 #include "StarletScene/components/grid.hpp"
+
 #include "StarletMath/mat4.hpp"
-#include "StarletGraphics/renderer.hpp"
-#include "StarletParsers/utils/log.hpp"
-#include "StarletScene/components/light.hpp"
+
+#include <glad/glad.h>
+
 
 void Renderer::setAssetPaths(const char* path) {
 	shaderManager.setBasePath(path);
@@ -116,24 +122,24 @@ bool Renderer::cacheLightUniforms() {
 
 
 
-bool Renderer::createPrimitiveMesh(const Primitive& primitive) {
+bool Renderer::createPrimitiveMesh(const Primitive& primitive, const TransformComponent& transform) {
 	switch (primitive.type) {
 	case PrimitiveType::Triangle:
-		return createTriangle(primitive.name, { primitive.transform.size.x, primitive.transform.size.y }, primitive.colour);
+		return createTriangle(primitive.name, { transform.size.x, transform.size.y }, primitive.colour);
 	case PrimitiveType::Square:
-		return createSquare(primitive.name, { primitive.transform.size.x, primitive.transform.size.y }, primitive.colour);
+		return createSquare(primitive.name, { transform.size.x, transform.size.y }, primitive.colour);
 	case PrimitiveType::Cube:
-		return createCube(primitive.name, primitive.transform.size, primitive.colour);
+		return createCube(primitive.name,transform.size, primitive.colour);
 	default:
 		return error("Renderer", "loadScenePrimitives", "Invalid primitive: " + primitive.name);
 	}
 }
-bool Renderer::createGridMesh(const Grid& grid, const std::string& meshName) {
+bool Renderer::createGridMesh(const Grid& grid, const TransformComponent& transform, const std::string& meshName) {
 	switch (grid.type) {
 	case GridType::Square:
-		return createSquare(meshName, { grid.transform.size.x, grid.transform.size.y }, grid.colour);
+		return createSquare(meshName, { transform.size.x, transform.size.y }, grid.colour);
 	case GridType::Cube:
-		return createCube(meshName, grid.transform.size, grid.colour);
+		return createCube(meshName, transform.size, grid.colour);
 	default:
 		return error("Renderer", "createGridMesh", "Invalid grid: " + grid.name + ", mesh: " + meshName);
 	}
@@ -195,10 +201,8 @@ void Renderer::bindSkyboxTexture(unsigned int textureID) const {
 	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
 }
 
-
-
-void Renderer::updateModelUniforms(const Model& instance, const MeshCPU& data) const {
-	const Mat4 modelMat = Mat4::modelMatrix(instance.transform);
+void Renderer::updateModelUniforms(const TransformComponent& transform, const Model& instance, const MeshCPU& data) const {
+	const Mat4 modelMat = Mat4::modelMatrix({ { transform.pos, 0.0f }, transform.rot, transform.size });
 	glUniformMatrix4fv(modelUL.model, 1, GL_FALSE, modelMat.models);
 	glUniformMatrix4fv(modelUL.modelInverseTranspose, 1, GL_FALSE, modelMat.inverse().transpose().models);
 
@@ -231,20 +235,30 @@ void Renderer::updateCameraUniforms(const Vec3<float>& eye, const Mat4& view, co
 	glUniformMatrix4fv(modelUL.modelView, 1, GL_FALSE, view.ptr());
 	glUniformMatrix4fv(modelUL.modelProj, 1, GL_FALSE, projection.ptr());
 }
-void Renderer::updateLightUniforms(const std::vector<Light*>& lights) const {
-	updateLightCount(static_cast<int>(lights.size()));
+void Renderer::updateLightUniforms(const Scene& scene) const {
+	auto lightEntities = scene.getEntitiesOfType<Light>();
+	updateLightCount(static_cast<int>(lightEntities.size()));
 
-	for (const Light* light : lights) {
-		if (light->enabled) {
-			if (light->position_UL != -1)    glUniform4f(light->position_UL, light->pos.x, light->pos.y, light->pos.z, 1.0f);
-			if (light->diffuse_UL != -1)     glUniform4f(light->diffuse_UL, light->diffuse.r, light->diffuse.g, light->diffuse.b, light->diffuse.a);
-			if (light->attenuation_UL != -1) glUniform4f(light->attenuation_UL, light->attenuation.r, light->attenuation.g, light->attenuation.b, light->attenuation.a);
-			if (light->direction_UL != -1)   glUniform4f(light->direction_UL, light->direction.r, light->direction.g, light->direction.b, 1.0f);
-			if (light->param1_UL != -1)			glUniform4f(light->param1_UL, static_cast<float>(light->type), light->param1.x, light->param1.y, 0.0f);
-			if (light->param2_UL != -1)			glUniform4f(light->param2_UL, light->enabled ? 1.0f : 0.0f, 0.0f, 0.0f, 0.0f);
-			break;
+	for (const auto& lightPair : lightEntities) {
+		const StarEntity entity = lightPair.first;
+		const Light* light = lightPair.second;
+
+		if (!light->enabled) {
+			if (light->param2_UL != -1) glUniform4f(light->param2_UL, 0.0f, 0.0f, 0.0f, 0.0f);
+			continue;
 		}
-		else if (light->param2_UL != -1) glUniform4f(light->param2_UL, 0.0f, 0.0f, 0.0f, 0.0f);
+
+		if (!scene.hasComponent<TransformComponent>(entity)) continue;
+
+		const TransformComponent& transform = scene.getComponent<TransformComponent>(entity);
+
+		if (light->position_UL != -1)    glUniform4f(light->position_UL, transform.pos.x, transform.pos.y, transform.pos.z, 1.0f);
+		if (light->diffuse_UL != -1)     glUniform4f(light->diffuse_UL, light->diffuse.r, light->diffuse.g, light->diffuse.b, light->diffuse.a);
+		if (light->attenuation_UL != -1) glUniform4f(light->attenuation_UL, light->attenuation.r, light->attenuation.g, light->attenuation.b, light->attenuation.a);
+		if (light->direction_UL != -1)   glUniform4f(light->direction_UL, transform.rot.r, transform.rot.g, transform.rot.b, 1.0f);
+		if (light->param1_UL != -1)			glUniform4f(light->param1_UL, static_cast<float>(light->type), light->param1.x, light->param1.y, 0.0f);
+		if (light->param2_UL != -1)			glUniform4f(light->param2_UL, light->enabled ? 1.0f : 0.0f, 0.0f, 0.0f, 0.0f);
+		break;
 	}
 }
 void Renderer::updateLightCount(int count) const {
@@ -253,14 +267,14 @@ void Renderer::updateLightCount(int count) const {
 
 
 
-bool Renderer::drawModel(const Model& instance) const {
+bool Renderer::drawModel(const Model& instance, const TransformComponent& transform) const {
 	if (!instance.isVisible) return true;
 
 	const MeshCPU* cpuMesh{};
 	if (!meshManager.getMeshCPU(instance.meshPath, cpuMesh))
 		return error("Renderer", "drawModel", "Could not find mesh: " + instance.meshPath);
 
-	updateModelUniforms(instance, *cpuMesh);
+	updateModelUniforms(transform, instance, *cpuMesh);
 
 	if (instance.useTextures) {
 		glUniform4f(modelUL.texMixRatios, instance.textureMixRatio[0], instance.textureMixRatio[1], instance.textureMixRatio[2], instance.textureMixRatio[3]);
@@ -291,47 +305,56 @@ bool Renderer::drawModel(const Model& instance) const {
 
 	return true;
 }
-bool Renderer::drawModels(const std::vector<Model*>& instance, const Vec3<float>& eye) const {
-	std::vector<const Model*> transparentInstances;
-	for (const Model* model : instance) {
+bool Renderer::drawModels(const Scene& scene, const Vec3<float>& eye) const {
+	std::vector<std::pair<const Model*, const TransformComponent*>> transparentInstances;
+	for (const auto& pair : scene.getEntitiesOfType<Model>()) {
+		const StarEntity entity = pair.first;
+		const Model* model = pair.second;
+
 		if (model->name == "skybox") continue;
 
-		if (model->colour.w >= 1.0f) drawModel(*model);
-		else                         transparentInstances.push_back(model);
+		if (!scene.hasComponent<TransformComponent>(entity)) continue;
+		const TransformComponent& transform = scene.getComponent<TransformComponent>(entity);
+
+		if (model->colour.w >= 1.0f) drawModel(*model, transform);
+		else                         transparentInstances.push_back({ model, &transform });
 	}
 
 	for (size_t i = 0; i < transparentInstances.size(); ++i) {
 		for (size_t j = 0; j < transparentInstances.size() - i - 1; ++j) {
-			const Vec4<float>& a = transparentInstances[j]->transform.pos;
-			const Vec4<float>& b = transparentInstances[j + 1]->transform.pos;
+			const Vec3<float>& a = transparentInstances[j].second->pos;
+			const Vec3<float>& b = transparentInstances[j + 1].second->pos;
 			float distA = (a.x - eye.x) * (a.x - eye.x) + (a.y - eye.y) * (a.y - eye.y) + (a.z - eye.z) * (a.z - eye.z);
 			float distB = (b.x - eye.x) * (b.x - eye.x) + (b.y - eye.y) * (b.y - eye.y) + (b.z - eye.z) * (b.z - eye.z);
 			if (distA < distB) {
-				const Model* temp = transparentInstances[j];
+				std::pair<const Model*, const TransformComponent*> temp = transparentInstances[j];
 				transparentInstances[j] = transparentInstances[j + 1];
 				transparentInstances[j + 1] = temp;
 			}
 		}
 	}
 
-	for (const Model* instance : transparentInstances) 
-		if(!drawModel(*instance))
-			return error("Renderer", "drawModels", "Failed to draw transparent model: " + instance->name);
-
+	for (const auto& pair : transparentInstances) 
+		if (!drawModel(*pair.first, *pair.second)) 
+			return error("Renderer", "drawModels", "Failed to draw transparent model");
+		
 	return true;
 }
-bool Renderer::drawSkybox(const Model& skybox, const Vec3<float>& cameraPos) const {
+bool Renderer::drawSkybox(const Model& skybox, const Vec3<float>& skyboxSize, const Vec3<float>& cameraPos) const {
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_FRONT);
 	glDepthMask(GL_FALSE);
 
 	Model tempSkybox = skybox;
-	tempSkybox.transform.pos = { cameraPos, 0.0f };
 	tempSkybox.isVisible = true;
 	setModelIsSkybox(true);
 
 	bindSkyboxTexture(textureManager.getTextureID(skybox.name));
-	drawModel(tempSkybox);
+
+	TransformComponent tempTransform;
+	tempTransform.pos = cameraPos;
+	tempTransform.size = skyboxSize;
+	drawModel(tempSkybox, tempTransform);
 
 	setModelIsSkybox(false);
 	glDepthMask(GL_TRUE);
@@ -339,15 +362,46 @@ bool Renderer::drawSkybox(const Model& skybox, const Vec3<float>& cameraPos) con
 	return true;
 }
 
-void Renderer::renderFrame(const Camera& cam, const float aspect, const std::vector<Light*>& lights, const std::vector<Model*>& models, const Model& skyBox) const {
+void Renderer::renderFrame(const Scene& scene, const float aspect) const {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	updateCameraUniforms(cam.pos, Mat4::lookAt(cam.pos, cam.front), Mat4::perspective(cam.fov, aspect, cam.nearPlane, cam.farPlane));
+	const Camera* activeCam{};
+	const TransformComponent* camTransform{};
+	for (auto& pair : scene.getEntitiesOfType<Camera>()) {
+		if (pair.second->enabled) {
+			activeCam = pair.second;
+			camTransform = &scene.getComponent<TransformComponent>(pair.first);
+			break;
+		}
+	}
 
-	updateLightUniforms(lights);
+	if (!activeCam || !camTransform) return;
 
-	drawModels(models, cam.pos);
-	drawSkybox(skyBox, cam.pos);
+	const float yaw = camTransform->rot.y;
+	const float pitch = camTransform->rot.x;
+
+	Vec3<float> front;
+	front.x = cos(radians(yaw)) * cos(radians(pitch));
+	front.y = sin(radians(pitch));
+	front.z = sin(radians(yaw)) * cos(radians(pitch));
+	front = front.normalized();
+
+	Vec3<float> right = front.cross(WORLD_UP).normalized();
+	Vec3<float> up = right.cross(front).normalized();
+
+	updateCameraUniforms(camTransform->pos, Mat4::lookAt(camTransform->pos, front, up), Mat4::perspective(activeCam->fov, aspect, activeCam->nearPlane, activeCam->farPlane));
+
+	updateLightUniforms(scene);
+
+	drawModels(scene, camTransform->pos);
+
+	const Model* skyBoxModel = scene.getComponentByName<Model>(std::string("skybox"));
+	const StarEntity skyboxEntity = scene.getEntityByName<Model>("skybox");
+
+	if (skyBoxModel && skyboxEntity != -1) {
+		const TransformComponent& skyBoxTransform = scene.getComponent<TransformComponent>(skyboxEntity);
+		drawSkybox(*skyBoxModel, skyBoxTransform.size, camTransform->pos);
+	}
 
 	glBindVertexArray(0);
 }

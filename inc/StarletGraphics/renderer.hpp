@@ -8,6 +8,8 @@
 #include <vector>
 
 template <typename T> struct Vec3;
+class Scene;
+struct TransformComponent;
 struct Mat4;
 struct Mesh;
 struct Model;
@@ -53,8 +55,8 @@ public:
 
 	bool cacheUniformLocations();
 
-	bool createPrimitiveMesh(const Primitive& primitive);
-	bool createGridMesh(const Grid& grid, const std::string& meshName);
+	bool createPrimitiveMesh(const Primitive& primitive, const TransformComponent& transform);
+	bool createGridMesh(const Grid& grid, const TransformComponent& transform, const std::string& meshName);
 	bool createTriangle(const std::string& name, const Vec2<float>& size, const Vec4<float>& vertexColour);
 	bool createSquare(const std::string& name, const Vec2<float>& size, const Vec4<float>& vertexColour);
 	bool createCube(const std::string& name, const Vec3<float>& size, const Vec4<float>& vertexColour);
@@ -70,16 +72,16 @@ public:
 	bool addTextures(const std::vector<TextureData*>& textures);
 	void bindSkyboxTexture(const unsigned int texture) const;
 
-	void updateModelUniforms(const Model& instance, const MeshCPU& data) const;
+	void updateModelUniforms(const TransformComponent& transform, const Model& instance, const MeshCPU& data) const;
 	void setModelIsSkybox(const bool isSkybox) const;
 	void updateCameraUniforms(const Vec3<float>& eye, const Mat4& view, const Mat4& projection) const;
-	void updateLightUniforms(const std::vector<Light*>& lights) const;
+	void updateLightUniforms(const Scene& scene) const;
 	void updateLightCount(const int count) const;
 
-	bool drawModel(const Model& instance) const;
-	bool drawModels(const std::vector<Model*>& instance, const Vec3<float>& eye) const;
-	bool drawSkybox(const Model& skybox, const Vec3<float>& cameraPos) const;
-	void renderFrame(const Camera& cam, const float aspect, const std::vector<Light*>& lights, const std::vector<Model*>& models, const Model& skyBox) const;
+	bool drawModel(const Model& instance, const TransformComponent& transform) const;
+	bool drawModels(const Scene& scene, const Vec3<float>& eye) const;
+	bool drawSkybox(const Model& skybox, const Vec3<float>& skyboxSize, const Vec3<float>& cameraPos) const;
+	void renderFrame(const Scene& scene, const float aspect) const;
 
 	void toggleWireframe();
 
