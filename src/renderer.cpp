@@ -305,8 +305,7 @@ bool Renderer::drawModel(const Model& instance, const TransformComponent& transf
 
 	return true;
 }
-bool Renderer::drawModels(const Scene& scene, const Vec3<float>& eye) const {
-	std::vector<std::pair<const Model*, const TransformComponent*>> transparentInstances;
+bool Renderer::drawOpaqueModels(const Scene& scene, const Vec3<float>& eye) const {
 	for (const auto& pair : scene.getEntitiesOfType<Model>()) {
 		const StarEntity entity = pair.first;
 		const Model* model = pair.second;
@@ -317,7 +316,24 @@ bool Renderer::drawModels(const Scene& scene, const Vec3<float>& eye) const {
 		const TransformComponent& transform = scene.getComponent<TransformComponent>(entity);
 
 		if (model->colour.w >= 1.0f) drawModel(*model, transform);
-		else                         transparentInstances.push_back({ model, &transform });
+	}
+
+	return true;
+}
+
+bool Renderer::drawTransparentModels(const Scene& scene, const Vec3<float>& eye) const {
+	std::vector<std::pair<const Model*, const TransformComponent*>> transparentInstances;
+
+	for (const auto& pair : scene.getEntitiesOfType<Model>()) {
+		const StarEntity entity = pair.first;
+		const Model* model = pair.second;
+
+		if (model->name == "skybox") continue;
+
+		if (!scene.hasComponent<TransformComponent>(entity)) continue;
+		const TransformComponent& transform = scene.getComponent<TransformComponent>(entity);
+
+		if (model->colour.w < 1.0f) transparentInstances.push_back({model, &transform});
 	}
 
 	for (size_t i = 0; i < transparentInstances.size(); ++i) {
@@ -334,10 +350,10 @@ bool Renderer::drawModels(const Scene& scene, const Vec3<float>& eye) const {
 		}
 	}
 
-	for (const auto& pair : transparentInstances) 
-		if (!drawModel(*pair.first, *pair.second)) 
+	for (const auto& pair : transparentInstances)
+		if (!drawModel(*pair.first, *pair.second))
 			return error("Renderer", "drawModels", "Failed to draw transparent model");
-		
+
 	return true;
 }
 bool Renderer::drawSkybox(const Model& skybox, const Vec3<float>& skyboxSize, const Vec3<float>& cameraPos) const {
@@ -393,7 +409,7 @@ void Renderer::renderFrame(const Scene& scene, const float aspect) const {
 
 	updateLightUniforms(scene);
 
-	drawModels(scene, camTransform->pos);
+	drawOpaqueModels(scene, camTransform->pos);
 
 	const Model* skyBoxModel = scene.getComponentByName<Model>(std::string("skybox"));
 	const StarEntity skyboxEntity = scene.getEntityByName<Model>("skybox");
@@ -402,6 +418,8 @@ void Renderer::renderFrame(const Scene& scene, const float aspect) const {
 		const TransformComponent& skyBoxTransform = scene.getComponent<TransformComponent>(skyboxEntity);
 		drawSkybox(*skyBoxModel, skyBoxTransform.size, camTransform->pos);
 	}
+
+	drawTransparentModels(scene, camTransform->pos);
 
 	glBindVertexArray(0);
 }

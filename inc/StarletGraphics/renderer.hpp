@@ -79,7 +79,8 @@ public:
 	void updateLightCount(const int count) const;
 
 	bool drawModel(const Model& instance, const TransformComponent& transform) const;
-	bool drawModels(const Scene& scene, const Vec3<float>& eye) const;
+	bool drawOpaqueModels(const Scene& scene, const Vec3<float>& eye) const;
+	bool drawTransparentModels(const Scene& scene, const Vec3<float>& eye) const;
 	bool drawSkybox(const Model& skybox, const Vec3<float>& skyboxSize, const Vec3<float>& cameraPos) const;
 	void renderFrame(const Scene& scene, const float aspect) const;
 
