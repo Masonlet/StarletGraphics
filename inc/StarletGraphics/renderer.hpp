@@ -53,11 +53,8 @@ struct LightUL {
 class Renderer {
 public:
 	Renderer(ShaderManager& sm, MeshManager& mm, TextureManager& tm) : shaderManager(sm), meshManager(mm), textureManager(tm) {}
-
-	void setAssetPaths(const char* path);
-
-	bool setupShaders();
-	void setGLStateDefault();
+	
+	bool initialize();
 
 	bool setProgram(const unsigned int program);
 	unsigned int getProgram() const { return program; }
@@ -93,6 +90,8 @@ private:
 	bool cacheLightUniforms();
 
 	bool getUniformLocation(int& location, const char* name) const;
+
+	void setGLStateDefault();
 
 	ModelUL modelUL;
 	LightUL lightUL;

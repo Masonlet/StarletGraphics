@@ -18,17 +18,7 @@
 
 #include <glad/glad.h>
 
-
-void Renderer::setAssetPaths(const char* path) {
-	shaderManager.setBasePath(path);
-	meshManager.setBasePath(path);
-	textureManager.setBasePath(path);
-}
-
-bool Renderer::setupShaders() {
-	if (!shaderManager.createProgramFromPaths("shader1", "vertex_shader.glsl", "fragment_shader.glsl"))
-		return error("Renderer", "setupShaders", "Failed to create shader program from file");
-
+bool Renderer::initialize() {
 	if (!setProgram(shaderManager.getProgramID("shader1")))
 		return error("Renderer", "setupShaders", "Failed to set program to shader1");
 
@@ -36,7 +26,7 @@ bool Renderer::setupShaders() {
 		return error("Renderer", "setupShaders", "Failed to cache uniform locations");
 
 	setGLStateDefault();
-	return debugLog("Renderer", "setupShaders", "Finished");
+	return true;
 }
 void Renderer::setGLStateDefault() {
 	glEnable(GL_DEPTH_TEST);
