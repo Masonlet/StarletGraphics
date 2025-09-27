@@ -22,6 +22,7 @@
 bool Renderer::setProgram(unsigned int program) {
 	if (program == 0) return error("Renderer", "setProgram", "Program is 0");
 	this->program = program;
+	uniforms.setProgram(program);
 	glUseProgram(program);
 	return true;
 }
@@ -30,7 +31,6 @@ bool Renderer::initialize() {
 	if (!setProgram(shaderManager.getProgramID("shader1")))
 		return error("Renderer", "setupShaders", "Failed to set program to shader1");
 
-	uniforms.setProgram(program);
 	if (!uniforms.cacheAllLocations())
 		return error("Renderer", "setupShaders", "Failed to cache uniform locations");
 
@@ -225,17 +225,12 @@ bool Renderer::drawSkybox(const Model& skybox, const Vec3<float>& skyboxSize, co
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_FRONT);
 	glDepthMask(GL_FALSE);
-
 	Model tempSkybox = skybox;
 	tempSkybox.isVisible = true;
 	setModelIsSkybox(true);
 
 	bindSkyboxTexture(textureManager.getTextureID(skybox.name));
-
-	TransformComponent tempTransform;
-	tempTransform.pos = cameraPos;
-	tempTransform.size = skyboxSize;
-	drawModel(tempSkybox, tempTransform);
+	drawModel(tempSkybox, { cameraPos, { 0.0f, 0.0f, 0.0f }, skyboxSize });
 
 	setModelIsSkybox(false);
 	glDepthMask(GL_TRUE);
@@ -258,6 +253,7 @@ void Renderer::renderFrame(const Scene& scene, const float aspect) const {
 
 	if (!activeCam || !camTransform) return;
 
+	const Vec3<float> eye = camTransform->pos;
 	const float yaw = camTransform->rot.y;
 	const float pitch = camTransform->rot.x;
 
@@ -270,21 +266,21 @@ void Renderer::renderFrame(const Scene& scene, const float aspect) const {
 	Vec3<float> right = front.cross(WORLD_UP).normalized();
 	Vec3<float> up = right.cross(front).normalized();
 
-	updateCameraUniforms(camTransform->pos, Mat4::lookAt(camTransform->pos, front, up), Mat4::perspective(activeCam->fov, aspect, activeCam->nearPlane, activeCam->farPlane));
+	updateCameraUniforms(eye, Mat4::lookAt(eye, front, up), Mat4::perspective(activeCam->fov, aspect, activeCam->nearPlane, activeCam->farPlane));
 
 	updateLightUniforms(scene);
 
-	drawOpaqueModels(scene, camTransform->pos);
+	drawOpaqueModels(scene, eye);
 
 	const Model* skyBoxModel = scene.getComponentByName<Model>(std::string("skybox"));
 	const StarEntity skyboxEntity = scene.getEntityByName<Model>("skybox");
 
 	if (skyBoxModel && skyboxEntity != -1) {
 		const TransformComponent& skyBoxTransform = scene.getComponent<TransformComponent>(skyboxEntity);
-		drawSkybox(*skyBoxModel, skyBoxTransform.size, camTransform->pos);
+		drawSkybox(*skyBoxModel, skyBoxTransform.size, eye);
 	}
 
-	drawTransparentModels(scene, camTransform->pos);
+	drawTransparentModels(scene, eye);
 
 	glBindVertexArray(0);
 }
