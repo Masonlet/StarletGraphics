@@ -18,11 +18,20 @@
 
 #include <glad/glad.h>
 
+
+bool Renderer::setProgram(unsigned int program) {
+	if (program == 0) return error("Renderer", "setProgram", "Program is 0");
+	this->program = program;
+	glUseProgram(program);
+	return true;
+}
+
 bool Renderer::initialize() {
 	if (!setProgram(shaderManager.getProgramID("shader1")))
 		return error("Renderer", "setupShaders", "Failed to set program to shader1");
 
-	if (!cacheUniformLocations())
+	uniforms.setProgram(program);
+	if (!uniforms.cacheAllLocations())
 		return error("Renderer", "setupShaders", "Failed to cache uniform locations");
 
 	setGLStateDefault();
@@ -38,77 +47,14 @@ void Renderer::setGLStateDefault() {
 	glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 }
 
-bool Renderer::setProgram(unsigned int program) {
-	if (program == 0) return error("Renderer", "setProgram", "Program is 0");
-	this->program = program;
-	glUseProgram(program);
-	return true;
-}
-
-bool Renderer::cacheUniformLocations() {
-	return cacheTextureUniforms()
-		&& cacheCameraUniforms()
-		&& cacheModelUniforms()
-		&& cacheLightUniforms();
-}
-
-bool Renderer::getUniformLocation(int& location, const char* name) const {
-	location = glGetUniformLocation(program, name);
-	if (location < 0) return error("Renderer", "getUniformLocation", std::string("Could not find uniform: ") + name);
-	return true;
-}
-bool Renderer::cacheTextureUniforms() {
-	glUniform1i(glGetUniformLocation(program, "textSampler2D_00"), 0);
-	glUniform1i(glGetUniformLocation(program, "textSampler2D_01"), 1);
-	glUniform1i(glGetUniformLocation(program, "textSampler2D_02"), 2);
-	glUniform1i(glGetUniformLocation(program, "textSampler2D_03"), 3);
-
-	bool ok = true;
-	ok &= getUniformLocation(modelUL.useTextures, "bUseTextures");
-	ok &= getUniformLocation(modelUL.texMixRatios, "texMixRatios");
-	ok &= getUniformLocation(skyboxTextureLocation, "skyboxCubeTexture");
-	if (skyboxTextureLocation != -1) glUniform1i(skyboxTextureLocation, SKYBOX_TU);
-
-	return ok;
-}
-bool Renderer::cacheCameraUniforms() {
-	return getUniformLocation(eyeLocation, "eyePos");
-}
-bool Renderer::cacheModelUniforms() {
-	bool ok = true;
-	ok &= getUniformLocation(modelUL.isSkybox, "bIsSkybox");
-	ok &= getUniformLocation(modelUL.model, "mModel");
-	ok &= getUniformLocation(modelUL.modelView, "mView");
-	ok &= getUniformLocation(modelUL.modelProj, "mProj");
-	ok &= getUniformLocation(modelUL.modelInverseTranspose, "mModel_InverseTranspose");
-	ok &= getUniformLocation(modelUL.colourMode, "colourMode");
-	ok &= getUniformLocation(modelUL.hasVertexColour, "hasVertexColour");
-	ok &= getUniformLocation(modelUL.colourOverride, "colourOverride");
-	ok &= getUniformLocation(modelUL.specular, "vertSpecular");
-	ok &= getUniformLocation(modelUL.yMinMax, "yMin_yMax");
-	ok &= getUniformLocation(modelUL.seed, "seed");
-	ok &= getUniformLocation(modelUL.isLit, "bIsLit");
-	return ok;
-}
-bool Renderer::cacheLightUniforms() {
-	bool ok = true;
-	ok &= getUniformLocation(lightCountLocation, "lightCount");
-	ok &= getUniformLocation(ambientLightLocation, "ambientLight");
-	ok &= getUniformLocation(lightUL.position_UL, "theLights[0].position");
-	ok &= getUniformLocation(lightUL.diffuse_UL, "theLights[0].diffuse");
-	ok &= getUniformLocation(lightUL.attenuation_UL, "theLights[0].attenuation");
-	ok &= getUniformLocation(lightUL.direction_UL, "theLights[0].direction");
-	ok &= getUniformLocation(lightUL.param1_UL, "theLights[0].param1");
-	ok &= getUniformLocation(lightUL.param2_UL, "theLights[0].param2");
-	return ok;
-}
-
 void Renderer::bindSkyboxTexture(unsigned int textureID) const {
 	glActiveTexture(GL_TEXTURE0 + SKYBOX_TU);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
 }
 
 void Renderer::updateModelUniforms(const TransformComponent& transform, const Model& instance, const MeshCPU& data) const {
+	const ModelUL& modelUL = uniforms.getModelUL();
+	
 	const Mat4 modelMat = Mat4::modelMatrix({ { transform.pos, 0.0f }, transform.rot, transform.size });
 	glUniformMatrix4fv(modelUL.model, 1, GL_FALSE, modelMat.models);
 	glUniformMatrix4fv(modelUL.modelInverseTranspose, 1, GL_FALSE, modelMat.inverse().transpose().models);
@@ -135,10 +81,11 @@ void Renderer::updateModelUniforms(const TransformComponent& transform, const Mo
 	glUniform1i(modelUL.useTextures, instance.useTextures ? 1 : 0);
 }
 void Renderer::setModelIsSkybox(bool isSkybox) const {
-	glUniform1i(modelUL.isSkybox, isSkybox ? 1 : 0);
+	glUniform1i(uniforms.getModelUL().isSkybox, isSkybox ? 1 : 0);
 }
 void Renderer::updateCameraUniforms(const Vec3<float>& eye, const Mat4& view, const Mat4& projection) const {
-	glUniform3f(eyeLocation, eye.x, eye.y, eye.z);
+	const ModelUL& modelUL = uniforms.getModelUL();
+	glUniform3f(uniforms.getEyeLocation(), eye.x, eye.y, eye.z);
 	glUniformMatrix4fv(modelUL.modelView, 1, GL_FALSE, view.ptr());
 	glUniformMatrix4fv(modelUL.modelProj, 1, GL_FALSE, projection.ptr());
 }
@@ -146,9 +93,9 @@ void Renderer::updateLightUniforms(const Scene& scene) const {
 	auto lightEntities = scene.getEntitiesOfType<Light>();
 	updateLightCount(static_cast<int>(lightEntities.size()));
 
-	if (ambientLightLocation != -1) {
+	if (uniforms.getAmbientLightLocation() != -1) {
 		const Vec4<float>& ambient = scene.getAmbientLight();
-		glUniform4fv(ambientLightLocation, 1, &ambient.x);
+		glUniform4fv(uniforms.getAmbientLightLocation(), 1, &ambient.x);
 	}
 
 	int lightIndex = 0;
@@ -181,10 +128,8 @@ void Renderer::updateLightUniforms(const Scene& scene) const {
 	}
 }
 void Renderer::updateLightCount(int count) const {
-	if (lightCountLocation != -1) glUniform1i(lightCountLocation, count);
+	if (uniforms.getLightCountLocation() != -1) glUniform1i(uniforms.getLightCountLocation(), count);
 }
-
-
 
 bool Renderer::drawModel(const Model& instance, const TransformComponent& transform) const {
 	if (!instance.isVisible) return true;
@@ -194,6 +139,7 @@ bool Renderer::drawModel(const Model& instance, const TransformComponent& transf
 		return error("Renderer", "drawModel", "Could not find mesh: " + instance.meshPath);
 
 	updateModelUniforms(transform, instance, *cpuMesh);
+	const ModelUL& modelUL = uniforms.getModelUL();
 
 	if (instance.useTextures) {
 		glUniform4f(modelUL.texMixRatios, instance.textureMixRatio[0], instance.textureMixRatio[1], instance.textureMixRatio[2], instance.textureMixRatio[3]);

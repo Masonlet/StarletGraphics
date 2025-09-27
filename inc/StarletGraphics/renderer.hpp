@@ -1,8 +1,9 @@
 #pragma once
 
-#include "StarletGraphics/shader/shaderManager.hpp"
-#include "StarletGraphics/mesh/meshManager.hpp"
-#include "StarletGraphics/texture/textureManager.hpp"
+#include "uniformCache.hpp"
+#include "shader/shaderManager.hpp"
+#include "mesh/meshManager.hpp"
+#include "texture/textureManager.hpp"
 #include <map>
 #include <string>
 #include <vector>
@@ -19,45 +20,14 @@ struct Primitive;
 struct Grid;
 struct TextureData;
 
-constexpr int SKYBOX_TU{ 20 };
-
-struct ModelUL {
-	int model{ -1 };
-	int modelInverseTranspose{ -1 };
-	int modelView{ -1 }, modelProj{ -1 };
-	int isSkybox{ -1 };
-
-	int colourMode{ -1 };
-	int colourOverride{ -1 };
-	int hasVertexColour{ -1 };
-	int specular{ -1 };
-
-	int yMinMax{ -1 };
-	int seed{ -1 };
-
-	int isLit{ -1 };
-
-	int useTextures{ -1 };
-	int texMixRatios{ -1 };
-};
-
-struct LightUL {
-	int position_UL{ -1 };
-	int diffuse_UL{ -1 };
-	int attenuation_UL{ -1 };
-	int direction_UL{ -1 };
-	int param1_UL{ -1 };
-	int param2_UL{ -1 };
-};
-
 class Renderer {
 public:
 	Renderer(ShaderManager& sm, MeshManager& mm, TextureManager& tm) : shaderManager(sm), meshManager(mm), textureManager(tm) {}
 	
-	bool initialize();
-
 	bool setProgram(const unsigned int program);
 	unsigned int getProgram() const { return program; }
+
+	bool initialize();
 
 	void bindSkyboxTexture(const unsigned int texture) const;
 
@@ -79,23 +49,9 @@ private:
 	unsigned int program{ 0 };
 	bool wireframe{ false };
 
-	int eyeLocation{ -1 };
-	int skyboxTextureLocation{ -1 };
-	int lightCountLocation{ -1 }, ambientLightLocation{ -1 };
-
-	bool cacheUniformLocations();
-	bool cacheTextureUniforms();
-	bool cacheCameraUniforms();
-	bool cacheModelUniforms();
-	bool cacheLightUniforms();
-
-	bool getUniformLocation(int& location, const char* name) const;
-
 	void setGLStateDefault();
 
-	ModelUL modelUL;
-	LightUL lightUL;
-
+	UniformCache uniforms;
 	ShaderManager& shaderManager;
 	MeshManager& meshManager;
 	TextureManager& textureManager;
