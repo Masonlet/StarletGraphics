@@ -116,8 +116,6 @@ bool Renderer::cacheLightUniforms() {
 	bool ok = true;
 	ok &= getUniformLocation(lightCountLocation, "lightCount");
 	ok &= getUniformLocation(ambientLightLocation, "ambientLight");
-	glUniform4f(ambientLightLocation, 0.0, 0.0, 0.0, 1.0);
-
 	ok &= getUniformLocation(lightUL.position_UL, "theLights[0].position");
 	ok &= getUniformLocation(lightUL.diffuse_UL, "theLights[0].diffuse");
 	ok &= getUniformLocation(lightUL.attenuation_UL, "theLights[0].attenuation");
@@ -246,6 +244,11 @@ void Renderer::updateLightUniforms(const Scene& scene) const {
 	auto lightEntities = scene.getEntitiesOfType<Light>();
 	updateLightCount(static_cast<int>(lightEntities.size()));
 
+	if (ambientLightLocation != -1) {
+		const Vec4<float>& ambient = scene.getAmbientLight();
+		glUniform4fv(ambientLightLocation, 1, &ambient.x);
+	}
+
 	int lightIndex = 0;
 	for (const auto& lightPair : lightEntities) {
 		const StarEntity entity = lightPair.first;
@@ -267,8 +270,8 @@ void Renderer::updateLightUniforms(const Scene& scene) const {
 
 		const TransformComponent& transform = scene.getComponent<TransformComponent>(entity);
 		if (pos_UL != -1)    glUniform4f(pos_UL, transform.pos.x, transform.pos.y, transform.pos.z, 1.0f);
-		if (diff_UL != -1)   glUniform4f(diff_UL, light->diffuse.r, light->diffuse.g, light->diffuse.b, light->diffuse.a);
-		if (atten_UL != -1)  glUniform4f(atten_UL, light->attenuation.r, light->attenuation.g, light->attenuation.b, light->attenuation.a);
+		if (diff_UL != -1)   glUniform4fv(diff_UL, 1, &light->diffuse.r);
+		if (atten_UL != -1)  glUniform4fv(atten_UL, 1, &light->attenuation.r);
 		if (dir_UL != -1)    glUniform4f(dir_UL, transform.rot.r, transform.rot.g, transform.rot.b, 1.0f);
 		if (param1_UL != -1) glUniform4f(param1_UL, static_cast<float>(light->type), light->param1.x, light->param1.y, 0.0f);
 		if (param2_UL != -1) glUniform4f(param2_UL, light->enabled ? 1.0f : 0.0f, 0.0f, 0.0f, 0.0f);
