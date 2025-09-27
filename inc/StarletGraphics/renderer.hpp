@@ -52,6 +52,8 @@ struct LightUL {
 
 class Renderer {
 public:
+	Renderer(ShaderManager& sm, MeshManager& mm, TextureManager& tm) : shaderManager(sm), meshManager(mm), textureManager(tm) {}
+
 	void setAssetPaths(const char* path);
 
 	bool setupShaders();
@@ -60,15 +62,6 @@ public:
 	bool setProgram(const unsigned int program);
 	unsigned int getProgram() const { return program; }
 
-	bool createPrimitiveMesh(const Primitive& primitive, const TransformComponent& transform);
-	bool createGridMesh(const Grid& grid, const TransformComponent& transform, const std::string& meshName);
-
-	bool addMeshes(const std::vector<Model*>& models);
-
-	bool getMesh(const std::string& path, MeshGPU*& dataOut)       { return meshManager.getMeshGPU(path, dataOut); }
-	bool getMesh(const std::string& path, const MeshGPU*& dataOut) { return meshManager.getMeshGPU(path, dataOut); }
-
-	bool addTextures(const std::vector<TextureData*>& textures);
 	void bindSkyboxTexture(const unsigned int texture) const;
 
 	void updateModelUniforms(const TransformComponent& transform, const Model& instance, const MeshCPU& data) const;
@@ -83,7 +76,7 @@ public:
 	bool drawSkybox(const Model& skybox, const Vec3<float>& skyboxSize, const Vec3<float>& cameraPos) const;
 	void renderFrame(const Scene& scene, const float aspect) const;
 
-	void toggleWireframe();
+	void toggleWireframe();	
 
 private:
 	unsigned int program{ 0 };
@@ -104,7 +97,7 @@ private:
 	ModelUL modelUL;
 	LightUL lightUL;
 
-	ShaderManager shaderManager;
-	MeshManager meshManager;
-	TextureManager textureManager;
+	ShaderManager& shaderManager;
+	MeshManager& meshManager;
+	TextureManager& textureManager;
 };

@@ -25,8 +25,6 @@ void Renderer::setAssetPaths(const char* path) {
 	textureManager.setBasePath(path);
 }
 
-
-
 bool Renderer::setupShaders() {
 	if (!shaderManager.createProgramFromPaths("shader1", "vertex_shader.glsl", "fragment_shader.glsl"))
 		return error("Renderer", "setupShaders", "Failed to create shader program from file");
@@ -49,8 +47,6 @@ void Renderer::setGLStateDefault() {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 }
-
-
 
 bool Renderer::setProgram(unsigned int program) {
 	if (program == 0) return error("Renderer", "setProgram", "Program is 0");
@@ -117,52 +113,6 @@ bool Renderer::cacheLightUniforms() {
 	return ok;
 }
 
-
-
-bool Renderer::createPrimitiveMesh(const Primitive& primitive, const TransformComponent& transform) {
-	switch (primitive.type) {
-	case PrimitiveType::Triangle:
-		return meshManager.createTriangle(primitive.name, { transform.size.x, transform.size.y }, primitive.colour);
-	case PrimitiveType::Square:
-		return meshManager.createSquare(primitive.name, { transform.size.x, transform.size.y }, primitive.colour);
-	case PrimitiveType::Cube:
-		return meshManager.createCube(primitive.name,transform.size, primitive.colour);
-	default:
-		return error("Renderer", "loadScenePrimitives", "Invalid primitive: " + primitive.name);
-	}
-}
-bool Renderer::createGridMesh(const Grid& grid, const TransformComponent& transform, const std::string& meshName) {
-	switch (grid.type) {
-	case GridType::Square:
-		return meshManager.createSquare(meshName, { transform.size.x, transform.size.y }, grid.colour);
-	case GridType::Cube:
-		return meshManager.createCube(meshName, transform.size, grid.colour);
-	default:
-		return error("Renderer", "createGridMesh", "Invalid grid: " + grid.name + ", mesh: " + meshName);
-	}
-}
-
-
-bool Renderer::addMeshes(const std::vector<Model*>& models) {
-	for (const Model* model : models)
-		if (!meshManager.loadAndAddMesh(model->meshPath)) 
-			return error("Renderer", "addMeshes", "Failed to load/add mesh: " + model->meshPath);
-
-	return debugLog("Renderer", "addMeshes", "Added " + std::to_string(models.size()) + " meshes");
-}
-
-bool Renderer::addTextures(const std::vector<TextureData*>& textures) {
-	for (const TextureData* texture : textures) {
-		if (!texture->isCube) {
-			if (!textureManager.addTexture(texture->name, texture->faces[0]))
-				return error("Renderer", "loadSceneTextures", "Failed to load 2D texture: " + texture->name);
-		}
-		else if (!textureManager.addTextureCube(texture->name, texture->faces))
-			return error("Renderer", "loadSceneTextures", "Failed to load cube map: " + texture->name);
-	}
-
-	return debugLog("Renderer", "addTextures", "Added " + std::to_string(textures.size()) + " textures");
-}
 void Renderer::bindSkyboxTexture(unsigned int textureID) const {
 	glActiveTexture(GL_TEXTURE0 + SKYBOX_TU);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
@@ -402,8 +352,6 @@ void Renderer::renderFrame(const Scene& scene, const float aspect) const {
 
 	glBindVertexArray(0);
 }
-
-
 
 void Renderer::toggleWireframe() {
 	wireframe = !wireframe;
