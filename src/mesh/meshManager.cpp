@@ -10,7 +10,7 @@ bool MeshManager::loadAndAddMesh(const std::string& path) {
 	if (findMesh(path)) return debugLog("MeshManager", "addMesh", "Mesh already exists: " + path);
 
 	MeshCPU cpuMesh;
-	if (!loader.loadMesh(basePath + "/models/" + path, cpuMesh))
+	if (!loader.loadMesh(basePath + path, cpuMesh))
 		return error("MeshManager", "loadAndAddMesh", "Could not load mesh from " + path);
 
 	MeshGPU gpuMesh;

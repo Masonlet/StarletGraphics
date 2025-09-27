@@ -28,10 +28,10 @@ bool ShaderManager::createProgramFromPaths(const std::string& name, const std::s
 	Shader shader{};
 
 	std::string vertexSource, fragmentSource;
-	if (!loader.loadSource(vertexSource, basePath + "/shaders/" + vertPath))
+	if (!loader.loadSource(vertexSource, basePath + vertPath))
 		return error("ShaderLoader", "createProgramFromPaths", "Failed to load vertex shader source");
 
-	if (!loader.loadSource(fragmentSource, basePath + "/shaders/" + fragPath))
+	if (!loader.loadSource(fragmentSource, basePath + fragPath))
 		return error("ShaderLoader", "createProgramFromPaths", "Failed to load fragment shader source");
 
 	if (!loader.compileShader(shader.vertexID, GL_VERTEX_SHADER, vertexSource))

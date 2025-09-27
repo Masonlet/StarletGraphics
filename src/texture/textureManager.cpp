@@ -18,8 +18,8 @@ bool TextureManager::addTexture(const std::string& name, const std::string& file
   if (findTexture(name)) return true;
 
   TextureCPU cpuTexture;
-  if (!loader.loadTexture2D(basePath + "/textures/" + filePath, cpuTexture))
-    return error("TextureManager", "addTexture", "Failed load: " + basePath + "/textures/" + filePath);
+  if (!loader.loadTexture2D(basePath + filePath, cpuTexture))
+    return error("TextureManager", "addTexture", "Failed load: " + basePath + filePath);
 
   TextureGPU gpuTexture;
   if (!loader.uploadTexture2D(cpuTexture, gpuTexture, true))
@@ -34,7 +34,7 @@ bool TextureManager::addTextureCube(const std::string& name, const std::string(&
   if (findTexture(name)) return true;
 
   std::string fullPaths[6];
-  for (int i = 0; i < 6; ++i) fullPaths[i] = basePath + "/textures/" + facePaths[i];
+  for (int i = 0; i < 6; ++i) fullPaths[i] = basePath + facePaths[i];
 
   TextureCPU faces[6];
   if (!loader.loadCubeFaces(fullPaths, faces))
