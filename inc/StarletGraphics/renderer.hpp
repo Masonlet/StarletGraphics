@@ -57,27 +57,17 @@ public:
 	bool setupShaders();
 	void setGLStateDefault();
 
-	bool createProgramFromPaths(const std::string& name, const std::string& vertPath, const std::string& fragPath);
 	bool setProgram(const unsigned int program);
 	unsigned int getProgram() const { return program; }
-	unsigned int getProgramID(const std::string& name) const;
-
-	bool cacheUniformLocations();
 
 	bool createPrimitiveMesh(const Primitive& primitive, const TransformComponent& transform);
 	bool createGridMesh(const Grid& grid, const TransformComponent& transform, const std::string& meshName);
-	bool createTriangle(const std::string& name, const Vec2<float>& size, const Vec4<float>& vertexColour);
-	bool createSquare(const std::string& name, const Vec2<float>& size, const Vec4<float>& vertexColour);
-	bool createCube(const std::string& name, const Vec3<float>& size, const Vec4<float>& vertexColour);
 
-	bool loadAndAddMesh(const std::string& path);
-	bool addMesh(const std::string& path, MeshCPU& mesh);
 	bool addMeshes(const std::vector<Model*>& models);
-	bool getMesh(const std::string& path, MeshGPU*& dataOut);
-	bool getMesh(const std::string& path, const MeshGPU*& dataOut);
 
-	bool addTexture(const std::string& name, const std::string& filePath);
-	bool addTextureCube(const std::string& name, const std::string(&facePaths)[6]);
+	bool getMesh(const std::string& path, MeshGPU*& dataOut)       { return meshManager.getMeshGPU(path, dataOut); }
+	bool getMesh(const std::string& path, const MeshGPU*& dataOut) { return meshManager.getMeshGPU(path, dataOut); }
+
 	bool addTextures(const std::vector<TextureData*>& textures);
 	void bindSkyboxTexture(const unsigned int texture) const;
 
@@ -103,6 +93,7 @@ private:
 	int skyboxTextureLocation{ -1 };
 	int lightCountLocation{ -1 }, ambientLightLocation{ -1 };
 
+	bool cacheUniformLocations();
 	bool cacheTextureUniforms();
 	bool cacheCameraUniforms();
 	bool cacheModelUniforms();

@@ -28,10 +28,10 @@ void Renderer::setAssetPaths(const char* path) {
 
 
 bool Renderer::setupShaders() {
-	if (!createProgramFromPaths("shader1", "vertex_shader.glsl", "fragment_shader.glsl"))
+	if (!shaderManager.createProgramFromPaths("shader1", "vertex_shader.glsl", "fragment_shader.glsl"))
 		return error("Renderer", "setupShaders", "Failed to create shader program from file");
 
-	if (!setProgram(getProgramID("shader1")))
+	if (!setProgram(shaderManager.getProgramID("shader1")))
 		return error("Renderer", "setupShaders", "Failed to set program to shader1");
 
 	if (!cacheUniformLocations())
@@ -52,20 +52,12 @@ void Renderer::setGLStateDefault() {
 
 
 
-bool Renderer::createProgramFromPaths(const std::string& name, const std::string& vertPath, const std::string& fragPath) {
-	return shaderManager.createProgramFromPaths(name, vertPath, fragPath);
-}
 bool Renderer::setProgram(unsigned int program) {
 	if (program == 0) return error("Renderer", "setProgram", "Program is 0");
 	this->program = program;
 	glUseProgram(program);
 	return true;
 }
-unsigned int Renderer::getProgramID(const std::string& name) const {
-	return shaderManager.getProgramID(name);
-}
-
-
 
 bool Renderer::cacheUniformLocations() {
 	return cacheTextureUniforms()
@@ -130,11 +122,11 @@ bool Renderer::cacheLightUniforms() {
 bool Renderer::createPrimitiveMesh(const Primitive& primitive, const TransformComponent& transform) {
 	switch (primitive.type) {
 	case PrimitiveType::Triangle:
-		return createTriangle(primitive.name, { transform.size.x, transform.size.y }, primitive.colour);
+		return meshManager.createTriangle(primitive.name, { transform.size.x, transform.size.y }, primitive.colour);
 	case PrimitiveType::Square:
-		return createSquare(primitive.name, { transform.size.x, transform.size.y }, primitive.colour);
+		return meshManager.createSquare(primitive.name, { transform.size.x, transform.size.y }, primitive.colour);
 	case PrimitiveType::Cube:
-		return createCube(primitive.name,transform.size, primitive.colour);
+		return meshManager.createCube(primitive.name,transform.size, primitive.colour);
 	default:
 		return error("Renderer", "loadScenePrimitives", "Invalid primitive: " + primitive.name);
 	}
@@ -142,60 +134,30 @@ bool Renderer::createPrimitiveMesh(const Primitive& primitive, const TransformCo
 bool Renderer::createGridMesh(const Grid& grid, const TransformComponent& transform, const std::string& meshName) {
 	switch (grid.type) {
 	case GridType::Square:
-		return createSquare(meshName, { transform.size.x, transform.size.y }, grid.colour);
+		return meshManager.createSquare(meshName, { transform.size.x, transform.size.y }, grid.colour);
 	case GridType::Cube:
-		return createCube(meshName, transform.size, grid.colour);
+		return meshManager.createCube(meshName, transform.size, grid.colour);
 	default:
 		return error("Renderer", "createGridMesh", "Invalid grid: " + grid.name + ", mesh: " + meshName);
 	}
 }
-bool Renderer::createTriangle(const std::string& name, const Vec2<float>& size, const Vec4<float>& vertexColour) {
-	return meshManager.createTriangle(name, size, vertexColour);
-}
-bool Renderer::createSquare(const std::string& name, const Vec2<float>& size, const Vec4<float>& vertexColour) {
-	return meshManager.createSquare(name, size, vertexColour);
-}
-bool Renderer::createCube(const std::string& name, const Vec3<float>& size, const Vec4<float>& vertexColour) {
-	return meshManager.createCube(name, size, vertexColour);
-}
 
 
-
-bool Renderer::loadAndAddMesh(const std::string& path) {
-	return meshManager.loadAndAddMesh(path);
-}
-bool Renderer::addMesh(const std::string& path, MeshCPU& mesh) {
-	return meshManager.addMesh(path, mesh);
-}
 bool Renderer::addMeshes(const std::vector<Model*>& models) {
 	for (const Model* model : models)
-		if (!loadAndAddMesh(model->meshPath)) 
+		if (!meshManager.loadAndAddMesh(model->meshPath)) 
 			return error("Renderer", "addMeshes", "Failed to load/add mesh: " + model->meshPath);
 
 	return debugLog("Renderer", "addMeshes", "Added " + std::to_string(models.size()) + " meshes");
 }
-bool Renderer::getMesh(const std::string& path, MeshGPU*& dataOut) {
-	return meshManager.getMeshGPU(path, dataOut);
-}
-bool Renderer::getMesh(const std::string& path, const MeshGPU*& dataOut) {
-	return meshManager.getMeshGPU(path, dataOut);
-}
 
-
-
-bool Renderer::addTexture(const std::string& name, const std::string& filePath) {
-	return textureManager.addTexture(name, filePath);
-}
-bool Renderer::addTextureCube(const std::string& name, const std::string(&facePaths)[6]) {
-	return textureManager.addTextureCube(name, facePaths);
-}
 bool Renderer::addTextures(const std::vector<TextureData*>& textures) {
 	for (const TextureData* texture : textures) {
 		if (!texture->isCube) {
-			if (!addTexture(texture->name, texture->faces[0]))
+			if (!textureManager.addTexture(texture->name, texture->faces[0]))
 				return error("Renderer", "loadSceneTextures", "Failed to load 2D texture: " + texture->name);
 		}
-		else if (!addTextureCube(texture->name, texture->faces))
+		else if (!textureManager.addTextureCube(texture->name, texture->faces))
 			return error("Renderer", "loadSceneTextures", "Failed to load cube map: " + texture->name);
 	}
 
