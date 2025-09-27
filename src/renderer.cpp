@@ -116,7 +116,14 @@ bool Renderer::cacheLightUniforms() {
 	bool ok = true;
 	ok &= getUniformLocation(lightCountLocation, "lightCount");
 	ok &= getUniformLocation(ambientLightLocation, "ambientLight");
-	glUniform4f(ambientLightLocation, 1.0, 1.0, 1.0, 1.0);
+	glUniform4f(ambientLightLocation, 0.0, 0.0, 0.0, 1.0);
+
+	ok &= getUniformLocation(lightUL.position_UL, "theLights[0].position");
+	ok &= getUniformLocation(lightUL.diffuse_UL, "theLights[0].diffuse");
+	ok &= getUniformLocation(lightUL.attenuation_UL, "theLights[0].attenuation");
+	ok &= getUniformLocation(lightUL.direction_UL, "theLights[0].direction");
+	ok &= getUniformLocation(lightUL.param1_UL, "theLights[0].param1");
+	ok &= getUniformLocation(lightUL.param2_UL, "theLights[0].param2");
 	return ok;
 }
 
@@ -239,26 +246,33 @@ void Renderer::updateLightUniforms(const Scene& scene) const {
 	auto lightEntities = scene.getEntitiesOfType<Light>();
 	updateLightCount(static_cast<int>(lightEntities.size()));
 
+	int lightIndex = 0;
 	for (const auto& lightPair : lightEntities) {
 		const StarEntity entity = lightPair.first;
 		const Light* light = lightPair.second;
 
-		if (!light->enabled) {
-			if (light->param2_UL != -1) glUniform4f(light->param2_UL, 0.0f, 0.0f, 0.0f, 0.0f);
+		std::string prefix = "theLights[" + std::to_string(lightIndex) + "].";
+		int pos_UL = glGetUniformLocation(program, (prefix + "position").c_str());
+		int diff_UL = glGetUniformLocation(program, (prefix + "diffuse").c_str());
+		int atten_UL = glGetUniformLocation(program, (prefix + "attenuation").c_str());
+		int dir_UL = glGetUniformLocation(program, (prefix + "direction").c_str());
+		int param1_UL = glGetUniformLocation(program, (prefix + "param1").c_str());
+		int param2_UL = glGetUniformLocation(program, (prefix + "param2").c_str());
+
+		if (!light->enabled || !scene.hasComponent<TransformComponent>(entity)) {
+			if (param2_UL != -1) glUniform4f(param2_UL, 0.0f, 0.0f, 0.0f, 0.0f);
+			++lightIndex;
 			continue;
 		}
 
-		if (!scene.hasComponent<TransformComponent>(entity)) continue;
-
 		const TransformComponent& transform = scene.getComponent<TransformComponent>(entity);
-
-		if (light->position_UL != -1)    glUniform4f(light->position_UL, transform.pos.x, transform.pos.y, transform.pos.z, 1.0f);
-		if (light->diffuse_UL != -1)     glUniform4f(light->diffuse_UL, light->diffuse.r, light->diffuse.g, light->diffuse.b, light->diffuse.a);
-		if (light->attenuation_UL != -1) glUniform4f(light->attenuation_UL, light->attenuation.r, light->attenuation.g, light->attenuation.b, light->attenuation.a);
-		if (light->direction_UL != -1)   glUniform4f(light->direction_UL, transform.rot.r, transform.rot.g, transform.rot.b, 1.0f);
-		if (light->param1_UL != -1)			glUniform4f(light->param1_UL, static_cast<float>(light->type), light->param1.x, light->param1.y, 0.0f);
-		if (light->param2_UL != -1)			glUniform4f(light->param2_UL, light->enabled ? 1.0f : 0.0f, 0.0f, 0.0f, 0.0f);
-		break;
+		if (pos_UL != -1)    glUniform4f(pos_UL, transform.pos.x, transform.pos.y, transform.pos.z, 1.0f);
+		if (diff_UL != -1)   glUniform4f(diff_UL, light->diffuse.r, light->diffuse.g, light->diffuse.b, light->diffuse.a);
+		if (atten_UL != -1)  glUniform4f(atten_UL, light->attenuation.r, light->attenuation.g, light->attenuation.b, light->attenuation.a);
+		if (dir_UL != -1)    glUniform4f(dir_UL, transform.rot.r, transform.rot.g, transform.rot.b, 1.0f);
+		if (param1_UL != -1) glUniform4f(param1_UL, static_cast<float>(light->type), light->param1.x, light->param1.y, 0.0f);
+		if (param2_UL != -1) glUniform4f(param2_UL, light->enabled ? 1.0f : 0.0f, 0.0f, 0.0f, 0.0f);
+		++lightIndex;
 	}
 }
 void Renderer::updateLightCount(int count) const {

@@ -41,6 +41,15 @@ struct ModelUL {
 	int texMixRatios{ -1 };
 };
 
+struct LightUL {
+	int position_UL{ -1 };
+	int diffuse_UL{ -1 };
+	int attenuation_UL{ -1 };
+	int direction_UL{ -1 };
+	int param1_UL{ -1 };
+	int param2_UL{ -1 };
+};
+
 class Renderer {
 public:
 	void setAssetPaths(const char* path);
@@ -102,6 +111,7 @@ private:
 	bool getUniformLocation(int& location, const char* name) const;
 
 	ModelUL modelUL;
+	LightUL lightUL;
 
 	ShaderManager shaderManager;
 	MeshManager meshManager;
