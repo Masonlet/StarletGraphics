@@ -122,8 +122,9 @@ void Renderer::updateLightUniforms(const Scene& scene) const {
 		}
 
 		const TransformComponent& transform = scene.getComponent<TransformComponent>(entity);
+		const ColourComponent& colour = scene.getComponent<ColourComponent>(entity);
 		if (pos_UL != -1)    glUniform4f(pos_UL, transform.pos.x, transform.pos.y, transform.pos.z, 1.0f);
-		if (diff_UL != -1)   glUniform4fv(diff_UL, 1, &light->diffuse.r);
+		if (diff_UL != -1)   glUniform4fv(diff_UL, 1, &colour.colour.r);
 		if (atten_UL != -1)  glUniform4fv(atten_UL, 1, &light->attenuation.r);
 		if (dir_UL != -1)    glUniform4f(dir_UL, transform.rot.r, transform.rot.g, transform.rot.b, 1.0f);
 		if (param1_UL != -1) glUniform4f(param1_UL, static_cast<float>(light->type), light->param1.x, light->param1.y, 0.0f);
