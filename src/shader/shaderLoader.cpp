@@ -1,12 +1,15 @@
 #include "StarletGraphics/shader/shader.hpp"
 #include "StarletGraphics/shader/shaderLoader.hpp"
-#include "StarletParsers/fileParser.hpp"
+
+#include "StarletParsers/parser.hpp"
 #include "StarletParsers/utils/log.hpp"
+
 #include <glad/glad.h>
 
 bool ShaderLoader::loadSource(std::string& outSource, const std::string& path) {
 	std::string source;
-	if (!loadFile(source, path))
+	Parser parser;
+	if (!parser.loadFile(source, path))
 		return error("ShaderLoader", "createProgramFromPaths", "Failed to load vertex shader file");
 
 	outSource = std::move(source);

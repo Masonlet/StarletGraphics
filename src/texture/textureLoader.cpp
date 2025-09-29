@@ -1,17 +1,22 @@
 #include "StarletGraphics/texture/textureLoader.hpp"
 #include "StarletGraphics/texture/texture.hpp"
-#include "StarletGraphics/texture/parsers/bmpParser.hpp"
+
+#include "StarletParsers/parser.hpp"
 #include "StarletParsers/utils/log.hpp"
+
 #include <glad/glad.h>
 
 bool TextureLoader::loadTexture2D(const std::string& path, TextureCPU& outTexture) {
   if (!outTexture.empty()) return error("TextureLoader", "loadTexture2D", "Attempting to load non-empty texture object: " + path);
 
-  return parseBMP(path.c_str(), outTexture) ? true : error("TextureLoader", "loadTexture2D", "Failed to parse BMP: " + path);
+  Parser parser;
+  return parser.parseBMP(path.c_str(), outTexture) ? true : error("TextureLoader", "loadTexture2D", "Failed to parse BMP: " + path);
 }
 bool TextureLoader::loadCubeFaces(const std::string(&facePaths)[6], TextureCPU(&facesOut)[6]) {
+  Parser parser;
+
   for (int i = 0; i < 6; ++i)
-    if (!parseBMP((facePaths[i]).c_str(), facesOut[i]))
+    if (!parser.parseBMP((facePaths[i]).c_str(), facesOut[i]))
       return error("TextureLoader", "loadCubeFaces", "Failed face[" + std::to_string(i) + "]: " + facePaths[i]);
 
   return true;
