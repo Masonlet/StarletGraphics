@@ -8,7 +8,6 @@
 #include "StarletScene/scene.hpp"
 
 #include "StarletScene/components/textureData.hpp"
-#include "StarletScene/components/textureConnection.hpp"
 #include "StarletScene/components/model.hpp"
 #include "StarletScene/components/light.hpp"
 #include "StarletScene/components/camera.hpp"
