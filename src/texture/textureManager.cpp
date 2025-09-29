@@ -1,6 +1,7 @@
 #include "StarletGraphics/texture/texture.hpp"
+
 #include "StarletGraphics/texture/textureManager.hpp"
-#include "StarletParsers/utils/log.hpp"
+#include "StarletParser/utils/log.hpp"
 
 TextureManager::~TextureManager() {
   for (std::map<std::string, TextureGPU>::iterator it = nameToGPUTextures.begin(); it != nameToGPUTextures.end(); ++it)

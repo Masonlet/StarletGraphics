@@ -1,5 +1,5 @@
 #include "StarletGraphics/shader/shaderManager.hpp"
-#include "StarletParsers/utils/log.hpp"
+#include "StarletParser/utils/log.hpp"
 #include <glad/glad.h>
 #include <sstream>
 

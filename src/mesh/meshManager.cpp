@@ -1,5 +1,5 @@
 #include "StarletGraphics/mesh/meshManager.hpp"
-#include "StarletParsers/utils/log.hpp"
+#include "StarletParser/utils/log.hpp"
 
 MeshManager::~MeshManager() {
 	for (std::map<std::string, MeshGPU>::iterator it = pathToGPUMeshes.begin(); it != pathToGPUMeshes.end(); ++it)
