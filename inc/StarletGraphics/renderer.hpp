@@ -4,13 +4,14 @@
 #include "shader/shaderManager.hpp"
 #include "mesh/meshManager.hpp"
 #include "texture/textureManager.hpp"
+
 #include <map>
 #include <string>
 #include <vector>
 
 template <typename T> struct Vec3;
 class Scene;
-struct TransformComponent;
+
 struct Mat4;
 struct Mesh;
 struct Model;
@@ -19,6 +20,9 @@ struct Light;
 struct Primitive;
 struct Grid;
 struct TextureData;
+
+struct TransformComponent;
+struct ColourComponent;
 
 class Renderer {
 public:
@@ -31,13 +35,13 @@ public:
 
 	void bindSkyboxTexture(const unsigned int texture) const;
 
-	void updateModelUniforms(const TransformComponent& transform, const Model& instance, const MeshCPU& data) const;
+	void updateModelUniforms(const Model& instance, const MeshCPU& data, const TransformComponent& transform, const ColourComponent& colour) const;
 	void setModelIsSkybox(const bool isSkybox) const;
 	void updateCameraUniforms(const Vec3<float>& eye, const Mat4& view, const Mat4& projection) const;
 	void updateLightUniforms(const Scene& scene) const;
 	void updateLightCount(const int count) const;
 
-	bool drawModel(const Model& instance, const TransformComponent& transform) const;
+	bool drawModel(const Model& instance, const TransformComponent& transform, const ColourComponent& colour) const;
 	bool drawOpaqueModels(const Scene& scene, const Vec3<float>& eye) const;
 	bool drawTransparentModels(const Scene& scene, const Vec3<float>& eye) const;
 	bool drawSkybox(const Model& skybox, const Vec3<float>& skyboxSize, const Vec3<float>& cameraPos) const;

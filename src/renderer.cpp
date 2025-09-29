@@ -6,7 +6,7 @@
 #include "StarletParser/utils/log.hpp"
 
 #include "StarletScene/scene.hpp"
-#include "StarletScene/components/transform.hpp"
+
 #include "StarletScene/components/textureData.hpp"
 #include "StarletScene/components/textureConnection.hpp"
 #include "StarletScene/components/model.hpp"
@@ -14,6 +14,9 @@
 #include "StarletScene/components/camera.hpp"
 #include "StarletScene/components/primitive.hpp"
 #include "StarletScene/components/grid.hpp"
+
+#include "StarletScene/components/transform.hpp"
+#include "StarletScene/components/colour.hpp"
 
 #include "StarletMath/mat4.hpp"
 
@@ -53,17 +56,20 @@ void Renderer::bindSkyboxTexture(unsigned int textureID) const {
 	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
 }
 
-void Renderer::updateModelUniforms(const TransformComponent& transform, const Model& instance, const MeshCPU& data) const {
+void Renderer::updateModelUniforms(const Model& instance, const MeshCPU& data, const TransformComponent& transform, const ColourComponent& colour) const {
 	const ModelUL& modelUL = uniforms.getModelUL();
 	
 	const Mat4 modelMat = Mat4::modelMatrix({ { transform.pos, 0.0f }, transform.rot, transform.size });
 	glUniformMatrix4fv(modelUL.model, 1, GL_FALSE, modelMat.models);
 	glUniformMatrix4fv(modelUL.modelInverseTranspose, 1, GL_FALSE, modelMat.inverse().transpose().models);
 
-	glUniform1i(modelUL.colourMode, static_cast<int>(instance.colourMode));
-	glUniform4fv(modelUL.colourOverride, 1, &instance.colour.x);
+	glUniform1i(modelUL.colourMode, static_cast<int>(colour.mode));
+	glUniform4fv(modelUL.colourOverride, 1, &colour.colour.x);
+	glUniform4fv(modelUL.specular, 1, &colour.specular.x);
+
 	glUniform1i(modelUL.hasVertexColour, data.hasColours ? 1 : 0);
-	glUniform4fv(modelUL.specular, 1, &instance.specular.x);
+	glUniform1i(modelUL.useTextures, instance.useTextures ? 1 : 0);
+	glUniform2f(modelUL.yMinMax, data.minY, data.maxY);
 
 	float r = 0.0f, g = 0.0f, b = 0.0f;
 	int i = 0;
@@ -77,9 +83,6 @@ void Renderer::updateModelUniforms(const TransformComponent& transform, const Mo
 	g = std::fmod(g / 255.0f, 1.0f);
 	b = std::fmod(b / 255.0f, 1.0f);
 	glUniform3f(modelUL.seed, r, g, b);
-	glUniform2f(modelUL.yMinMax, data.minY, data.maxY);
-
-	glUniform1i(modelUL.useTextures, instance.useTextures ? 1 : 0);
 }
 void Renderer::setModelIsSkybox(bool isSkybox) const {
 	glUniform1i(uniforms.getModelUL().isSkybox, isSkybox ? 1 : 0);
@@ -132,14 +135,14 @@ void Renderer::updateLightCount(int count) const {
 	if (uniforms.getLightCountLocation() != -1) glUniform1i(uniforms.getLightCountLocation(), count);
 }
 
-bool Renderer::drawModel(const Model& instance, const TransformComponent& transform) const {
+bool Renderer::drawModel(const Model& instance, const TransformComponent& transform, const ColourComponent& colour) const {
 	if (!instance.isVisible) return true;
 
 	const MeshCPU* cpuMesh{};
 	if (!meshManager.getMeshCPU(instance.meshPath, cpuMesh))
 		return error("Renderer", "drawModel", "Could not find mesh: " + instance.meshPath);
 
-	updateModelUniforms(transform, instance, *cpuMesh);
+	updateModelUniforms(instance, *cpuMesh, transform, colour);
 	const ModelUL& modelUL = uniforms.getModelUL();
 
 	if (instance.useTextures) {
@@ -163,11 +166,11 @@ bool Renderer::drawModel(const Model& instance, const TransformComponent& transf
 	if (!meshManager.getMeshGPU(instance.meshPath, gpuMesh))
 		return error("Renderer", "drawModel", "Could not find mesh: " + instance.meshPath);
 
-	if (instance.colour.w < 1.0f)	glDepthMask(GL_FALSE);
+	if (colour.colour.w < 1.0f)	glDepthMask(GL_FALSE);
 	glBindVertexArray(gpuMesh->VAOID);
 	glDrawElements(GL_TRIANGLES, gpuMesh->numIndices, GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
-	if (instance.colour.w < 1.0f) glDepthMask(GL_TRUE);
+	if (colour.colour.w < 1.0f) glDepthMask(GL_TRUE);
 
 	return true;
 }
@@ -181,35 +184,47 @@ bool Renderer::drawOpaqueModels(const Scene& scene, const Vec3<float>& eye) cons
 		if (!scene.hasComponent<TransformComponent>(entity)) continue;
 		const TransformComponent& transform = scene.getComponent<TransformComponent>(entity);
 
-		if (model->colour.w >= 1.0f) drawModel(*model, transform);
+		if(scene.hasComponent<ColourComponent>(entity)) {
+			const ColourComponent& colour = scene.getComponent<ColourComponent>(entity);
+
+			if (colour.colour.w < 1.0f) continue;
+			if (!drawModel(*model, transform, colour))
+				return error("Renderer", "drawModels", "Failed to draw opaque model");
+		} else if (!drawModel(*model, transform, {}))
+			return error("Renderer", "drawModels", "Failed to draw opaque model");
 	}
 
 	return true;
 }
 
 bool Renderer::drawTransparentModels(const Scene& scene, const Vec3<float>& eye) const {
-	std::vector<std::pair<const Model*, const TransformComponent*>> transparentInstances;
+	std::vector<std::tuple<const Model*, const TransformComponent*, const ColourComponent*>> transparentInstances;
 
 	for (const auto& pair : scene.getEntitiesOfType<Model>()) {
 		const StarEntity entity = pair.first;
 		const Model* model = pair.second;
-
+		
 		if (model->name == "skybox") continue;
 
 		if (!scene.hasComponent<TransformComponent>(entity)) continue;
 		const TransformComponent& transform = scene.getComponent<TransformComponent>(entity);
 
-		if (model->colour.w < 1.0f) transparentInstances.push_back({model, &transform});
+		if (scene.hasComponent<ColourComponent>(entity)) {
+			const ColourComponent& colour = scene.getComponent<ColourComponent>(entity);
+
+			if (colour.colour.w < 1.0f)
+				transparentInstances.push_back({ model, &transform, &colour });
+		}
 	}
 
 	for (size_t i = 0; i < transparentInstances.size(); ++i) {
 		for (size_t j = 0; j < transparentInstances.size() - i - 1; ++j) {
-			const Vec3<float>& a = transparentInstances[j].second->pos;
-			const Vec3<float>& b = transparentInstances[j + 1].second->pos;
+			const Vec3<float>& a = std::get<1>(transparentInstances[j])->pos;
+			const Vec3<float>& b = std::get<1>(transparentInstances[j + 1])->pos;
 			float distA = (a.x - eye.x) * (a.x - eye.x) + (a.y - eye.y) * (a.y - eye.y) + (a.z - eye.z) * (a.z - eye.z);
 			float distB = (b.x - eye.x) * (b.x - eye.x) + (b.y - eye.y) * (b.y - eye.y) + (b.z - eye.z) * (b.z - eye.z);
 			if (distA < distB) {
-				std::pair<const Model*, const TransformComponent*> temp = transparentInstances[j];
+				std::tuple<const Model*, const TransformComponent*, const ColourComponent*> temp = transparentInstances[j];
 				transparentInstances[j] = transparentInstances[j + 1];
 				transparentInstances[j + 1] = temp;
 			}
@@ -217,7 +232,7 @@ bool Renderer::drawTransparentModels(const Scene& scene, const Vec3<float>& eye)
 	}
 
 	for (const auto& pair : transparentInstances)
-		if (!drawModel(*pair.first, *pair.second))
+		if (!drawModel(*std::get<0>(pair), *std::get<1>(pair), *std::get<2>(pair)))
 			return error("Renderer", "drawModels", "Failed to draw transparent model");
 
 	return true;
@@ -231,7 +246,7 @@ bool Renderer::drawSkybox(const Model& skybox, const Vec3<float>& skyboxSize, co
 	setModelIsSkybox(true);
 
 	bindSkyboxTexture(textureManager.getTextureID(skybox.name));
-	drawModel(tempSkybox, { cameraPos, { 0.0f, 0.0f, 0.0f }, skyboxSize });
+	drawModel(tempSkybox, { cameraPos, { 0.0f, 0.0f, 0.0f }, skyboxSize }, {});
 
 	setModelIsSkybox(false);
 	glDepthMask(GL_TRUE);
