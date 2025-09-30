@@ -31,31 +31,62 @@ struct LightUL {
 
 constexpr int SKYBOX_TU{ 20 };
 
-class UniformCache {
+class Cache {
+public :
+	void setProgram(unsigned int programID) { program = programID; }	
+	virtual bool cacheLocations() = 0;
+	virtual ~Cache() = default;
+
+protected:
+	unsigned int program{ 0 };
+	bool getUniformLocation(int& location, const char* name) const;
+};
+
+class LightCache : public Cache {
 public:
-	void setProgram(unsigned int programID) { program = programID; }
-
-	bool cacheAllLocations();
-
-	const ModelUL& getModelUL() const { return modelUL; }
-	const LightUL& getLightUL() const { return lightUL; }
-	int getEyeLocation() const { return eyeLocation; }
-	int getSkyboxTextureLocation() const { return skyboxTextureLocation; }
+	bool cacheLocations() override;
 	int getLightCountLocation() const { return lightCountLocation; }
 	int getAmbientLightLocation() const { return ambientLightLocation; }
+	const LightUL& getLightUL() const { return uniform; }
+
+private:
+	int lightCountLocation{ -1 };
+	int ambientLightLocation{ -1 };
+	LightUL uniform;
+};
+
+class ModelCache : public Cache {
+public:
+	bool cacheLocations() override;
+	int getSkyboxTextureLocation() const { return skyboxTextureLocation; }
+	const ModelUL& getModelUL() const { return uniform; }
+
+private:
+	ModelUL uniform;
+	int skyboxTextureLocation{ -1 };
+};
+
+class CameraCache : public Cache {
+public:
+	bool cacheLocations() override;
+	int getEyeLocation() const { return eyeLocation; }
+
+private:
+	int eyeLocation{ -1 };
+};
+
+class UniformCache {
+public:
+	bool setProgram(unsigned int programID);
+	bool cacheAllLocations();
+
+	const ModelCache& getModelCache() const { return modelCache; }
+	const LightCache& getLightCache() const { return lightCache; }
+	const CameraCache& getCameraCache() const { return cameraCache; }
 
 private:
 	unsigned int program{ 0 };
-	int eyeLocation{ -1 };
-	int skyboxTextureLocation{ -1 };
-	int lightCountLocation{ -1 }, ambientLightLocation{ -1 };
-
-	ModelUL modelUL;
-	LightUL lightUL;
-
-	bool getUniformLocation(int& location, const char* name) const;
-	bool cacheTextureUniforms();
-	bool cacheCameraUniforms();
-	bool cacheModelUniforms();
-	bool cacheLightUniforms();
+	ModelCache modelCache;
+	LightCache lightCache;
+	CameraCache cameraCache;
 };

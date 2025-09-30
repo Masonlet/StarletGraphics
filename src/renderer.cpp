@@ -56,7 +56,7 @@ void Renderer::bindSkyboxTexture(unsigned int textureID) const {
 }
 
 void Renderer::updateModelUniforms(const Model& instance, const MeshCPU& data, const TransformComponent& transform, const ColourComponent& colour) const {
-	const ModelUL& modelUL = uniforms.getModelUL();
+	const ModelUL& modelUL = uniforms.getModelCache().getModelUL();
 	
 	const Mat4 modelMat = Mat4::modelMatrix({ { transform.pos, 0.0f }, transform.rot, transform.size });
 	glUniformMatrix4fv(modelUL.model, 1, GL_FALSE, modelMat.models);
@@ -85,11 +85,11 @@ void Renderer::updateModelUniforms(const Model& instance, const MeshCPU& data, c
 	glUniform3f(modelUL.seed, r, g, b);
 }
 void Renderer::setModelIsSkybox(bool isSkybox) const {
-	glUniform1i(uniforms.getModelUL().isSkybox, isSkybox ? 1 : 0);
+	glUniform1i(uniforms.getModelCache().getModelUL().isSkybox, isSkybox ? 1 : 0);
 }
 void Renderer::updateCameraUniforms(const Vec3<float>& eye, const Mat4& view, const Mat4& projection) const {
-	const ModelUL& modelUL = uniforms.getModelUL();
-	glUniform3f(uniforms.getEyeLocation(), eye.x, eye.y, eye.z);
+	const ModelUL& modelUL = uniforms.getModelCache().getModelUL();
+	glUniform3f(uniforms.getCameraCache().getEyeLocation(), eye.x, eye.y, eye.z);
 	glUniformMatrix4fv(modelUL.modelView, 1, GL_FALSE, view.ptr());
 	glUniformMatrix4fv(modelUL.modelProj, 1, GL_FALSE, projection.ptr());
 }
@@ -97,10 +97,8 @@ void Renderer::updateLightUniforms(const Scene& scene) const {
 	auto lightEntities = scene.getEntitiesOfType<Light>();
 	updateLightCount(static_cast<int>(lightEntities.size()));
 
-	if (uniforms.getAmbientLightLocation() != -1) {
-		const Vec4<float>& ambient = scene.getAmbientLight();
-		glUniform4fv(uniforms.getAmbientLightLocation(), 1, &ambient.x);
-	}
+	const unsigned int location = uniforms.getLightCache().getAmbientLightLocation();
+	if (location != -1) glUniform4fv(location, 1, &scene.getAmbientLight().x);
 
 	int lightIndex = 0;
 	for (const auto& lightPair : lightEntities) {
@@ -133,7 +131,8 @@ void Renderer::updateLightUniforms(const Scene& scene) const {
 	}
 }
 void Renderer::updateLightCount(int count) const {
-	if (uniforms.getLightCountLocation() != -1) glUniform1i(uniforms.getLightCountLocation(), count);
+	const unsigned int location = uniforms.getLightCache().getLightCountLocation();
+	if (location != -1) glUniform1i(location, count);
 }
 
 bool Renderer::drawModel(const Model& instance, const TransformComponent& transform, const ColourComponent& colour) const {
@@ -144,7 +143,7 @@ bool Renderer::drawModel(const Model& instance, const TransformComponent& transf
 		return error("Renderer", "drawModel", "Could not find mesh: " + instance.meshPath);
 
 	updateModelUniforms(instance, *cpuMesh, transform, colour);
-	const ModelUL& modelUL = uniforms.getModelUL();
+	const ModelUL& modelUL = uniforms.getModelCache().getModelUL();
 
 	if (instance.useTextures) {
 		glUniform4f(modelUL.texMixRatios, instance.textureMixRatio[0], instance.textureMixRatio[1], instance.textureMixRatio[2], instance.textureMixRatio[3]);
