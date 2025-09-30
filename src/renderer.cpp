@@ -62,13 +62,14 @@ void Renderer::updateModelUniforms(const Model& instance, const MeshCPU& data, c
 	glUniformMatrix4fv(modelUL.model, 1, GL_FALSE, modelMat.models);
 	glUniformMatrix4fv(modelUL.modelInverseTranspose, 1, GL_FALSE, modelMat.inverse().transpose().models);
 
-	glUniform1i(modelUL.colourMode, static_cast<int>(colour.mode));
 	glUniform4fv(modelUL.colourOverride, 1, &colour.colour.x);
 	glUniform4fv(modelUL.specular, 1, &colour.specular.x);
 
 	glUniform1i(modelUL.hasVertexColour, data.hasColours ? 1 : 0);
-	glUniform1i(modelUL.useTextures, instance.useTextures ? 1 : 0);
 	glUniform2f(modelUL.yMinMax, data.minY, data.maxY);
+
+	glUniform1i(modelUL.useTextures, instance.useTextures ? 1 : 0);
+	glUniform1i(modelUL.colourMode, static_cast<int>(instance.mode));
 
 	float r = 0.0f, g = 0.0f, b = 0.0f;
 	int i = 0;
