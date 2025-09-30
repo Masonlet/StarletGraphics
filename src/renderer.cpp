@@ -50,12 +50,12 @@ void Renderer::setGLStateDefault() {
 	glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 }
 
-void Renderer::bindSkyboxTexture(unsigned int textureID) const {
+void ModelRenderer::bindSkyboxTexture(unsigned int textureID) const {
 	glActiveTexture(GL_TEXTURE0 + SKYBOX_TU);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
 }
 
-void Renderer::updateModelUniforms(const Model& instance, const MeshCPU& data, const TransformComponent& transform, const ColourComponent& colour) const {
+void ModelRenderer::updateModelUniforms(const Model& instance, const MeshCPU& data, const TransformComponent& transform, const ColourComponent& colour) const {
 	const ModelUL& modelUL = uniforms.getModelCache().getModelUL();
 	
 	const Mat4 modelMat = Mat4::modelMatrix({ { transform.pos, 0.0f }, transform.rot, transform.size });
@@ -84,16 +84,17 @@ void Renderer::updateModelUniforms(const Model& instance, const MeshCPU& data, c
 	b = std::fmod(b / 255.0f, 1.0f);
 	glUniform3f(modelUL.seed, r, g, b);
 }
-void Renderer::setModelIsSkybox(bool isSkybox) const {
+void ModelRenderer::setModelIsSkybox(bool isSkybox) const {
 	glUniform1i(uniforms.getModelCache().getModelUL().isSkybox, isSkybox ? 1 : 0);
 }
-void Renderer::updateCameraUniforms(const Vec3<float>& eye, const Mat4& view, const Mat4& projection) const {
+void CameraRenderer::updateCameraUniforms(const Vec3<float>& eye, const Mat4& view, const Mat4& projection) const {
 	const ModelUL& modelUL = uniforms.getModelCache().getModelUL();
 	glUniform3f(uniforms.getCameraCache().getEyeLocation(), eye.x, eye.y, eye.z);
 	glUniformMatrix4fv(modelUL.modelView, 1, GL_FALSE, view.ptr());
 	glUniformMatrix4fv(modelUL.modelProj, 1, GL_FALSE, projection.ptr());
 }
-void Renderer::updateLightUniforms(const Scene& scene) const {
+
+void LightRenderer::updateLightUniforms(const unsigned int program, const Scene& scene) const {
 	auto lightEntities = scene.getEntitiesOfType<Light>();
 	updateLightCount(static_cast<int>(lightEntities.size()));
 
@@ -130,12 +131,12 @@ void Renderer::updateLightUniforms(const Scene& scene) const {
 		++lightIndex;
 	}
 }
-void Renderer::updateLightCount(int count) const {
+void LightRenderer::updateLightCount(int count) const {
 	const unsigned int location = uniforms.getLightCache().getLightCountLocation();
 	if (location != -1) glUniform1i(location, count);
 }
 
-bool Renderer::drawModel(const Model& instance, const TransformComponent& transform, const ColourComponent& colour) const {
+bool ModelRenderer::drawModel(const Model& instance, const TransformComponent& transform, const ColourComponent& colour) const {
 	if (!instance.isVisible) return true;
 
 	const MeshCPU* cpuMesh{};
@@ -174,7 +175,7 @@ bool Renderer::drawModel(const Model& instance, const TransformComponent& transf
 
 	return true;
 }
-bool Renderer::drawOpaqueModels(const Scene& scene, const Vec3<float>& eye) const {
+bool ModelRenderer::drawOpaqueModels(const Scene& scene, const Vec3<float>& eye) const {
 	for (const auto& pair : scene.getEntitiesOfType<Model>()) {
 		const StarEntity entity = pair.first;
 		const Model* model = pair.second;
@@ -197,7 +198,7 @@ bool Renderer::drawOpaqueModels(const Scene& scene, const Vec3<float>& eye) cons
 	return true;
 }
 
-bool Renderer::drawTransparentModels(const Scene& scene, const Vec3<float>& eye) const {
+bool ModelRenderer::drawTransparentModels(const Scene& scene, const Vec3<float>& eye) const {
 	std::vector<std::tuple<const Model*, const TransformComponent*, const ColourComponent*>> transparentInstances;
 
 	for (const auto& pair : scene.getEntitiesOfType<Model>()) {
@@ -237,7 +238,7 @@ bool Renderer::drawTransparentModels(const Scene& scene, const Vec3<float>& eye)
 
 	return true;
 }
-bool Renderer::drawSkybox(const Model& skybox, const Vec3<float>& skyboxSize, const Vec3<float>& cameraPos) const {
+bool ModelRenderer::drawSkybox(const Model& skybox, const Vec3<float>& skyboxSize, const Vec3<float>& cameraPos) const {
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_FRONT);
 	glDepthMask(GL_FALSE);
@@ -282,21 +283,17 @@ void Renderer::renderFrame(const Scene& scene, const float aspect) const {
 	Vec3<float> right = front.cross(WORLD_UP).normalized();
 	Vec3<float> up = right.cross(front).normalized();
 
-	updateCameraUniforms(eye, Mat4::lookAt(eye, front, up), Mat4::perspective(activeCam->fov, aspect, activeCam->nearPlane, activeCam->farPlane));
+	cameraRenderer.updateCameraUniforms(eye, Mat4::lookAt(eye, front, up), Mat4::perspective(activeCam->fov, aspect, activeCam->nearPlane, activeCam->farPlane));
+	lightRenderer.updateLightUniforms(program, scene);
 
-	updateLightUniforms(scene);
-
-	drawOpaqueModels(scene, eye);
-
+	modelRenderer.drawOpaqueModels(scene, eye);
 	const Model* skyBoxModel = scene.getComponentByName<Model>(std::string("skybox"));
 	const StarEntity skyboxEntity = scene.getEntityByName<Model>("skybox");
-
 	if (skyBoxModel && skyboxEntity != -1) {
 		const TransformComponent& skyBoxTransform = scene.getComponent<TransformComponent>(skyboxEntity);
-		drawSkybox(*skyBoxModel, skyBoxTransform.size, eye);
+		modelRenderer.drawSkybox(*skyBoxModel, skyBoxTransform.size, eye);
 	}
-
-	drawTransparentModels(scene, eye);
+	modelRenderer.drawTransparentModels(scene, eye);
 
 	glBindVertexArray(0);
 }

@@ -13,7 +13,7 @@ template <typename T> struct Vec3;
 class Scene;
 
 struct Mat4;
-struct Mesh;
+struct MeshCPU;
 struct Model;
 struct Camera;
 struct Light;
@@ -24,30 +24,54 @@ struct TextureData;
 struct TransformComponent;
 struct ColourComponent;
 
-class Renderer {
+class CameraRenderer {
 public:
-	Renderer(ShaderManager& sm, MeshManager& mm, TextureManager& tm) : shaderManager(sm), meshManager(mm), textureManager(tm) {}
-	
-	bool setProgram(const unsigned int program);
-	unsigned int getProgram() const { return program; }
+  CameraRenderer(const UniformCache& uc) : uniforms(uc) {}
 
-	bool initialize();
+	void updateCameraUniforms(const Vec3<float>& eye, const Mat4& view, const Mat4& projection) const;
+private:
+	const UniformCache& uniforms;
+};
+
+class ModelRenderer {
+public:
+	ModelRenderer(const UniformCache& uc, MeshManager& mm, TextureManager& tm) : uniforms(uc), meshManager(mm), textureManager(tm) {}
+	void updateModelUniforms(const Model& instance, const MeshCPU& data, const TransformComponent& transform, const ColourComponent& colour) const;
 
 	void bindSkyboxTexture(const unsigned int texture) const;
-
-	void updateModelUniforms(const Model& instance, const MeshCPU& data, const TransformComponent& transform, const ColourComponent& colour) const;
 	void setModelIsSkybox(const bool isSkybox) const;
-	void updateCameraUniforms(const Vec3<float>& eye, const Mat4& view, const Mat4& projection) const;
-	void updateLightUniforms(const Scene& scene) const;
-	void updateLightCount(const int count) const;
 
 	bool drawModel(const Model& instance, const TransformComponent& transform, const ColourComponent& colour) const;
 	bool drawOpaqueModels(const Scene& scene, const Vec3<float>& eye) const;
 	bool drawTransparentModels(const Scene& scene, const Vec3<float>& eye) const;
 	bool drawSkybox(const Model& skybox, const Vec3<float>& skyboxSize, const Vec3<float>& cameraPos) const;
-	void renderFrame(const Scene& scene, const float aspect) const;
 
-	void toggleWireframe();	
+private:
+	const UniformCache& uniforms;
+	MeshManager& meshManager;
+	TextureManager& textureManager;
+};
+
+class LightRenderer {
+public:
+	LightRenderer(const UniformCache& uc) : uniforms(uc) {}
+
+	void updateLightUniforms(const unsigned int program, const Scene& scene) const;
+	void updateLightCount(const int count) const;
+private:
+	const UniformCache& uniforms;
+};
+
+class Renderer {
+public:
+	Renderer(ShaderManager& sm, MeshManager& mm, TextureManager& tm) : shaderManager(sm), uniforms(), lightRenderer(uniforms), cameraRenderer(uniforms), modelRenderer(uniforms, mm, tm) {}
+
+	bool setProgram(const unsigned int program);
+	unsigned int getProgram() const { return program; }
+
+	bool initialize();
+	void renderFrame(const Scene& scene, const float aspect) const;
+	void toggleWireframe();
 
 private:
 	unsigned int program{ 0 };
@@ -57,6 +81,8 @@ private:
 
 	UniformCache uniforms;
 	ShaderManager& shaderManager;
-	MeshManager& meshManager;
-	TextureManager& textureManager;
+
+	LightRenderer lightRenderer;
+	ModelRenderer modelRenderer;
+	CameraRenderer cameraRenderer;
 };
