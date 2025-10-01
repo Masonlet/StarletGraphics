@@ -5,10 +5,12 @@
 #include "StarletParser/utils/log.hpp"
 
 #include "StarletScene/scene.hpp"
-
 #include "StarletScene/components/camera.hpp"
 #include "StarletScene/components/model.hpp"
 #include "StarletScene/components/transform.hpp"
+
+
+#include "StarletGraphics/renderer/cameraView.hpp"
 #include "StarletMath/mat4.hpp"
 
 #include <glad/glad.h>
@@ -56,30 +58,18 @@ void Renderer::renderFrame(const Scene& scene, const float aspect) const {
 
 	if (!activeCam || !camTransform) return;
 
-	const Vec3<float> eye = camTransform->pos;
-	const float yaw = camTransform->rot.y;
-	const float pitch = camTransform->rot.x;
-
-	Vec3<float> front;
-	front.x = cos(radians(yaw)) * cos(radians(pitch));
-	front.y = sin(radians(pitch));
-	front.z = sin(radians(yaw)) * cos(radians(pitch));
-	front = front.normalized();
-
-	Vec3<float> right = front.cross(WORLD_UP).normalized();
-	Vec3<float> up = right.cross(front).normalized();
-
-	cameraRenderer.updateCameraUniforms(eye, Mat4::lookAt(eye, front, up), Mat4::perspective(activeCam->fov, aspect, activeCam->nearPlane, activeCam->farPlane));
+	const CameraView view = CameraView::fromTransform(camTransform->pos, camTransform->rot, WORLD_UP);
+	cameraRenderer.updateCameraUniforms(view.eye, Mat4::lookAt(view.eye, view.front, view.up), Mat4::perspective(activeCam->fov, aspect, activeCam->nearPlane, activeCam->farPlane));
 	lightRenderer.updateLightUniforms(program, scene);
 
-	modelRenderer.drawOpaqueModels(scene, eye);
+	modelRenderer.drawOpaqueModels(scene, view.eye);
 	const Model* skyBoxModel = scene.getComponentByName<Model>(std::string("skybox"));
 	const StarEntity skyboxEntity = scene.getEntityByName<Model>("skybox");
 	if (skyBoxModel && skyboxEntity != -1) {
 		const TransformComponent& skyBoxTransform = scene.getComponent<TransformComponent>(skyboxEntity);
-		modelRenderer.drawSkybox(*skyBoxModel, skyBoxTransform.size, eye);
+		modelRenderer.drawSkybox(*skyBoxModel, skyBoxTransform.size, view.eye);
 	}
-	modelRenderer.drawTransparentModels(scene, eye);
+	modelRenderer.drawTransparentModels(scene, view.eye);
 
 	glBindVertexArray(0);
 }
