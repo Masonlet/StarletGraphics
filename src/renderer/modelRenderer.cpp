@@ -1,54 +1,17 @@
-#include "StarletGraphics/shader/shaderManager.hpp"
-#include "StarletGraphics/texture/textureManager.hpp"
+#include "StarletGraphics/uniform/uniformCache.hpp"
 #include "StarletGraphics/mesh/meshManager.hpp"
-
-#include "StarletGraphics/renderer.hpp"
+#include "StarletGraphics/texture/textureManager.hpp"
+#include "StarletGraphics/renderer/modelRenderer.hpp"
 #include "StarletParser/utils/log.hpp"
 
 #include "StarletScene/scene.hpp"
 
-#include "StarletScene/components/textureData.hpp"
 #include "StarletScene/components/model.hpp"
-#include "StarletScene/components/light.hpp"
-#include "StarletScene/components/camera.hpp"
-#include "StarletScene/components/primitive.hpp"
-#include "StarletScene/components/grid.hpp"
-
 #include "StarletScene/components/transform.hpp"
 #include "StarletScene/components/colour.hpp"
-
 #include "StarletMath/mat4.hpp"
 
 #include <glad/glad.h>
-
-
-bool Renderer::setProgram(unsigned int program) {
-	if (program == 0) return error("Renderer", "setProgram", "Program is 0");
-	this->program = program;
-	uniforms.setProgram(program);
-	glUseProgram(program);
-	return true;
-}
-
-bool Renderer::initialize() {
-	if (!setProgram(shaderManager.getProgramID("shader1")))
-		return error("Renderer", "setupShaders", "Failed to set program to shader1");
-
-	if (!uniforms.cacheAllLocations())
-		return error("Renderer", "setupShaders", "Failed to cache uniform locations");
-
-	setGLStateDefault();
-	return true;
-}
-void Renderer::setGLStateDefault() {
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LEQUAL);
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-}
 
 void ModelRenderer::bindSkyboxTexture(unsigned int textureID) const {
 	glActiveTexture(GL_TEXTURE0 + SKYBOX_TU);
@@ -86,54 +49,6 @@ void ModelRenderer::updateModelUniforms(const Model& instance, const MeshCPU& da
 }
 void ModelRenderer::setModelIsSkybox(bool isSkybox) const {
 	glUniform1i(uniforms.getModelCache().getModelUL().isSkybox, isSkybox ? 1 : 0);
-}
-void CameraRenderer::updateCameraUniforms(const Vec3<float>& eye, const Mat4& view, const Mat4& projection) const {
-	const ModelUL& modelUL = uniforms.getModelCache().getModelUL();
-	glUniform3f(uniforms.getCameraCache().getEyeLocation(), eye.x, eye.y, eye.z);
-	glUniformMatrix4fv(modelUL.modelView, 1, GL_FALSE, view.ptr());
-	glUniformMatrix4fv(modelUL.modelProj, 1, GL_FALSE, projection.ptr());
-}
-
-void LightRenderer::updateLightUniforms(const unsigned int program, const Scene& scene) const {
-	auto lightEntities = scene.getEntitiesOfType<Light>();
-	updateLightCount(static_cast<int>(lightEntities.size()));
-
-	const unsigned int location = uniforms.getLightCache().getAmbientLightLocation();
-	if (location != -1) glUniform4fv(location, 1, &scene.getAmbientLight().x);
-
-	int lightIndex = 0;
-	for (const auto& lightPair : lightEntities) {
-		const StarEntity entity = lightPair.first;
-		const Light* light = lightPair.second;
-
-		std::string prefix = "theLights[" + std::to_string(lightIndex) + "].";
-		int pos_UL = glGetUniformLocation(program, (prefix + "position").c_str());
-		int diff_UL = glGetUniformLocation(program, (prefix + "diffuse").c_str());
-		int atten_UL = glGetUniformLocation(program, (prefix + "attenuation").c_str());
-		int dir_UL = glGetUniformLocation(program, (prefix + "direction").c_str());
-		int param1_UL = glGetUniformLocation(program, (prefix + "param1").c_str());
-		int param2_UL = glGetUniformLocation(program, (prefix + "param2").c_str());
-
-		if (!light->enabled || !scene.hasComponent<TransformComponent>(entity)) {
-			if (param2_UL != -1) glUniform4f(param2_UL, 0.0f, 0.0f, 0.0f, 0.0f);
-			++lightIndex;
-			continue;
-		}
-
-		const TransformComponent& transform = scene.getComponent<TransformComponent>(entity);
-		const ColourComponent& colour = scene.getComponent<ColourComponent>(entity);
-		if (pos_UL != -1)    glUniform4f(pos_UL, transform.pos.x, transform.pos.y, transform.pos.z, 1.0f);
-		if (diff_UL != -1)   glUniform4fv(diff_UL, 1, &colour.colour.r);
-		if (atten_UL != -1)  glUniform4fv(atten_UL, 1, &light->attenuation.r);
-		if (dir_UL != -1)    glUniform4f(dir_UL, transform.rot.r, transform.rot.g, transform.rot.b, 1.0f);
-		if (param1_UL != -1) glUniform4f(param1_UL, static_cast<float>(light->type), light->param1.x, light->param1.y, 0.0f);
-		if (param2_UL != -1) glUniform4f(param2_UL, light->enabled ? 1.0f : 0.0f, 0.0f, 0.0f, 0.0f);
-		++lightIndex;
-	}
-}
-void LightRenderer::updateLightCount(int count) const {
-	const unsigned int location = uniforms.getLightCache().getLightCountLocation();
-	if (location != -1) glUniform1i(location, count);
 }
 
 bool ModelRenderer::drawModel(const Model& instance, const TransformComponent& transform, const ColourComponent& colour) const {
@@ -253,52 +168,4 @@ bool ModelRenderer::drawSkybox(const Model& skybox, const Vec3<float>& skyboxSiz
 	glDepthMask(GL_TRUE);
 	glCullFace(GL_BACK);
 	return true;
-}
-
-void Renderer::renderFrame(const Scene& scene, const float aspect) const {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	const Camera* activeCam{};
-	const TransformComponent* camTransform{};
-	for (auto& pair : scene.getEntitiesOfType<Camera>()) {
-		if (pair.second->enabled) {
-			activeCam = pair.second;
-			camTransform = &scene.getComponent<TransformComponent>(pair.first);
-			break;
-		}
-	}
-
-	if (!activeCam || !camTransform) return;
-
-	const Vec3<float> eye = camTransform->pos;
-	const float yaw = camTransform->rot.y;
-	const float pitch = camTransform->rot.x;
-
-	Vec3<float> front;
-	front.x = cos(radians(yaw)) * cos(radians(pitch));
-	front.y = sin(radians(pitch));
-	front.z = sin(radians(yaw)) * cos(radians(pitch));
-	front = front.normalized();
-
-	Vec3<float> right = front.cross(WORLD_UP).normalized();
-	Vec3<float> up = right.cross(front).normalized();
-
-	cameraRenderer.updateCameraUniforms(eye, Mat4::lookAt(eye, front, up), Mat4::perspective(activeCam->fov, aspect, activeCam->nearPlane, activeCam->farPlane));
-	lightRenderer.updateLightUniforms(program, scene);
-
-	modelRenderer.drawOpaqueModels(scene, eye);
-	const Model* skyBoxModel = scene.getComponentByName<Model>(std::string("skybox"));
-	const StarEntity skyboxEntity = scene.getEntityByName<Model>("skybox");
-	if (skyBoxModel && skyboxEntity != -1) {
-		const TransformComponent& skyBoxTransform = scene.getComponent<TransformComponent>(skyboxEntity);
-		modelRenderer.drawSkybox(*skyBoxModel, skyBoxTransform.size, eye);
-	}
-	modelRenderer.drawTransparentModels(scene, eye);
-
-	glBindVertexArray(0);
-}
-
-void Renderer::toggleWireframe() {
-	wireframe = !wireframe;
-	glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
 }
