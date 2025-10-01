@@ -1,16 +1,14 @@
 #pragma once
 
+#include "StarletGraphics/resourceManager.hpp"
+
 #include "mesh.hpp"
 #include "meshLoader.hpp"
-#include <string>	
 #include <map>
 
-class MeshManager {
+class MeshManager : public ResourceManager {
 public:
-	MeshManager() = default;
 	~MeshManager();
-
-	void setBasePath(const char* path) { basePath = path; }
 
 	bool loadAndAddMesh(const std::string& path);
 	bool addMesh(const std::string& path, MeshCPU& mesh);
@@ -19,7 +17,11 @@ public:
 	bool createSquare(const std::string& name, const Vec2<float>& size, const Vec4<float>& vertexColour);
 	bool createCube(const std::string& name, const Vec3<float>& size, const Vec4<float>& vertexColour);
 
-	bool findMesh(const std::string& path) const;
+	bool exists(const std::string& name) const override {
+		return pathToCPUMeshes.find(name) != pathToCPUMeshes.end()
+			  || pathToGPUMeshes.find(name) != pathToGPUMeshes.end();
+	}
+
 	bool getMeshCPU(const std::string& path, MeshCPU*& dataOut);
 	bool getMeshCPU(const std::string& path, const MeshCPU*& dataOut) const;
 	bool getMeshGPU(const std::string& path, MeshGPU*& dataOut);
@@ -27,7 +29,6 @@ public:
 
 private:
 	MeshLoader loader;
-	std::string basePath;
 	std::map<std::string, MeshCPU> pathToCPUMeshes;
 	std::map<std::string, MeshGPU> pathToGPUMeshes;
 };

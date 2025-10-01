@@ -1,28 +1,28 @@
 #pragma once
 
+#include "StarletGraphics/resourceManager.hpp"
+
 #include "shader.hpp"
 #include "shaderLoader.hpp"
-#include <vector>
 #include <map>
-#include <string>
 
-class ShaderManager {
+class ShaderManager : public ResourceManager {
 public:
-	ShaderManager() = default;
 	~ShaderManager();
 
-	void setBasePath(const char* path) { basePath = path; }
-
 	bool useProgram(const std::string& name) const;
+
+	bool exists(const std::string& name) const {
+		return nameToShaders.find(name) != nameToShaders.end();
+	}
+
 	bool createProgramFromPaths(const std::string& name, const std::string& vertPath, const std::string& fragPath);
 
-	bool findShader(const std::string& name) const;
 	bool getShader(const std::string& name, Shader*& dataOut);
 	bool getShader(const std::string& name, const Shader*& dataOut) const;
 	unsigned int getProgramID(const std::string& name) const;
 
 private:
 	ShaderLoader loader;
-	std::string basePath;
 	std::map<std::string, Shader> nameToShaders;
 };

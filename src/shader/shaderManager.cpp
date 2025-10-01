@@ -19,7 +19,7 @@ bool ShaderManager::useProgram(const std::string& name) const {
 	return true;
 }
 bool ShaderManager::createProgramFromPaths(const std::string& name, const std::string& vertPath, const std::string& fragPath) {
-	if (findShader(name)) {
+	if (exists(name)) {
 		std::map<std::string, Shader>::iterator it = nameToShaders.find(name);
 		loader.unloadShader(it->second);
 		nameToShaders.erase(it);
@@ -62,9 +62,6 @@ unsigned int ShaderManager::getProgramID(const std::string& name) const {
 	return (it == nameToShaders.end()) ? 0u : it->second.programID;
 }
 
-bool ShaderManager::findShader(const std::string& name) const {
-	return nameToShaders.find(name) != nameToShaders.end();
-}
 bool ShaderManager::getShader(const std::string& name, Shader*& dataOut) {
 	std::map<std::string, Shader>::iterator it = nameToShaders.find(name);
 	if (it == nameToShaders.end()) return error("ShaderManager", "getShader", "Shader not found: " + name);

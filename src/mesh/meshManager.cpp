@@ -7,7 +7,7 @@ MeshManager::~MeshManager() {
 }
 
 bool MeshManager::loadAndAddMesh(const std::string& path) {
-	if (findMesh(path)) return debugLog("MeshManager", "addMesh", "Mesh already exists: " + path);
+	if (exists(path)) return debugLog("MeshManager", "addMesh", "Mesh already exists: " + path);
 
 	MeshCPU cpuMesh;
 	if (!loader.loadMesh(basePath + path, cpuMesh))
@@ -22,7 +22,7 @@ bool MeshManager::loadAndAddMesh(const std::string& path) {
 	return debugLog("MeshManager", "addMesh", "Added mesh: " + path);
 }
 bool MeshManager::addMesh(const std::string& path, MeshCPU& meshCPU) {
-	if (findMesh(path)) return true;
+	if (exists(path)) return true;
 	if (meshCPU.empty()) return error("MeshManager", "addMesh", "Trying to add an empty mesh");
 
 	MeshGPU meshGPU;
@@ -34,9 +34,6 @@ bool MeshManager::addMesh(const std::string& path, MeshCPU& meshCPU) {
 	return debugLog("MeshManager", "addMesh", "Added mesh: " + path);
 }
 
-bool MeshManager::findMesh(const std::string& name) const {
-	return pathToGPUMeshes.find(name) != pathToGPUMeshes.end() || pathToCPUMeshes.find(name) != pathToCPUMeshes.end();
-}
 bool MeshManager::getMeshGPU(const std::string& name, MeshGPU*& data) {
 	std::map<std::string, MeshGPU>::iterator it = pathToGPUMeshes.find(name);
 	if (it == pathToGPUMeshes.end()) return false;
