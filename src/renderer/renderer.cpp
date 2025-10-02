@@ -30,6 +30,7 @@ void Renderer::renderFrame(const unsigned int program, const Scene& scene, const
 	const TransformComponent* camTransform{};
 	for (auto& [entity, camera] : scene.getEntitiesOfType<Camera>()) {
 		if (camera->enabled) {
+			activeCam = camera;
 			camTransform = &scene.getComponent<TransformComponent>(entity);
 			break;
 		}
