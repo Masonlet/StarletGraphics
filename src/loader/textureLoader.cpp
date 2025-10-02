@@ -1,5 +1,5 @@
-#include "StarletGraphics/texture/textureLoader.hpp"
-#include "StarletGraphics/texture/texture.hpp"
+#include "StarletGraphics/loader/textureLoader.hpp"
+#include "StarletGraphics/resource/texture.hpp"
 
 #include "StarletParser/parser.hpp"
 #include "StarletParser/utils/log.hpp"

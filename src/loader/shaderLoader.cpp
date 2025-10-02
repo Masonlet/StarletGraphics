@@ -1,5 +1,5 @@
-#include "StarletGraphics/shader/shader.hpp"
-#include "StarletGraphics/shader/shaderLoader.hpp"
+#include "StarletGraphics/resource/shader.hpp"
+#include "StarletGraphics/loader/shaderLoader.hpp"
 
 #include "StarletParser/parser.hpp"
 #include "StarletParser/utils/log.hpp"

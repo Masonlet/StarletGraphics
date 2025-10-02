@@ -1,9 +1,8 @@
 #pragma once
 
-#include "StarletGraphics/resourceManager.hpp"
-
-#include "shader.hpp"
-#include "shaderLoader.hpp"
+#include "StarletGraphics/manager/resourceManager.hpp"
+#include "StarletGraphics/resource/shader.hpp"
+#include "StarletGraphics/loader/shaderLoader.hpp"
 #include <map>
 
 class ShaderManager : public ResourceManager {

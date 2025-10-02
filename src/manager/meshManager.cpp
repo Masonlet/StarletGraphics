@@ -1,4 +1,4 @@
-#include "StarletGraphics/mesh/meshManager.hpp"
+#include "StarletGraphics/manager/meshManager.hpp"
 #include "StarletParser/utils/log.hpp"
 
 MeshManager::~MeshManager() {

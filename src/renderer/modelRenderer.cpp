@@ -1,6 +1,6 @@
 #include "StarletGraphics/uniform/uniformCache.hpp"
-#include "StarletGraphics/mesh/meshManager.hpp"
-#include "StarletGraphics/texture/textureManager.hpp"
+#include "StarletGraphics/manager/meshManager.hpp"
+#include "StarletGraphics/manager/textureManager.hpp"
 #include "StarletGraphics/renderer/modelRenderer.hpp"
 #include "StarletParser/utils/log.hpp"
 

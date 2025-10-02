@@ -1,10 +1,8 @@
 #pragma once
 
-
-#include "StarletGraphics/resourceManager.hpp"
-
-#include "texture.hpp"
-#include "textureLoader.hpp"
+#include "StarletGraphics/manager/resourceManager.hpp"
+#include "StarletGraphics/resource/texture.hpp"
+#include "StarletGraphics/loader/textureLoader.hpp"
 #include <map>
 
 class TextureManager : public ResourceManager {

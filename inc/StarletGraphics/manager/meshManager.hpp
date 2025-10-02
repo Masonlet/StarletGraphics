@@ -1,9 +1,8 @@
 #pragma once
 
-#include "StarletGraphics/resourceManager.hpp"
-
-#include "mesh.hpp"
-#include "meshLoader.hpp"
+#include "StarletGraphics/manager/resourceManager.hpp"
+#include "StarletGraphics/resource/mesh.hpp"
+#include "StarletGraphics/loader/meshLoader.hpp"
 #include <map>
 
 class MeshManager : public ResourceManager {

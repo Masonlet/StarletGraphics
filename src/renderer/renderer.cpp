@@ -1,6 +1,6 @@
-#include "StarletGraphics/texture/textureManager.hpp"
-#include "StarletGraphics/mesh/meshManager.hpp"
-#include "StarletGraphics/shader/shaderManager.hpp"
+#include "StarletGraphics/manager/textureManager.hpp"
+#include "StarletGraphics/manager/meshManager.hpp"
+#include "StarletGraphics/manager/shaderManager.hpp"
 #include "StarletGraphics/renderer/renderer.hpp"
 #include "StarletParser/utils/log.hpp"
 
