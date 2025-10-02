@@ -1,6 +1,7 @@
 #pragma once
 
 #include "StarletGraphics/uniform/uniformCache.hpp"
+#include "StarletGraphics/manager/glStateManager.hpp"
 
 #include "StarletGraphics/renderer/lightRenderer.hpp"
 #include "StarletGraphics/renderer/modelRenderer.hpp"
@@ -14,20 +15,14 @@ class Scene;
 
 class Renderer {
 public:
-	Renderer(ShaderManager& sm, MeshManager& mm, TextureManager& tm) : shaderManager(sm), uniforms(), lightRenderer(uniforms), cameraRenderer(uniforms), modelRenderer(uniforms, mm, tm) {}
+	Renderer(ShaderManager& sm, MeshManager& mm, TextureManager& tm) : shaderManager(sm), lightRenderer(uniforms), cameraRenderer(uniforms), modelRenderer(uniforms, mm, tm), glState(sm) {}
 
-	bool setProgram(const unsigned int program);
-	unsigned int getProgram() const { return program; }
-
-	bool initialize();
+	bool init();
 	void renderFrame(const Scene& scene, const float aspect) const;
-	void toggleWireframe();
+	void toggleWireframe() { glState.toggleWireframe(); }
 
 private:
-	unsigned int program{ 0 };
-	bool wireframe{ false };
-
-	void setGLStateDefault();
+	GLStateManager glState;
 
 	UniformCache uniforms;
 	ShaderManager& shaderManager;
