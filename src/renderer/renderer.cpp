@@ -15,10 +15,8 @@
 
 #include <glad/glad.h>
 
-bool Renderer::init() {
-	if (!glState.init()) return error("Renderer", "init", "Failed to initialize GL state");
-
-	if (!uniforms.setProgram(glState.getProgram()))
+bool Renderer::init(const unsigned int program) {
+	if (!uniforms.setProgram(program))
 		return error("Renderer", "init", "Failed to set UniformCache program");
 
 	if (!uniforms.cacheAllLocations())
@@ -27,7 +25,7 @@ bool Renderer::init() {
 	return true;
 }
 
-void Renderer::renderFrame(const Scene& scene, const float aspect) const {
+void Renderer::renderFrame(const unsigned int program, const Scene& scene, const float aspect) const {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	const Camera* activeCam{};
@@ -44,7 +42,7 @@ void Renderer::renderFrame(const Scene& scene, const float aspect) const {
 
 	const CameraView view = CameraView::fromTransform(camTransform->pos, camTransform->rot, WORLD_UP);
 	cameraRenderer.updateCameraUniforms(view.eye, Mat4::lookAt(view.eye, view.front, view.up), Mat4::perspective(activeCam->fov, aspect, activeCam->nearPlane, activeCam->farPlane));
-	lightRenderer.updateLightUniforms(glState.getProgram(), scene);
+	lightRenderer.updateLightUniforms(program, scene);
 
 	modelRenderer.drawOpaqueModels(scene, view.eye);
 	const Model* skyBoxModel = scene.getComponentByName<Model>(std::string("skybox"));

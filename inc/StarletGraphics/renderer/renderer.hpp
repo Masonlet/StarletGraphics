@@ -15,18 +15,13 @@ class Scene;
 
 class Renderer {
 public:
-	Renderer(ShaderManager& sm, MeshManager& mm, TextureManager& tm) : shaderManager(sm), lightRenderer(uniforms), cameraRenderer(uniforms), modelRenderer(uniforms, mm, tm), glState(sm) {}
+	Renderer(MeshManager& mm, TextureManager& tm) : lightRenderer(uniforms), cameraRenderer(uniforms), modelRenderer(uniforms, mm, tm) {}
 
-	bool init();
-	void renderFrame(const Scene& scene, const float aspect) const;
-	void toggleWireframe() { glState.toggleWireframe(); }
+	bool init(const unsigned int program);
+	void renderFrame(const unsigned int program, const Scene& scene, const float aspect) const;
 
 private:
-	GLStateManager glState;
-
 	UniformCache uniforms;
-	ShaderManager& shaderManager;
-
 	LightRenderer lightRenderer;
 	ModelRenderer modelRenderer;
 	CameraRenderer cameraRenderer;
