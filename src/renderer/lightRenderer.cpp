@@ -1,13 +1,9 @@
-#include "StarletGraphics/uniform/uniformCache.hpp"
-
 #include "StarletGraphics/renderer/lightRenderer.hpp"
+#include "StarletGraphics/uniform/uniformCache.hpp"
 #include "StarletParser/utils/log.hpp"
 
 #include "StarletScene/scene.hpp"
-
-#include "StarletScene/components/model.hpp"
 #include "StarletScene/components/light.hpp"
-
 #include "StarletScene/components/transform.hpp"
 #include "StarletScene/components/colour.hpp"
 

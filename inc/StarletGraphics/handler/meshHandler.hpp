@@ -2,7 +2,6 @@
 
 struct MeshCPU;
 struct MeshGPU;
-#include <string>
 
 struct MeshHandler {
 	bool uploadMesh(MeshCPU& meshData, MeshGPU& meshOut);

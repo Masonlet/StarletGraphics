@@ -1,6 +1,7 @@
 #pragma once
 
 struct Shader;
+
 #include <string>
 
 struct ShaderHandler {

@@ -2,7 +2,6 @@
 
 struct TextureCPU;
 struct TextureGPU;
-#include <string>
 
 struct TextureHandler {
 	bool uploadTexture2D(TextureCPU& cpuTexture, TextureGPU& gpuTexture, bool generateMIPMap);

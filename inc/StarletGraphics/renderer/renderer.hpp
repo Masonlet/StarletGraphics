@@ -5,10 +5,6 @@
 #include "StarletGraphics/renderer/modelRenderer.hpp"
 #include "StarletGraphics/renderer/cameraRenderer.hpp"
 
-class ShaderManager;
-class MeshManager;
-class TextureManager;
-
 class Scene;
 
 class Renderer {

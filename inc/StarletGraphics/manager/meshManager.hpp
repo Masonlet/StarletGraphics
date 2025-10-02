@@ -1,9 +1,11 @@
 #pragma once
 
 #include "StarletGraphics/manager/manager.hpp"
+
 #include "StarletGraphics/resource/meshCPU.hpp"
 #include "StarletGraphics/resource/meshGPU.hpp"
 #include "StarletGraphics/handler/meshHandler.hpp"
+
 #include <map>
 
 class MeshManager : public Manager {

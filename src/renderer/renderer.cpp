@@ -1,15 +1,13 @@
+#include "StarletGraphics/renderer/renderer.hpp"
 #include "StarletGraphics/manager/textureManager.hpp"
 #include "StarletGraphics/manager/meshManager.hpp"
 #include "StarletGraphics/manager/shaderManager.hpp"
-#include "StarletGraphics/renderer/renderer.hpp"
 #include "StarletParser/utils/log.hpp"
 
 #include "StarletScene/scene.hpp"
 #include "StarletScene/components/camera.hpp"
 #include "StarletScene/components/model.hpp"
 #include "StarletScene/components/transform.hpp"
-
-
 #include "StarletGraphics/renderer/cameraView.hpp"
 #include "StarletMath/mat4.hpp"
 
@@ -30,10 +28,9 @@ void Renderer::renderFrame(const unsigned int program, const Scene& scene, const
 
 	const Camera* activeCam{};
 	const TransformComponent* camTransform{};
-	for (auto& pair : scene.getEntitiesOfType<Camera>()) {
-		if (pair.second->enabled) {
-			activeCam = pair.second;
-			camTransform = &scene.getComponent<TransformComponent>(pair.first);
+	for (auto& [entity, camera] : scene.getEntitiesOfType<Camera>()) {
+		if (camera->enabled) {
+			camTransform = &scene.getComponent<TransformComponent>(entity);
 			break;
 		}
 	}

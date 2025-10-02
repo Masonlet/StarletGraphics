@@ -1,13 +1,13 @@
+#include "StarletGraphics/renderer/modelRenderer.hpp"
 #include "StarletGraphics/uniform/uniformCache.hpp"
 #include "StarletGraphics/manager/resourceManager.hpp"
-#include "StarletGraphics/renderer/modelRenderer.hpp"
 #include "StarletParser/utils/log.hpp"
 
 #include "StarletScene/scene.hpp"
-
 #include "StarletScene/components/model.hpp"
 #include "StarletScene/components/transform.hpp"
 #include "StarletScene/components/colour.hpp"
+
 #include "StarletMath/mat4.hpp"
 
 #include <glad/glad.h>
@@ -89,10 +89,7 @@ bool ModelRenderer::drawModel(const Model& instance, const TransformComponent& t
 	return true;
 }
 bool ModelRenderer::drawOpaqueModels(const Scene& scene, const Vec3<float>& eye) const {
-	for (const auto& pair : scene.getEntitiesOfType<Model>()) {
-		const StarEntity entity = pair.first;
-		const Model* model = pair.second;
-
+	for (const auto& [entity, model] : scene.getEntitiesOfType<Model>()) {
 		if (model->name == "skybox") continue;
 
 		if (!scene.hasComponent<TransformComponent>(entity)) continue;
@@ -114,10 +111,7 @@ bool ModelRenderer::drawOpaqueModels(const Scene& scene, const Vec3<float>& eye)
 bool ModelRenderer::drawTransparentModels(const Scene& scene, const Vec3<float>& eye) const {
 	std::vector<std::tuple<const Model*, const TransformComponent*, const ColourComponent*>> transparentInstances;
 
-	for (const auto& pair : scene.getEntitiesOfType<Model>()) {
-		const StarEntity entity = pair.first;
-		const Model* model = pair.second;
-		
+	for (const auto& [entity, model] : scene.getEntitiesOfType<Model>()) {
 		if (model->name == "skybox") continue;
 
 		if (!scene.hasComponent<TransformComponent>(entity)) continue;
