@@ -1,6 +1,5 @@
 #include "StarletGraphics/uniform/uniformCache.hpp"
-#include "StarletGraphics/manager/meshManager.hpp"
-#include "StarletGraphics/manager/textureManager.hpp"
+#include "StarletGraphics/manager/resourceManager.hpp"
 #include "StarletGraphics/renderer/modelRenderer.hpp"
 #include "StarletParser/utils/log.hpp"
 
@@ -54,9 +53,11 @@ void ModelRenderer::setModelIsSkybox(bool isSkybox) const {
 bool ModelRenderer::drawModel(const Model& instance, const TransformComponent& transform, const ColourComponent& colour) const {
 	if (!instance.isVisible) return true;
 
-	const MeshCPU* cpuMesh{};
-	if (!meshManager.getMeshCPU(instance.meshPath, cpuMesh))
-		return error("Renderer", "drawModel", "Could not find mesh: " + instance.meshPath);
+	const MeshCPU* cpuMesh = resourceManager.getMeshCPU(instance.meshHandle);
+	if (!cpuMesh) return error("ModelRenderer", "drawModel", "Invalid CPU mesh handle for: " + instance.meshPath);
+
+	const MeshGPU* gpuMesh = resourceManager.getMeshGPU(instance.meshHandle);
+	if (!gpuMesh) return error("ModelRenderer", "drawModel", "Invalid GPU mesh handle for: " + instance.meshPath);
 
 	updateModelUniforms(instance, *cpuMesh, transform, colour);
 	const ModelUL& modelUL = uniforms.getModelCache().getModelUL();
@@ -68,8 +69,9 @@ bool ModelRenderer::drawModel(const Model& instance, const TransformComponent& t
 			const std::string& name = instance.textureNames[i];
 			if (name.empty()) continue;
 
-			unsigned int textureID = textureManager.getTextureID(name);
-			if (textureID == 0) return error("Renderer", "drawModel", "Could not find texture: " + name);
+			unsigned int textureID = resourceManager.getTextureID(instance.textureHandles[i]);
+			if (textureID == 0) 
+				return error("ModelRenderer", "drawModel", "Invalid texture handle for slot " + std::to_string(i) + " in model: " + instance.name);
 
 			glActiveTexture(GL_TEXTURE0 + static_cast<unsigned int>(i));
 			glBindTexture(GL_TEXTURE_2D, textureID);
@@ -77,10 +79,6 @@ bool ModelRenderer::drawModel(const Model& instance, const TransformComponent& t
 	}
 
 	glUniform1i(modelUL.isLit, instance.isLighted ? 1 : 0);
-
-	const MeshGPU* gpuMesh{};
-	if (!meshManager.getMeshGPU(instance.meshPath, gpuMesh))
-		return error("Renderer", "drawModel", "Could not find mesh: " + instance.meshPath);
 
 	if (colour.colour.w < 1.0f)	glDepthMask(GL_FALSE);
 	glBindVertexArray(gpuMesh->VAOID);
@@ -147,8 +145,8 @@ bool ModelRenderer::drawTransparentModels(const Scene& scene, const Vec3<float>&
 		}
 	}
 
-	for (const auto& pair : transparentInstances)
-		if (!drawModel(*std::get<0>(pair), *std::get<1>(pair), *std::get<2>(pair)))
+	for (const auto& [model, transform, colour] : transparentInstances)
+		if (!drawModel(*model, *transform, *colour))
 			return error("Renderer", "drawModels", "Failed to draw transparent model");
 
 	return true;
@@ -161,9 +159,11 @@ bool ModelRenderer::drawSkybox(const Model& skybox, const Vec3<float>& skyboxSiz
 	tempSkybox.isVisible = true;
 	setModelIsSkybox(true);
 
-	bindSkyboxTexture(textureManager.getTextureID(skybox.name));
-	drawModel(tempSkybox, { cameraPos, { 0.0f, 0.0f, 0.0f }, skyboxSize }, {});
+	if (skybox.textureHandles[0].isValid()) 
+		bindSkyboxTexture(resourceManager.getTextureID(skybox.textureHandles[0]));
+	else return error("ModelRenderer", "drawSkybox", "Skybox has no valid texture handle");
 
+	drawModel(tempSkybox, { cameraPos, { 0.0f, 0.0f, 0.0f }, skyboxSize }, {});
 	setModelIsSkybox(false);
 	glDepthMask(GL_TRUE);
 	glCullFace(GL_BACK);

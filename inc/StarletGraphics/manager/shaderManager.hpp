@@ -1,11 +1,11 @@
 #pragma once
 
-#include "StarletGraphics/manager/resourceManager.hpp"
+#include "StarletGraphics/manager/manager.hpp"
 #include "StarletGraphics/resource/shader.hpp"
 #include "StarletGraphics/handler/shaderHandler.hpp"
 #include <map>
 
-class ShaderManager : public ResourceManager {
+class ShaderManager : public Manager {
 public:
 	~ShaderManager();
 

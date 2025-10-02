@@ -1,6 +1,6 @@
 #pragma once
 
-class ShaderManager;
+#include "StarletGraphics/manager/shaderManager.hpp"
 
 class GLStateManager {
 public:

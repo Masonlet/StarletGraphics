@@ -1,8 +1,7 @@
 #pragma once
 
 class UniformCache;
-class MeshManager;
-class TextureManager;
+class ResourceManager;
 
 template <typename T> struct Vec3;
 class Scene;
@@ -15,7 +14,7 @@ struct ColourComponent;
 
 class ModelRenderer {
 public:
-	ModelRenderer(const UniformCache& uc, MeshManager& mm, TextureManager& tm) : uniforms(uc), meshManager(mm), textureManager(tm) {}
+	ModelRenderer(const UniformCache& uc, const ResourceManager& rm): uniforms(uc), resourceManager(rm) {}
 	void updateModelUniforms(const Model& instance, const MeshCPU& data, const TransformComponent& transform, const ColourComponent& colour) const;
 
 	void bindSkyboxTexture(const unsigned int texture) const;
@@ -28,6 +27,5 @@ public:
 
 private:
 	const UniformCache& uniforms;
-	MeshManager& meshManager;
-	TextureManager& textureManager;
+	const ResourceManager& resourceManager; 
 };

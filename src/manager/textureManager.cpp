@@ -1,5 +1,7 @@
-#include "StarletGraphics/resource/texture.hpp"
 #include "StarletGraphics/manager/textureManager.hpp"
+#include "StarletGraphics/resource/textureCPU.hpp"
+#include "StarletGraphics/resource/textureGPU.hpp"
+
 #include "StarletParser/parser.hpp"
 #include "StarletParser/utils/log.hpp"
 
