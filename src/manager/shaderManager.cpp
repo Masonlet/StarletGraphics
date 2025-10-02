@@ -1,11 +1,12 @@
 #include "StarletGraphics/manager/shaderManager.hpp"
+#include "StarletParser/parser.hpp"
 #include "StarletParser/utils/log.hpp"
 #include <glad/glad.h>
 #include <sstream>
 
 ShaderManager::~ShaderManager() {
 	for (std::map<std::string, Shader>::iterator it = nameToShaders.begin(); it != nameToShaders.end(); ++it)
-		loader.unloadShader(it->second);
+		handler.unloadShader(it->second);
 }
 
 bool ShaderManager::useProgram(const std::string& name) const {
@@ -21,29 +22,29 @@ bool ShaderManager::useProgram(const std::string& name) const {
 bool ShaderManager::createProgramFromPaths(const std::string& name, const std::string& vertPath, const std::string& fragPath) {
 	if (exists(name)) {
 		std::map<std::string, Shader>::iterator it = nameToShaders.find(name);
-		loader.unloadShader(it->second);
+		handler.unloadShader(it->second);
 		nameToShaders.erase(it);
 	}
 
-	Shader shader{};
-
+	Parser parser;
 	std::string vertexSource, fragmentSource;
-	if (!loader.loadSource(vertexSource, basePath + vertPath))
+	if (!parser.loadFile(vertexSource, basePath + vertPath))
 		return error("ShaderLoader", "createProgramFromPaths", "Failed to load vertex shader source");
 
-	if (!loader.loadSource(fragmentSource, basePath + fragPath))
+	if (!parser.loadFile(fragmentSource, basePath + fragPath))
 		return error("ShaderLoader", "createProgramFromPaths", "Failed to load fragment shader source");
 
-	if (!loader.compileShader(shader.vertexID, GL_VERTEX_SHADER, vertexSource))
+	Shader shader{};
+	if (!handler.compileShader(shader.vertexID, GL_VERTEX_SHADER, vertexSource))
 		return error("ShaderLoader", "createProgramFromPaths", "Failed to compile vertex shader");
 
-	if (!loader.compileShader(shader.fragmentID, GL_FRAGMENT_SHADER, fragmentSource)) {
-		loader.unloadShader(shader);
+	if (!handler.compileShader(shader.fragmentID, GL_FRAGMENT_SHADER, fragmentSource)) {
+		handler.unloadShader(shader);
 		return error("ShaderLoader", "createProgramFromPaths", "Failed to compile fragment shader");
 	}
 
-	if (!loader.linkProgram(shader.programID, shader.vertexID, shader.fragmentID)) {
-		loader.unloadShader(shader);
+	if (!handler.linkProgram(shader.programID, shader.vertexID, shader.fragmentID)) {
+		handler.unloadShader(shader);
 		return error("ShaderLoader", "createProgramFromPaths", "Failed to link program");
 	}
 
@@ -51,7 +52,7 @@ bool ShaderManager::createProgramFromPaths(const std::string& name, const std::s
 
 	std::map<std::string, Shader>::iterator it = nameToShaders.find(name);
 	if (it != nameToShaders.end())
-		loader.unloadShader(it->second);
+		handler.unloadShader(it->second);
 
 	nameToShaders[name] = std::move(shader);
 	return true;

@@ -2,7 +2,7 @@
 
 #include "StarletGraphics/manager/resourceManager.hpp"
 #include "StarletGraphics/resource/texture.hpp"
-#include "StarletGraphics/loader/textureLoader.hpp"
+#include "StarletGraphics/handler/textureHandler.hpp"
 #include <map>
 
 class TextureManager : public ResourceManager {
@@ -19,6 +19,6 @@ public:
 	unsigned int getTextureID(const std::string& name) const;
 
 private:
-	TextureLoader loader;
+	TextureHandler handler;
 	std::map<std::string, TextureGPU> nameToGPUTextures;
 };

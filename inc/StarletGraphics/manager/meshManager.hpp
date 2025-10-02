@@ -2,7 +2,7 @@
 
 #include "StarletGraphics/manager/resourceManager.hpp"
 #include "StarletGraphics/resource/mesh.hpp"
-#include "StarletGraphics/loader/meshLoader.hpp"
+#include "StarletGraphics/handler/meshHandler.hpp"
 #include <map>
 
 class MeshManager : public ResourceManager {
@@ -27,7 +27,7 @@ public:
 	bool getMeshGPU(const std::string& path, const MeshGPU*& dataOut) const;
 
 private:
-	MeshLoader loader;
+	MeshHandler handler;
 	std::map<std::string, MeshCPU> pathToCPUMeshes;
 	std::map<std::string, MeshGPU> pathToGPUMeshes;
 };

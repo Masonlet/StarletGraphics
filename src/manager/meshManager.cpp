@@ -1,20 +1,22 @@
 #include "StarletGraphics/manager/meshManager.hpp"
+#include "StarletParser/parser.hpp"
 #include "StarletParser/utils/log.hpp"
 
 MeshManager::~MeshManager() {
 	for (std::map<std::string, MeshGPU>::iterator it = pathToGPUMeshes.begin(); it != pathToGPUMeshes.end(); ++it)
-		loader.unloadMesh(it->second);
+		handler.unloadMesh(it->second);
 }
 
 bool MeshManager::loadAndAddMesh(const std::string& path) {
 	if (exists(path)) return debugLog("MeshManager", "addMesh", "Mesh already exists: " + path);
 
+	Parser parser;
 	MeshCPU cpuMesh;
-	if (!loader.loadMesh(basePath + path, cpuMesh))
+	if (!parser.parsePlyMesh(basePath + path, cpuMesh))
 		return error("MeshManager", "loadAndAddMesh", "Could not load mesh from " + path);
 
 	MeshGPU gpuMesh;
-	if (!loader.uploadMesh(cpuMesh, gpuMesh))
+	if (!handler.uploadMesh(cpuMesh, gpuMesh))
 		return error("MeshManager", "loadAndAddMesh", "Could not upload mesh from: " + path);
 
 	pathToCPUMeshes[path] = std::move(cpuMesh);
@@ -26,7 +28,7 @@ bool MeshManager::addMesh(const std::string& path, MeshCPU& meshCPU) {
 	if (meshCPU.empty()) return error("MeshManager", "addMesh", "Trying to add an empty mesh");
 
 	MeshGPU meshGPU;
-	if (!loader.uploadMesh(meshCPU, meshGPU))
+	if (!handler.uploadMesh(meshCPU, meshGPU))
 		return error("MeshManager", "addMesh", "Could not upload mesh from: " + path);
 
 	pathToGPUMeshes[path] = std::move(meshGPU);

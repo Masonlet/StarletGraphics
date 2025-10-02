@@ -2,7 +2,7 @@
 
 #include "StarletGraphics/manager/resourceManager.hpp"
 #include "StarletGraphics/resource/shader.hpp"
-#include "StarletGraphics/loader/shaderLoader.hpp"
+#include "StarletGraphics/handler/shaderHandler.hpp"
 #include <map>
 
 class ShaderManager : public ResourceManager {
@@ -22,6 +22,6 @@ public:
 	unsigned int getProgramID(const std::string& name) const;
 
 private:
-	ShaderLoader loader;
+	ShaderHandler handler;
 	std::map<std::string, Shader> nameToShaders;
 };

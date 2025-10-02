@@ -1,24 +1,14 @@
 #include "StarletGraphics/resource/shader.hpp"
-#include "StarletGraphics/loader/shaderLoader.hpp"
+#include "StarletGraphics/handler/shaderHandler.hpp"
 
 #include "StarletParser/parser.hpp"
 #include "StarletParser/utils/log.hpp"
 
 #include <glad/glad.h>
 
-bool ShaderLoader::loadSource(std::string& outSource, const std::string& path) {
-	std::string source;
-	Parser parser;
-	if (!parser.loadFile(source, path))
-		return error("ShaderLoader", "createProgramFromPaths", "Failed to load vertex shader file");
-
-	outSource = std::move(source);
-	return true;
-}
-
-bool ShaderLoader::compileShader(unsigned int& outShaderID, int glShaderType, const std::string& source) {
+bool ShaderHandler::compileShader(unsigned int& outShaderID, int glShaderType, const std::string& source) {
 	outShaderID = glCreateShader(static_cast<GLenum>(glShaderType));
-	if (!outShaderID) return error("ShaderLoader", "compileShader", "glCreateShader failed.");
+	if (!outShaderID) return error("ShaderHandler", "compileShader", "glCreateShader failed.");
 
 	const char* src = source.c_str();
 	glShaderSource(outShaderID, 1, &src, nullptr);
@@ -46,12 +36,12 @@ bool ShaderLoader::compileShader(unsigned int& outShaderID, int glShaderType, co
 		(glShaderType == GL_VERTEX_SHADER ? "VERTEX"
 			: glShaderType == GL_FRAGMENT_SHADER ? "FRAGMENT"
 			: "UNKNOWN");
-	return error("ShaderLoader", "compileShader", "Shader compilation failed (type=" + shaderType + "):\n" + log);
+	return error("ShaderHandler", "compileShader", "Shader compilation failed (type=" + shaderType + "):\n" + log);
 }
 
-bool ShaderLoader::linkProgram(unsigned int& outProgramID, unsigned int vertID, unsigned int fragID) {
+bool ShaderHandler::linkProgram(unsigned int& outProgramID, unsigned int vertID, unsigned int fragID) {
 	outProgramID = glCreateProgram();
-	if (!outProgramID) return error("ShaderLoader", "linkProgram", "glCreateProgram failed.");
+	if (!outProgramID) return error("ShaderHandler", "linkProgram", "glCreateProgram failed.");
 
 	glAttachShader(outProgramID, vertID);
 	glAttachShader(outProgramID, fragID);
@@ -78,10 +68,10 @@ bool ShaderLoader::linkProgram(unsigned int& outProgramID, unsigned int vertID, 
 
 	glDeleteProgram(outProgramID);
 	outProgramID = 0;
-	return error("ShaderLoader", "linkProgram", std::string("Program link failed:\n") + log);
+	return error("ShaderHandler", "linkProgram", std::string("Program link failed:\n") + log);
 }
 
-void ShaderLoader::unloadShader(Shader& shader) {
+void ShaderHandler::unloadShader(Shader& shader) {
 	if (shader.programID && glIsProgram(shader.programID))  glDeleteProgram(shader.programID);
 	if (shader.vertexID && glIsShader(shader.vertexID))     glDeleteShader(shader.vertexID);
 	if (shader.fragmentID && glIsShader(shader.fragmentID)) glDeleteShader(shader.fragmentID);

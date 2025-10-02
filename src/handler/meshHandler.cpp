@@ -1,19 +1,13 @@
 #include "StarletGraphics/resource/mesh.hpp"
-#include "StarletGraphics/loader/meshLoader.hpp"
+#include "StarletGraphics/handler/meshHandler.hpp"
 
 #include "StarletParser/parser.hpp"
 #include "StarletParser/utils/log.hpp"
 
 #include <glad/glad.h>
 
-bool MeshLoader::loadMesh(const std::string& path, MeshCPU& meshOut) {
-  if (!meshOut.empty()) return error("MeshLoader", "loadMesh", "Loading non-empty mesh: " + path);
-  Parser parser;
-  return parser.parsePlyMesh(path, meshOut) ? true : error("MeshLoader", "loadMesh", "Failed to parse mesh file: " + path);
-}
-
-bool MeshLoader::uploadMesh(MeshCPU& meshData, MeshGPU& meshOut) {
-  if (meshData.empty()) return error("MeshLoader", "uploadMesh", "Invalid mesh data");
+bool MeshHandler::uploadMesh(MeshCPU& meshData, MeshGPU& meshOut) {
+  if (meshData.empty()) return error("MeshHandler", "uploadMesh", "Invalid mesh data");
 
   meshOut.numVertices = meshData.numVertices;
   meshOut.numIndices = meshData.numIndices;
@@ -48,14 +42,14 @@ bool MeshLoader::uploadMesh(MeshCPU& meshData, MeshGPU& meshOut) {
   glBindVertexArray(0);
 
   GLenum err = glGetError();
-  if (err != GL_NO_ERROR) return error("MeshLoader", "UploadToGPU", "OpenGL error " + std::to_string(err));
+  if (err != GL_NO_ERROR) return error("MeshHandler", "UploadToGPU", "OpenGL error " + std::to_string(err));
 
   meshData.vertices.clear();
   meshData.indices.clear();
   return true;
 }
 
-void MeshLoader::unloadMesh(MeshGPU& mesh) {
+void MeshHandler::unloadMesh(MeshGPU& mesh) {
   if (glIsVertexArray(mesh.VAOID))     glDeleteVertexArrays(1, &mesh.VAOID);
   if (glIsBuffer(mesh.VertexBufferID)) glDeleteBuffers(1, &mesh.VertexBufferID);
   if (glIsBuffer(mesh.IndexBufferID))  glDeleteBuffers(1, &mesh.IndexBufferID);

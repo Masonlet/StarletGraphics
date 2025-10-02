@@ -1,4 +1,4 @@
-#include "StarletGraphics/loader/textureLoader.hpp"
+#include "StarletGraphics/handler/textureHandler.hpp"
 #include "StarletGraphics/resource/texture.hpp"
 
 #include "StarletParser/parser.hpp"
@@ -6,24 +6,8 @@
 
 #include <glad/glad.h>
 
-bool TextureLoader::loadTexture2D(const std::string& path, TextureCPU& outTexture) {
-  if (!outTexture.empty()) return error("TextureLoader", "loadTexture2D", "Attempting to load non-empty texture object: " + path);
-
-  Parser parser;
-  return parser.parseBMP(path.c_str(), outTexture) ? true : error("TextureLoader", "loadTexture2D", "Failed to parse BMP: " + path);
-}
-bool TextureLoader::loadCubeFaces(const std::string(&facePaths)[6], TextureCPU(&facesOut)[6]) {
-  Parser parser;
-
-  for (int i = 0; i < 6; ++i)
-    if (!parser.parseBMP((facePaths[i]).c_str(), facesOut[i]))
-      return error("TextureLoader", "loadCubeFaces", "Failed face[" + std::to_string(i) + "]: " + facePaths[i]);
-
-  return true;
-}
-
-bool TextureLoader::uploadTexture2D(TextureCPU& cpuTexture, TextureGPU& gpuTexture, bool generateMIPMap) {
-  if (cpuTexture.empty()) return error("TextureLoader", "uploadTexture2D", "Attempting to upload empty texture");
+bool TextureHandler::uploadTexture2D(TextureCPU& cpuTexture, TextureGPU& gpuTexture, bool generateMIPMap) {
+  if (cpuTexture.empty()) return error("TextureHandler", "uploadTexture2D", "Attempting to upload empty texture");
 
   glGenTextures(1, &gpuTexture.id);
   glBindTexture(GL_TEXTURE_2D, gpuTexture.id);
@@ -43,17 +27,17 @@ bool TextureLoader::uploadTexture2D(TextureCPU& cpuTexture, TextureGPU& gpuTextu
   GLenum err = glGetError();
   if (err != GL_NO_ERROR) {
     if (gpuTexture.id) glDeleteTextures(1, &gpuTexture.id);
-    return error("TextureLoader", "uploadTexture2D", "OpenGL error " + std::to_string(err));
+    return error("TextureHandler", "uploadTexture2D", "OpenGL error " + std::to_string(err));
   }
 
   return true;
 }
-bool TextureLoader::uploadTextureCube(TextureCPU(&faces)[6], TextureGPU& cubeOut, bool generateMIPMap) {
+bool TextureHandler::uploadTextureCube(TextureCPU(&faces)[6], TextureGPU& cubeOut, bool generateMIPMap) {
   const int w = faces[0].width, h = faces[0].height;
   const uint8_t bpp = faces[0].pixelSize;
   for (int i = 0; i < 6; ++i)
     if (faces[i].pixels.empty() || faces[i].width != w || faces[i].height != h || faces[i].pixelSize != bpp)
-      return error("TextureLoader", "uploadTextureCube", "Inconsistent cube faces");
+      return error("TextureHandler", "uploadTextureCube", "Inconsistent cube faces");
 
   glGenTextures(1, &cubeOut.id);
   glBindTexture(GL_TEXTURE_CUBE_MAP, cubeOut.id);
@@ -81,13 +65,13 @@ bool TextureLoader::uploadTextureCube(TextureCPU(&faces)[6], TextureGPU& cubeOut
   GLenum err = glGetError();
   if (err != GL_NO_ERROR) {
     if (cubeOut.id) glDeleteTextures(1, &cubeOut.id);
-    return error("TextureLoader", "uploadTextureCube", "OpenGL error " + std::to_string(err));
+    return error("TextureHandler", "uploadTextureCube", "OpenGL error " + std::to_string(err));
   }
 
   return true;
 }
 
-void TextureLoader::unloadTexture(TextureGPU& texture) {
+void TextureHandler::unloadTexture(TextureGPU& texture) {
   if (texture.id) {
     glDeleteTextures(1, &texture.id);
     texture.id = 0;
