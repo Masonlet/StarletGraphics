@@ -134,7 +134,6 @@ bool ResourceLoader::processPrimitives(SceneManager& sm) {
   return true;
 }
 
-
 bool ResourceLoader::processGrids(SceneManager& sceneManager) {
   for (const Grid* grid : sceneManager.getScene().getComponentsOfType<Grid>()) {
     std::string sharedName = grid->name + (grid->type == GridType::Square ? "_sharedSquare" : "_sharedCube");
@@ -186,6 +185,12 @@ bool ResourceLoader::processGrids(SceneManager& sceneManager) {
       TransformComponent* transform = sceneManager.getScene().addComponent<TransformComponent>(e);
       if (!transform) return error("ResourceLoader", "processGrids", "Failed to add TransformComponent");
       transform->pos = pos;
+
+      if (colour) {
+        ColourComponent* instanceColour = sceneManager.getScene().addComponent<ColourComponent>(e);
+        if (!instanceColour) return error("ResourceLoader", "processGrids", "Failed to add ColourComponent");
+        *instanceColour = *colour;
+      }
 
       Model* model = sceneManager.getScene().addComponent<Model>(e);
       if (!model) return error("Engine", "loadSceneGrids", "Failed to add grid instance model: " + sharedName);
