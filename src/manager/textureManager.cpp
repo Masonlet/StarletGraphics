@@ -29,7 +29,7 @@ bool TextureManager::addTexture(const std::string& name, const std::string& file
 
   cpuTexture.freePixels();
   nameToGPUTextures[name] = std::move(gpuTexture);
-  return debugLog("TextureManager", "addTexture", "Added texture: " + name + "at: " + filePath);
+  return debugLog("TextureManager", "addTexture", "Added texture: " + name + " at: " + filePath);
 }
 
 bool TextureManager::addTextureCube(const std::string& name, const std::string(&facePaths)[6]) {
