@@ -44,7 +44,7 @@ bool ResourceLoader::loadTextures(const std::vector<TextureData*>& textures) {
 
     if (textureID == 0) return error("ResourceLoader", "loadTextures", "Failed to get texture ID for: " + texture->name);
 
-    TextureHandle handle = resourceManager.addTexture(texture->name, textureID);
+    ResourceHandle handle = resourceManager.addTexture(texture->name, textureID);
     if (!handle.isValid())
       return error("ResourceLoader", "loadTextures", "Failed to add texture: " + texture->name);
   }
@@ -55,7 +55,7 @@ bool ResourceLoader::loadTextures(const std::vector<TextureData*>& textures) {
 bool ResourceLoader::processTextureConnections(Scene& scene) {
   for (Model* model : scene.getComponentsOfType<Model>()) {
     if (model->name == "skybox") {
-      TextureHandle handle = resourceManager.getTextureHandle("skybox");
+      ResourceHandle handle = resourceManager.getTextureHandle("skybox");
       if (!handle.isValid()) return error("ResourceLoader", "processTextureConnection", "Failed to get skybox texture handle");
 
       model->textureHandles[0] = handle;
@@ -104,7 +104,7 @@ bool ResourceLoader::processPrimitives(SceneManager& sm) {
 
     for (unsigned i = 0; i < Model::NUM_TEXTURES; ++i) {
       model->textureNames[i].clear();
-      model->textureHandles[i] = TextureHandle{ 0 };
+      model->textureHandles[i] = ResourceHandle{ 0 };
       model->textureMixRatio[i] = 0.0f;
     }
   }
@@ -131,7 +131,7 @@ bool ResourceLoader::processGrids(SceneManager& sceneManager) {
     if (!createGridMesh(*grid, sharedName, gridTransform, colour ? *colour : defaultColour))
       return error("ResourceLoader", "processGrids", "Failed to create mesh for: " + sharedName);
 
-    MeshHandle sharedMeshHandle = resourceManager.addMesh(sharedName);
+    ResourceHandle sharedMeshHandle = resourceManager.addMesh(sharedName);
 
     const int gridSide = (grid->count > 0) ? static_cast<int>(std::ceil(std::sqrt(static_cast<float>(grid->count)))) : 0;
     for (int i = 0; i < 0 + grid->count; ++i) {
@@ -172,7 +172,7 @@ bool ResourceLoader::processGrids(SceneManager& sceneManager) {
 
       for (unsigned ti = 0; ti < Model::NUM_TEXTURES; ++ti) {
         model->textureNames[ti].clear();
-        model->textureHandles[ti] = TextureHandle{ 0 };
+        model->textureHandles[ti] = ResourceHandle{ 0 };
         model->textureMixRatio[ti] = 0.0f;
       }
     }
