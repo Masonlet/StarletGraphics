@@ -1,5 +1,5 @@
 #include "StarletGraphics/uniform/uniformCache.hpp"
-#include "StarletParser/utils/log.hpp"
+#include "StarletSerializer/utils/log.hpp"
 
 bool UniformCache::setProgram(unsigned int programID) {
 	if (programID == 0) return error("UniformCache", "setProgram", "Program ID is 0");

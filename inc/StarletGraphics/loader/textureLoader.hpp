@@ -1,6 +1,6 @@
 #pragma once
 
-#include "StarletParser/parser.hpp"
+#include "StarletSerializer/parser.hpp"
 #include "StarletGraphics/handler/textureHandler.hpp"
 
 #include <string>

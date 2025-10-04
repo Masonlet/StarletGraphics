@@ -1,5 +1,5 @@
 #include "StarletGraphics/uniform/uniformCache.hpp"
-#include "StarletParser/utils/log.hpp"
+#include "StarletSerializer/utils/log.hpp"
 
 bool LightCache::cacheLocations() {
 	bool ok = true;

@@ -2,8 +2,8 @@
 #include "StarletGraphics/resource/meshCPU.hpp"
 #include "StarletGraphics/resource/meshGPU.hpp"
 
-#include "StarletParser/parser.hpp"
-#include "StarletParser/utils/log.hpp"
+#include "StarletSerializer/parser.hpp"
+#include "StarletSerializer/utils/log.hpp"
 
 #include <glad/glad.h>
 

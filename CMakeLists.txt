@@ -15,5 +15,5 @@ if(NOT TARGET ${GRAPHICS_NAME})
 
   target_sources(${GRAPHICS_NAME} PRIVATE ${GRAPHICS_SRC} ${GRAPHICS_HEADERS})
   target_include_directories(${GRAPHICS_NAME} PUBLIC $<BUILD_INTERFACE:${GRAPHICS_INC_DIR}> $<INSTALL_INTERFACE:include>)
-  target_link_libraries(${GRAPHICS_NAME} PUBLIC StarletParser StarletScene glad)
+  target_link_libraries(${GRAPHICS_NAME} PUBLIC StarletSerializer StarletScene glad)
 endif()

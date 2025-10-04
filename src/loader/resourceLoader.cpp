@@ -1,6 +1,6 @@
 #include "StarletGraphics/loader/resourceLoader.hpp"
 #include "StarletGraphics/manager/resourceManager.hpp"
-#include "StarletParser/utils/log.hpp"
+#include "StarletSerializer/utils/log.hpp"
 
 #include "StarletScene/sceneManager.hpp"
 #include "StarletScene/components/model.hpp"

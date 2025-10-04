@@ -2,7 +2,7 @@
 #include "StarletGraphics/manager/textureManager.hpp"
 #include "StarletGraphics/manager/meshManager.hpp"
 #include "StarletGraphics/manager/shaderManager.hpp"
-#include "StarletParser/utils/log.hpp"
+#include "StarletSerializer/utils/log.hpp"
 
 #include "StarletScene/scene.hpp"
 #include "StarletScene/components/camera.hpp"
