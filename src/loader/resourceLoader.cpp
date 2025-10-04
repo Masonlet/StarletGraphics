@@ -81,7 +81,7 @@ bool ResourceLoader::processPrimitives(SceneManager& sm) {
   for (Primitive* primitive : sm.getScene().getComponentsOfType<Primitive>()) {
     const StarEntity entity = primitive->id;
     if (!sm.getScene().hasComponent<TransformComponent>(entity))
-      return error("Engine", "loadScenePrimitives", "Primitive entity has no transform component.");
+      return error("Engine", "processPrimitives", "Primitive entity has no transform component.");
 
     const TransformComponent& transform = sm.getScene().getComponent<TransformComponent>(entity);
 
@@ -95,7 +95,7 @@ bool ResourceLoader::processPrimitives(SceneManager& sm) {
       return error("ResourceLoader", "processPrimitives", "Failed to create mesh for primitive: " + primitive->name);
 
     Model* model = sm.getScene().addComponent<Model>(entity);
-    if (!model) return error("Engine", "loadScenePrimitives", "Failed to create model component for primitive: " + primitive->name);
+    if (!model) return error("Engine", "processPrimitives", "Failed to create model component for primitive: " + primitive->name);
 
     model->name = primitive->name;
     model->meshPath = primitive->name;
@@ -118,7 +118,7 @@ bool ResourceLoader::processGrids(SceneManager& sceneManager) {
 
     const StarEntity entity = grid->id;
     if (!sceneManager.getScene().hasComponent<TransformComponent>(entity))
-      return error("Engine", "loadSceneGrids", "Grid entity has no transform component.");
+      return error("Engine", "processGrids", "Grid entity has no transform component.");
 
     const TransformComponent& gridTransform = sceneManager.getScene().getComponent<TransformComponent>(entity);
 
@@ -163,7 +163,7 @@ bool ResourceLoader::processGrids(SceneManager& sceneManager) {
       }
 
       Model* model = sceneManager.getScene().addComponent<Model>(e);
-      if (!model) return error("Engine", "loadSceneGrids", "Failed to add grid instance model: " + sharedName);
+      if (!model) return error("Engine", "processGrids", "Failed to add grid instance model: " + sharedName);
 
       model->name = grid->name + "_instance_" + std::to_string(i);
       model->meshPath = sharedName;
@@ -287,7 +287,7 @@ bool ResourceLoader::createPrimitiveMesh(const Primitive& primitive, const Trans
   case PrimitiveType::Cube:
     return createCube(primitive.name, transform.size, colour.colour);
   default:
-    return error("Renderer", "loadScenePrimitives", "Invalid primitive: " + primitive.name);
+    return error("Renderer", "createPrimitiveMesh", "Invalid primitive: " + primitive.name);
   }
 }
 

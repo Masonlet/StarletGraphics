@@ -7,8 +7,8 @@
 
 #include <glad/glad.h>
 
-bool MeshHandler::uploadMesh(MeshCPU& meshData, MeshGPU& meshOut) {
-  if (meshData.empty()) return error("MeshHandler", "uploadMesh", "Invalid mesh data");
+bool MeshHandler::upload(MeshCPU& meshData, MeshGPU& meshOut) {
+  if (meshData.empty()) return error("MeshHandler", "upload", "Invalid mesh data");
 
   meshOut.numVertices = meshData.numVertices;
   meshOut.numIndices = meshData.numIndices;
@@ -43,14 +43,14 @@ bool MeshHandler::uploadMesh(MeshCPU& meshData, MeshGPU& meshOut) {
   glBindVertexArray(0);
 
   GLenum err = glGetError();
-  if (err != GL_NO_ERROR) return error("MeshHandler", "UploadToGPU", "OpenGL error " + std::to_string(err));
+  if (err != GL_NO_ERROR) return error("MeshHandler", "upload", "OpenGL error " + std::to_string(err));
 
   meshData.vertices.clear();
   meshData.indices.clear();
   return true;
 }
 
-void MeshHandler::unloadMesh(MeshGPU& mesh) {
+void MeshHandler::unload(MeshGPU& mesh) {
   if (glIsVertexArray(mesh.VAOID))     glDeleteVertexArrays(1, &mesh.VAOID);
   if (glIsBuffer(mesh.VertexBufferID)) glDeleteBuffers(1, &mesh.VertexBufferID);
   if (glIsBuffer(mesh.IndexBufferID))  glDeleteBuffers(1, &mesh.IndexBufferID);

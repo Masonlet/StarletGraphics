@@ -1,4 +1,5 @@
 #include "StarletGraphics/manager/shaderManager.hpp"
+#include "StarletGraphics/resource/shaderCPU.hpp"
 
 #include "StarletSerializer/parser.hpp"
 #include "StarletSerializer/utils/log.hpp"
@@ -7,12 +8,12 @@
 #include <sstream>
 
 ShaderManager::~ShaderManager() {
-	for (std::map<std::string, Shader>::iterator it = nameToShaders.begin(); it != nameToShaders.end(); ++it)
-		handler.unloadShader(it->second);
+	for (std::map<std::string, ShaderGPU>::iterator it = nameToShaders.begin(); it != nameToShaders.end(); ++it)
+		handler.unload(it->second);
 }
 
 bool ShaderManager::useProgram(const std::string& name) const {
-	std::map<std::string, Shader>::const_iterator it = nameToShaders.find(name);
+	std::map<std::string, ShaderGPU>::const_iterator it = nameToShaders.find(name);
 	if (it == nameToShaders.end())
 		return error("ShaderManager", "useProgram", "Shader not found: " + name);
 	if (!it->second.linked || it->second.programID == 0)
@@ -23,56 +24,44 @@ bool ShaderManager::useProgram(const std::string& name) const {
 }
 bool ShaderManager::createProgramFromPaths(const std::string& name, const std::string& vertPath, const std::string& fragPath) {
 	if (exists(name)) {
-		std::map<std::string, Shader>::iterator it = nameToShaders.find(name);
-		handler.unloadShader(it->second);
+		std::map<std::string, ShaderGPU>::iterator it = nameToShaders.find(name);
+		handler.unload(it->second);
 		nameToShaders.erase(it);
 	}
 
 	Parser parser;
-	std::string vertexSource, fragmentSource;
-	if (!parser.loadFile(vertexSource, basePath + vertPath))
+	ShaderCPU cpu;
+	if (!parser.loadFile(cpu.vertexSource, basePath + vertPath))
 		return error("ShaderLoader", "createProgramFromPaths", "Failed to load vertex shader source");
 
-	if (!parser.loadFile(fragmentSource, basePath + fragPath))
+	if (!parser.loadFile(cpu.fragmentSource, basePath + fragPath))
 		return error("ShaderLoader", "createProgramFromPaths", "Failed to load fragment shader source");
 
-	Shader shader{};
-	if (!handler.compileShader(shader.vertexID, GL_VERTEX_SHADER, vertexSource))
-		return error("ShaderLoader", "createProgramFromPaths", "Failed to compile vertex shader");
+	cpu.vertexPath = vertPath;
+	cpu.fragmentPath = fragPath;
+	cpu.valid = true;
 
-	if (!handler.compileShader(shader.fragmentID, GL_FRAGMENT_SHADER, fragmentSource)) {
-		handler.unloadShader(shader);
-		return error("ShaderLoader", "createProgramFromPaths", "Failed to compile fragment shader");
-	}
+	ShaderGPU gpu;
+	if (!handler.upload(cpu, gpu))
+		return error("ShaderManager", "createProgramFromPaths", "Failed to upload shader");
 
-	if (!handler.linkProgram(shader.programID, shader.vertexID, shader.fragmentID)) {
-		handler.unloadShader(shader);
-		return error("ShaderLoader", "createProgramFromPaths", "Failed to link program");
-	}
-
-	shader.linked = true;
-
-	std::map<std::string, Shader>::iterator it = nameToShaders.find(name);
-	if (it != nameToShaders.end())
-		handler.unloadShader(it->second);
-
-	nameToShaders[name] = std::move(shader);
+	nameToShaders[name] = std::move(gpu);
 	return true;
 }
 
 unsigned int ShaderManager::getProgramID(const std::string& name) const {
-	std::map<std::string, Shader>::const_iterator it = nameToShaders.find(name);
+	std::map<std::string, ShaderGPU>::const_iterator it = nameToShaders.find(name);
 	return (it == nameToShaders.end()) ? 0u : it->second.programID;
 }
 
-bool ShaderManager::getShader(const std::string& name, Shader*& dataOut) {
-	std::map<std::string, Shader>::iterator it = nameToShaders.find(name);
+bool ShaderManager::getShader(const std::string& name, ShaderGPU*& dataOut) {
+	std::map<std::string, ShaderGPU>::iterator it = nameToShaders.find(name);
 	if (it == nameToShaders.end()) return error("ShaderManager", "getShader", "Shader not found: " + name);
 	dataOut = &it->second;
 	return true;
 }
-bool ShaderManager::getShader(const std::string& name, const Shader*& dataOut) const {
-	std::map<std::string, Shader>::const_iterator it = nameToShaders.find(name);
+bool ShaderManager::getShader(const std::string& name, const ShaderGPU*& dataOut) const {
+	std::map<std::string, ShaderGPU>::const_iterator it = nameToShaders.find(name);
 	if (it == nameToShaders.end()) return error("ShaderManager", "getShader", "Shader not found: " + name);
 	dataOut = &it->second;
 	return true;

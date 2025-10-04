@@ -7,8 +7,11 @@
 
 #include <glad/glad.h>
 
-bool TextureHandler::uploadTexture2D(TextureCPU& cpuTexture, TextureGPU& gpuTexture, bool generateMIPMap) {
-  if (cpuTexture.empty()) return error("TextureHandler", "uploadTexture2D", "Attempting to upload empty texture");
+bool TextureHandler::upload(TextureCPU& cpuTexture, TextureGPU& gpuTexture) {
+	return upload(cpuTexture, gpuTexture, true);
+}
+bool TextureHandler::upload(TextureCPU& cpuTexture, TextureGPU& gpuTexture, bool generateMIPMap) {
+  if (cpuTexture.empty()) return error("TextureHandler", "upload", "Attempting to upload empty Texture");
 
   glGenTextures(1, &gpuTexture.id);
   glBindTexture(GL_TEXTURE_2D, gpuTexture.id);
@@ -28,18 +31,21 @@ bool TextureHandler::uploadTexture2D(TextureCPU& cpuTexture, TextureGPU& gpuText
   GLenum err = glGetError();
   if (err != GL_NO_ERROR) {
     if (gpuTexture.id) glDeleteTextures(1, &gpuTexture.id);
-    return error("TextureHandler", "uploadTexture2D", "OpenGL error " + std::to_string(err));
+    return error("TextureHandler", "upload", "OpenGL error " + std::to_string(err));
   }
 
   cpuTexture.freePixels();
   return true;
 }
-bool TextureHandler::uploadTextureCube(TextureCPU(&faces)[6], TextureGPU& cubeOut, bool generateMIPMap) {
+bool TextureHandler::upload(TextureCPU(&faces)[6], TextureGPU& cubeOut) {
+	return upload(faces, cubeOut, true);
+}
+bool TextureHandler::upload(TextureCPU(&faces)[6], TextureGPU& cubeOut, bool generateMIPMap) {
   const int w = faces[0].width, h = faces[0].height;
   const uint8_t bpp = faces[0].pixelSize;
   for (int i = 0; i < 6; ++i)
     if (faces[i].pixels.empty() || faces[i].width != w || faces[i].height != h || faces[i].pixelSize != bpp)
-      return error("TextureHandler", "uploadTextureCube", "Inconsistent cube faces");
+      return error("TextureHandler", "upload", "Inconsistent cube faces");
 
   glGenTextures(1, &cubeOut.id);
   glBindTexture(GL_TEXTURE_CUBE_MAP, cubeOut.id);
@@ -67,13 +73,13 @@ bool TextureHandler::uploadTextureCube(TextureCPU(&faces)[6], TextureGPU& cubeOu
   GLenum err = glGetError();
   if (err != GL_NO_ERROR) {
     if (cubeOut.id) glDeleteTextures(1, &cubeOut.id);
-    return error("TextureHandler", "uploadTextureCube", "OpenGL error " + std::to_string(err));
+    return error("TextureHandler", "upload", "OpenGL error " + std::to_string(err));
   }
 
   return true;
 }
 
-void TextureHandler::unloadTexture(TextureGPU& texture) {
+void TextureHandler::unload(TextureGPU& texture) {
   if (texture.id) {
     glDeleteTextures(1, &texture.id);
     texture.id = 0;

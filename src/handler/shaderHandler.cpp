@@ -1,14 +1,34 @@
-#include "StarletGraphics/resource/shader.hpp"
 #include "StarletGraphics/handler/shaderHandler.hpp"
+#include "StarletGraphics/resource/shaderGPU.hpp"
+#include "StarletGraphics/resource/shaderCPU.hpp"
 
 #include "StarletSerializer/parser.hpp"
 #include "StarletSerializer/utils/log.hpp"
 
 #include <glad/glad.h>
 
+bool ShaderHandler::upload(ShaderCPU& cpu, ShaderGPU& gpu) {
+	if (cpu.empty()) return error("ShaderHandler", "upload", "Attempting to upload empty Shader");
+
+	if (!compileShader(gpu.vertexID, GL_VERTEX_SHADER, cpu.vertexSource)) return false;
+	if (!compileShader(gpu.fragmentID, GL_FRAGMENT_SHADER, cpu.fragmentSource)) {
+		glDeleteShader(gpu.vertexID);
+		return false;
+	}
+
+	if (!linkProgram(gpu.programID, gpu.vertexID, gpu.fragmentID)) {
+		glDeleteShader(gpu.vertexID);
+		glDeleteShader(gpu.fragmentID);
+		return false;
+	}
+
+	gpu.linked = true;
+	return true;
+}
+
 bool ShaderHandler::compileShader(unsigned int& outShaderID, int glShaderType, const std::string& source) {
 	outShaderID = glCreateShader(static_cast<GLenum>(glShaderType));
-	if (!outShaderID) return error("ShaderHandler", "compileShader", "glCreateShader failed.");
+	if (!outShaderID) return error("ShaderHandler", "compileShader", "glCreateShader failed");
 
 	const char* src = source.c_str();
 	glShaderSource(outShaderID, 1, &src, nullptr);
@@ -41,7 +61,7 @@ bool ShaderHandler::compileShader(unsigned int& outShaderID, int glShaderType, c
 
 bool ShaderHandler::linkProgram(unsigned int& outProgramID, unsigned int vertID, unsigned int fragID) {
 	outProgramID = glCreateProgram();
-	if (!outProgramID) return error("ShaderHandler", "linkProgram", "glCreateProgram failed.");
+	if (!outProgramID) return error("ShaderHandler", "linkProgram", "glCreateProgram failed");
 
 	glAttachShader(outProgramID, vertID);
 	glAttachShader(outProgramID, fragID);
@@ -71,7 +91,7 @@ bool ShaderHandler::linkProgram(unsigned int& outProgramID, unsigned int vertID,
 	return error("ShaderHandler", "linkProgram", std::string("Program link failed:\n") + log);
 }
 
-void ShaderHandler::unloadShader(Shader& shader) {
+void ShaderHandler::unload(ShaderGPU& shader) {
 	if (shader.programID && glIsProgram(shader.programID))  glDeleteProgram(shader.programID);
 	if (shader.vertexID && glIsShader(shader.vertexID))     glDeleteShader(shader.vertexID);
 	if (shader.fragmentID && glIsShader(shader.fragmentID)) glDeleteShader(shader.fragmentID);

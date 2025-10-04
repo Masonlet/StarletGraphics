@@ -2,7 +2,7 @@
 
 #include "StarletGraphics/manager/manager.hpp"
 
-#include "StarletGraphics/resource/shader.hpp"
+#include "StarletGraphics/resource/shaderGPU.hpp"
 #include "StarletGraphics/handler/shaderHandler.hpp"
 
 #include <map>
@@ -19,11 +19,11 @@ public:
 
 	bool createProgramFromPaths(const std::string& name, const std::string& vertPath, const std::string& fragPath);
 
-	bool getShader(const std::string& name, Shader*& dataOut);
-	bool getShader(const std::string& name, const Shader*& dataOut) const;
+	bool getShader(const std::string& name, ShaderGPU*& dataOut);
+	bool getShader(const std::string& name, const ShaderGPU*& dataOut) const;
 	unsigned int getProgramID(const std::string& name) const;
 
 private:
 	ShaderHandler handler;
-	std::map<std::string, Shader> nameToShaders;
+	std::map<std::string, ShaderGPU> nameToShaders;
 };

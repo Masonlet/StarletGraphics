@@ -11,11 +11,11 @@ bool MeshLoader::loadMesh(MeshCPU& mesh, const std::string& path) {
 	return true;
 }
 bool MeshLoader::uploadMesh(MeshCPU& meshCPU, MeshGPU& meshGPU) {
-	if (!handler.uploadMesh(meshCPU, meshGPU))
-		return error("MeshManager", "loadAndAddMesh", "Could not upload mesh ");
+	if (!handler.upload(meshCPU, meshGPU))
+		return error("MeshManager", "loadAndAddMesh", "Could not upload mesh");
 
 	return true;
 }
 void MeshLoader::unloadMesh(MeshGPU& mesh) {
-	handler.unloadMesh(mesh);
+	handler.unload(mesh);
 }
