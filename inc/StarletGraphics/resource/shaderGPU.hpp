@@ -5,15 +5,15 @@
 
 class ShaderGPU {
 public:
-  uint32_t programID  { 0 };
-  uint32_t vertexID   { 0 };
-  uint32_t fragmentID { 0 };
-  bool     linked { false };
+  uint32_t programID{ 0 };
+  uint32_t vertexID{ 0 };
+  uint32_t fragmentID{ 0 };
+  bool     linked{ false };
 
   bool empty() const { return programID == 0 || !linked; }
 
   ShaderGPU() = default;
-  ~ShaderGPU() = default;                 
+  ~ShaderGPU() = default;
 
   ShaderGPU(const ShaderGPU&) = delete;
   ShaderGPU& operator=(const ShaderGPU&) = delete;
@@ -32,3 +32,4 @@ public:
     return *this;
   }
 };
+

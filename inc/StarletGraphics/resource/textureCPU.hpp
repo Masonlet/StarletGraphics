@@ -1,33 +1,24 @@
 #pragma once
 
+#include "StarletGraphics/resource/resourceCPU.hpp"
+
 #include <vector>
 
-struct TextureCPU {
+struct TextureCPU : public ResourceCPU<TextureCPU> {
   int32_t width{ 0 }, height{ 0 };
   std::vector<uint8_t> pixels;
   uint8_t  pixelSize{ 0 };
   size_t   byteSize{ 0 };
 
-  inline bool empty() const { return width == 0 || height == 0 || pixels.empty() || byteSize == 0; }
-  inline void freePixels() { pixels.clear(); byteSize = 0; }
-
-  TextureCPU() = default;
-  ~TextureCPU() = default;
-
-  TextureCPU(const TextureCPU&) = delete;
-  TextureCPU& operator=(const TextureCPU&) = delete;
-
-  TextureCPU(TextureCPU&& other) noexcept { *this = static_cast<TextureCPU&&>(other); }
-  TextureCPU& operator=(TextureCPU&& other) noexcept {
-    if (this != &other) {
-      width = other.width;
-      height = other.height;
-      pixels = other.pixels;
-      pixelSize = other.pixelSize;
-      byteSize = other.byteSize;
-      other.pixels.clear();
-      other.byteSize = 0;
-    }
-    return *this;
-	}
+  void freePixels() { pixels.clear(); byteSize = 0; }
+  bool empty() const { return width == 0 || height == 0 || pixels.empty() || byteSize == 0; }
+  void move(TextureCPU&& other) {
+    width = other.width;
+    height = other.height;
+    pixels = std::move(other.pixels);
+    pixelSize = other.pixelSize;
+    byteSize = other.byteSize;
+    other.pixels.clear();
+    other.byteSize = 0;
+  }
 };

@@ -1,9 +1,12 @@
 #pragma once
 
+#include <cstdint>
+#include <utility>
+
 struct MeshGPU {
-  unsigned int VAOID{ 0 }, VertexBufferID{ 0 }, IndexBufferID{ 0 };
-  unsigned int numVertices{ 0 }, numIndices{ 0 };
-  unsigned int VertexBuffer_Start_Index{ 0 }, IndexBuffer_Start_Index{ 0 };
+  uint32_t VAOID{ 0 }, VertexBufferID{ 0 }, IndexBufferID{ 0 };
+  uint32_t numVertices{ 0 }, numIndices{ 0 };
+  uint32_t VertexBuffer_Start_Index{ 0 }, IndexBuffer_Start_Index{ 0 };
 
   MeshGPU() = default;
   ~MeshGPU() = default;
@@ -23,7 +26,7 @@ struct MeshGPU {
 
       VertexBuffer_Start_Index = other.VertexBuffer_Start_Index;
       IndexBuffer_Start_Index = other.IndexBuffer_Start_Index;
-      
+
       other.VAOID = 0;
       other.VertexBufferID = 0;
       other.IndexBufferID = 0;

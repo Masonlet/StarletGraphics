@@ -49,6 +49,7 @@ bool ShaderManager::createProgramFromPaths(const std::string& name, const std::s
 	return true;
 }
 
+
 unsigned int ShaderManager::getProgramID(const std::string& name) const {
 	std::map<std::string, ShaderGPU>::const_iterator it = nameToShaders.find(name);
 	return (it == nameToShaders.end()) ? 0u : it->second.programID;
