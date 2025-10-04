@@ -3,18 +3,18 @@
 
 MeshManager::~MeshManager() {
 	for (std::map<std::string, MeshGPU>::iterator it = pathToGPUMeshes.begin(); it != pathToGPUMeshes.end(); ++it)
-		loader.unloadMesh(it->second);
+		handler.unload(it->second);
 }
 
 bool MeshManager::loadAndAddMesh(const std::string& path) {
 	if (exists(path)) return debugLog("MeshManager", "addMesh", "Mesh already exists: " + path);
 
 	MeshCPU meshCPU;
-	if(!loader.loadMesh(meshCPU, basePath + path))
+	if(!parser.parsePlyMesh(basePath + path, meshCPU))
 		return error("MeshManager", "loadAndAddMesh", "Could not load mesh from " + path);
 
 	MeshGPU meshGPU;
-	if (!loader.uploadMesh(meshCPU, meshGPU))
+	if (!handler.upload(meshCPU, meshGPU))
 		return error("MeshManager", "loadAndAddMesh", "Could not upload mesh from: " + path);
 
 	pathToGPUMeshes[path] = std::move(meshGPU);
@@ -26,7 +26,7 @@ bool MeshManager::addMesh(const std::string& path, MeshCPU& meshCPU) {
 	if (meshCPU.empty()) return error("MeshManager", "addMesh", "Trying to add an empty mesh");
 
 	MeshGPU meshGPU;
-	if(!loader.uploadMesh(meshCPU, meshGPU))
+	if(!handler.upload(meshCPU, meshGPU))
 		return error("MeshManager", "addMesh", "Could not upload mesh from: " + path);
 
 	pathToGPUMeshes[path] = std::move(meshGPU);

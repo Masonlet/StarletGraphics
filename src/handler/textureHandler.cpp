@@ -76,6 +76,8 @@ bool TextureHandler::upload(TextureCPU(&faces)[6], TextureGPU& cubeOut, bool gen
     return error("TextureHandler", "upload", "OpenGL error " + std::to_string(err));
   }
 
+  for (int i = 0; i < 6; ++i)
+		faces[i].freePixels();
   return true;
 }
 

@@ -1,10 +1,10 @@
 #pragma once
 
 #include "StarletGraphics/manager/manager.hpp"
-
 #include "StarletGraphics/resource/textureGPU.hpp"
 #include "StarletGraphics/handler/textureHandler.hpp"
-#include "StarletGraphics/loader/textureLoader.hpp"
+
+#include "StarletSerializer/parser.hpp"
 
 #include <map>
 
@@ -22,6 +22,7 @@ public:
 	unsigned int getTextureID(const std::string& name) const;
 
 private:
-	TextureLoader loader;
+	Parser parser;
+	TextureHandler handler;
 	std::map<std::string, TextureGPU> nameToGPUTextures;
 };

@@ -1,10 +1,11 @@
 #pragma once
 
 #include "StarletGraphics/manager/manager.hpp"
-
+#include "StarletGraphics/handler/meshHandler.hpp"
 #include "StarletGraphics/resource/meshCPU.hpp"
 #include "StarletGraphics/resource/meshGPU.hpp"
-#include "StarletGraphics/loader/meshLoader.hpp"
+
+#include "StarletSerializer/parser.hpp"
 
 #include <map>
 
@@ -26,7 +27,8 @@ public:
 	bool getMeshGPU(const std::string& path, const MeshGPU*& dataOut) const;
 
 private:
-	MeshLoader loader;
+	Parser parser;
+	MeshHandler handler;
 	std::map<std::string, MeshCPU> pathToCPUMeshes;
 	std::map<std::string, MeshGPU> pathToGPUMeshes;
 };
