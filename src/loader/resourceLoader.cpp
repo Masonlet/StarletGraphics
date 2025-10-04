@@ -12,26 +12,12 @@
 #include "StarletScene/components/transform.hpp"
 #include "StarletScene/components/colour.hpp"
 
-void ResourceLoader::setBasePath(const std::string& path) { 
-  basePath = path; 
-  meshManager.setBasePath((path + "/models/").c_str());
-  textureManager.setBasePath((path + "/textures/").c_str());
-}
-
 bool ResourceLoader::loadMeshes(const std::vector<Model*>& models) {
   for (Model* model : models) {
-    if (!meshManager.loadAndAddMesh(model->meshPath))
+    if (!resourceManager.getMeshManager().loadAndAddMesh(model->meshPath))
       return error("ResourceLoader", "loadMeshes", "Failed to load/add mesh: " + model->meshPath);
 
-    MeshGPU* gpuMesh;
-    if (!meshManager.getMeshGPU(model->meshPath, gpuMesh))
-      return error("ResourceLoader", "loadMeshes", "Failed to get GPU mesh: " + model->meshPath);
-
-    const MeshCPU* cpuMesh;
-    if (!meshManager.getMeshCPU(model->meshPath, cpuMesh))
-      return error("ResourceLoader", "loadMeshes", "Failed to get CPU mesh: " + model->meshPath);
-
-    model->meshHandle = resourceManager.addMesh(model->meshPath, gpuMesh, cpuMesh);
+    model->meshHandle = resourceManager.addMesh(model->meshPath);
 
     if (!model->meshHandle.isValid())
       return error("ResourceLoader", "loadMeshes", "Failed to register mesh: " + model->meshPath);
@@ -44,16 +30,16 @@ bool ResourceLoader::loadTextures(const std::vector<TextureData*>& textures) {
     unsigned int textureID = 0;
 
     if (!texture->isCube) {
-      if (!textureManager.addTexture(texture->name, texture->faces[0]))
+      if (!resourceManager.getTextureManager().addTexture(texture->name, texture->faces[0]))
         return error("ResourceLoader", "loadTextures", "Failed to load 2D texture: " + texture->name);
 
-      textureID = textureManager.getTextureID(texture->name);
+      textureID = resourceManager.getTextureManager().getTextureID(texture->name);
     }
     else {
-      if (!textureManager.addTextureCube(texture->name, texture->faces))
+      if (!resourceManager.getTextureManager().addTextureCube(texture->name, texture->faces))
         return error("ResourceLoader", "loadTextures", "Failed to load cube map: " + texture->name);
 
-      textureID = textureManager.getTextureID(texture->name);
+      textureID = resourceManager.getTextureManager().getTextureID(texture->name);
     }
 
     if (textureID == 0) return error("ResourceLoader", "loadTextures", "Failed to get texture ID for: " + texture->name);
@@ -108,20 +94,12 @@ bool ResourceLoader::processPrimitives(SceneManager& sm) {
     if (!createPrimitiveMesh(*primitive, transform, colour ? *colour : defaultColour))
       return error("ResourceLoader", "processPrimitives", "Failed to create mesh for primitive: " + primitive->name);
 
-    MeshGPU* primMesh;
-    if (!meshManager.getMeshGPU(primitive->name, primMesh))
-      return error("ResourceLoader", "processPrimitives", "Failed to get GPU mesh: " + primitive->name);
-
-    const MeshCPU* cpuMesh;
-    if (!meshManager.getMeshCPU(primitive->name, cpuMesh))
-      return error("ResourceLoader", "processPrimitives", "Failed to get CPU mesh: " + primitive->name);
-
     Model* model = sm.getScene().addComponent<Model>(entity);
     if (!model) return error("Engine", "loadScenePrimitives", "Failed to create model component for primitive: " + primitive->name);
 
     model->name = primitive->name;
     model->meshPath = primitive->name;
-    model->meshHandle = resourceManager.addMesh(primitive->name, primMesh, cpuMesh);
+    model->meshHandle = resourceManager.addMesh(primitive->name);
     model->useTextures = false;
 
     for (unsigned i = 0; i < Model::NUM_TEXTURES; ++i) {
@@ -153,15 +131,7 @@ bool ResourceLoader::processGrids(SceneManager& sceneManager) {
     if (!createGridMesh(*grid, sharedName, gridTransform, colour ? *colour : defaultColour))
       return error("ResourceLoader", "processGrids", "Failed to create mesh for: " + sharedName);
 
-    MeshGPU* gpuMesh;
-    if (!meshManager.getMeshGPU(sharedName, gpuMesh))
-      return error("ResourceLoader", "processGrids", "Failed to get GPU mesh: " + sharedName);
-
-    const MeshCPU* cpuMesh;
-    if (!meshManager.getMeshCPU(sharedName, cpuMesh))
-      return error("ResourceLoader", "processGrids", "Failed to get CPU mesh: " + sharedName);
-
-    MeshHandle sharedMeshHandle = resourceManager.addMesh(sharedName, gpuMesh, cpuMesh);
+    MeshHandle sharedMeshHandle = resourceManager.addMesh(sharedName);
 
     const int gridSide = (grid->count > 0) ? static_cast<int>(std::ceil(std::sqrt(static_cast<float>(grid->count)))) : 0;
     for (int i = 0; i < 0 + grid->count; ++i) {
@@ -228,7 +198,7 @@ bool ResourceLoader::createTriangle(const std::string& name, const Vec2<float>& 
   info.indices[1] = 1;
   info.indices[2] = 2;
 
-  return meshManager.addMesh(name, info)
+  return resourceManager.getMeshManager().addMesh(name, info)
     ? debugLog("Primitive", "createTriangle", "Added triangle: " + name)
     : error("Primitive", "createTriangle", "Failed to create triangle " + name);
 }
@@ -260,7 +230,7 @@ bool ResourceLoader::createSquare(const std::string& name, const Vec2<float>& si
     info.indices[i] = i;
   }
 
-  return meshManager.addMesh(name, info)
+  return resourceManager.getMeshManager().addMesh(name, info)
     ? debugLog("Primitive", "createSquare", "Added square: " + name)
     : error("Primitive", "createSquare", "Failed to create square " + name);
 }
@@ -304,7 +274,7 @@ bool ResourceLoader::createCube(const std::string& name, const Vec3<float>& size
     }
   }
 
-  return meshManager.addMesh(name, info)
+  return resourceManager.getMeshManager().addMesh(name, info)
     ? debugLog("Primitive", "createCube", "Added cube: " + name)
     : error("Primitive", "createCube", "Failed to create cube " + name);
 }

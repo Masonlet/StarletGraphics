@@ -1,20 +1,24 @@
 #include "StarletGraphics/manager/resourceManager.hpp"
 
-MeshHandle ResourceManager::addMesh(const std::string& path, const MeshGPU* gpu, const MeshCPU* cpu) {
+void ResourceManager::setBasePath(const std::string& path) {
+  meshManager.setBasePath((path + "/models/").c_str());
+  textureManager.setBasePath((path + "/textures/").c_str());
+}
+
+MeshHandle ResourceManager::addMesh(const std::string& path) {
   auto it = meshPathToHandle.find(path);
   if (it != meshPathToHandle.end()) return it->second;
 
   MeshHandle handle{ nextMeshId++ };
-  meshGPULookup[handle.id] = gpu;
-  meshCPULookup[handle.id] = cpu;
   meshPathToHandle[path] = handle;
+  meshHandleToPath[handle.id] = path;
   return handle;
 }
 bool ResourceManager::hasMesh(const std::string& path) const {
   return meshPathToHandle.find(path) != meshPathToHandle.end();
 }
 bool ResourceManager::hasMesh(MeshHandle handle) const {
-  return handle.isValid() && meshGPULookup.find(handle.id) != meshGPULookup.end();
+  return handle.isValid() && meshHandleToPath.find(handle.id) != meshHandleToPath.end();
 }
 MeshHandle ResourceManager::getMeshHandle(const std::string& path) const {
   auto it = meshPathToHandle.find(path);
@@ -22,13 +26,23 @@ MeshHandle ResourceManager::getMeshHandle(const std::string& path) const {
 }
 const MeshGPU* ResourceManager::getMeshGPU(MeshHandle handle) const {
   if (!handle.isValid()) return nullptr;
-  auto it = meshGPULookup.find(handle.id);
-  return it != meshGPULookup.end() ? it->second : nullptr;
+
+  auto it = meshHandleToPath.find(handle.id);
+  if (it == meshHandleToPath.end()) return nullptr;
+  const std::string& path = it->second;
+
+  const MeshGPU* gpuData = nullptr;
+  return meshManager.getMeshGPU(path, gpuData) ? gpuData : nullptr;
 }
 const MeshCPU* ResourceManager::getMeshCPU(MeshHandle handle) const {
   if (!handle.isValid()) return nullptr;
-  auto it = meshCPULookup.find(handle.id);
-  return it != meshCPULookup.end() ? it->second : nullptr;
+  
+  auto it = meshHandleToPath.find(handle.id);
+  if (it == meshHandleToPath.end()) return nullptr;
+  const std::string& path = it->second;
+
+  const MeshCPU* cpuData = nullptr;
+  return meshManager.getMeshCPU(path, cpuData) ? cpuData : nullptr;
 }
 
 TextureHandle ResourceManager::addTexture(const std::string& name, unsigned int textureID) {
@@ -36,7 +50,7 @@ TextureHandle ResourceManager::addTexture(const std::string& name, unsigned int 
   if (it != textureNameToHandle.end()) return it->second;
  
   TextureHandle handle{ nextTextureId++ };
-  textureGLIDLookup[handle.id] = textureID;
+  textureHandleToName[handle.id] = name;
   textureNameToHandle[name] = handle;
   return handle;
 }
@@ -44,7 +58,7 @@ bool ResourceManager::hasTexture(const std::string& name) const {
   return textureNameToHandle.find(name) != textureNameToHandle.end();
 }
 bool ResourceManager::hasTexture(TextureHandle handle) const {
-  return handle.isValid() && textureGLIDLookup.find(handle.id) != textureGLIDLookup.end();
+  return handle.isValid() && textureHandleToName.find(handle.id) != textureHandleToName.end();
 }
 TextureHandle ResourceManager::getTextureHandle(const std::string& name) const {
   auto it = textureNameToHandle.find(name);
@@ -52,6 +66,10 @@ TextureHandle ResourceManager::getTextureHandle(const std::string& name) const {
 }
 unsigned int ResourceManager::getTextureID(TextureHandle handle) const {
   if (!handle.isValid()) return 0;
-  auto it = textureGLIDLookup.find(handle.id);
-  return it != textureGLIDLookup.end() ? it->second : 0;
+
+  auto it = textureHandleToName.find(handle.id);
+  if (it == textureHandleToName.end()) return 0;
+
+  const std::string& textureName = it->second;
+  return textureManager.getTextureID(textureName);
 }

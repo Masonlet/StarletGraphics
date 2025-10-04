@@ -31,6 +31,7 @@ bool TextureHandler::uploadTexture2D(TextureCPU& cpuTexture, TextureGPU& gpuText
     return error("TextureHandler", "uploadTexture2D", "OpenGL error " + std::to_string(err));
   }
 
+  cpuTexture.freePixels();
   return true;
 }
 bool TextureHandler::uploadTextureCube(TextureCPU(&faces)[6], TextureGPU& cubeOut, bool generateMIPMap) {

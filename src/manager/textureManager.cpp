@@ -7,7 +7,7 @@
 
 TextureManager::~TextureManager() {
   for (std::map<std::string, TextureGPU>::iterator it = nameToGPUTextures.begin(); it != nameToGPUTextures.end(); ++it)
-    handler.unloadTexture(it->second);
+    loader.unloadTexture(it->second);
 }
 
 unsigned int TextureManager::getTextureID(const std::string& name) const {
@@ -18,13 +18,12 @@ unsigned int TextureManager::getTextureID(const std::string& name) const {
 bool TextureManager::addTexture(const std::string& name, const std::string& filePath) {
   if (exists(name)) return true;
 
-  Parser parser;
   TextureCPU cpuTexture;
-  if (!parser.parseBMP(basePath + filePath, cpuTexture))
+  if (!loader.addTexture2D(cpuTexture, basePath + filePath))
     return error("TextureManager", "addTexture", "Failed load: " + basePath + filePath);
 
   TextureGPU gpuTexture;
-  if (!handler.uploadTexture2D(cpuTexture, gpuTexture, true))
+  if (!loader.uploadTexture2D(cpuTexture, gpuTexture, true))
     return error("TextureManager", "addTexture", "Failed upload: " + name);
 
   cpuTexture.freePixels();
@@ -38,14 +37,12 @@ bool TextureManager::addTextureCube(const std::string& name, const std::string(&
   std::string fullPaths[6];
   for (int i = 0; i < 6; ++i) fullPaths[i] = basePath + facePaths[i];
 
-  Parser parser;
   TextureCPU faces[6];
-  for (int i = 0; i < 6; ++i)
-    if (!parser.parseBMP((fullPaths[i]).c_str(), faces[i]))
-      return error("TextureLoader", "loadCubeFaces", "Failed face[" + std::to_string(i) + "]: " + fullPaths[i]);
+  if (!loader.addTextureCube(faces, fullPaths))
+    return error("TextureLoader", "loadCubeFaces", "Failed to add");
 
   TextureGPU cube;
-  if (!handler.uploadTextureCube(faces, cube, true))
+  if (!loader.uploadTextureCube(faces, cube, true))
     return error("TextureManager", "addCubeTexture", "Failed to upload: " + name);
 
   for (TextureCPU& face : faces) face.freePixels();
