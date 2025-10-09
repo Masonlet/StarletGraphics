@@ -4,7 +4,7 @@
 
 #include "StarletGraphics/resource/shaderGPU.hpp"
 #include "StarletGraphics/handler/shaderHandler.hpp"
-
+#include "StarletSerializer/parser.hpp"
 #include <map>
 
 class ShaderManager : public Manager {
@@ -24,6 +24,7 @@ public:
 	unsigned int getProgramID(const std::string& name) const;
 
 private:
+	Parser parser;
 	ShaderHandler handler;
 	std::map<std::string, ShaderGPU> nameToShaders;
 };

@@ -1,7 +1,8 @@
 #pragma once
 
-#include "StarletGraphics/manager/meshManager.hpp"
-#include "StarletGraphics/manager/textureManager.hpp"
+template<typename T> struct Vec2;
+template<typename T> struct Vec3;
+template<typename T> struct Vec4;
 
 struct Primitive;
 struct Model;
@@ -14,6 +15,9 @@ struct ColourComponent;
 class Scene;
 class SceneManager;
 class ResourceManager;
+
+#include <vector>
+#include <string>
 
 class ResourceLoader {
 public:

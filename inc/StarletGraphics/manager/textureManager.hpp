@@ -2,9 +2,9 @@
 
 #include "StarletGraphics/manager/manager.hpp"
 #include "StarletGraphics/resource/textureGPU.hpp"
-#include "StarletGraphics/handler/textureHandler.hpp"
 
 #include "StarletSerializer/parser.hpp"
+#include "StarletGraphics/handler/textureHandler.hpp"
 
 #include <map>
 

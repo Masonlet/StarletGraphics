@@ -1,11 +1,9 @@
 #include "StarletGraphics/manager/shaderManager.hpp"
-#include "StarletGraphics/resource/shaderCPU.hpp"
-
-#include "StarletSerializer/parser.hpp"
 #include "StarletSerializer/utils/log.hpp"
 
+#include "StarletGraphics/resource/shaderCPU.hpp"
+
 #include <glad/glad.h>
-#include <sstream>
 
 ShaderManager::~ShaderManager() {
 	for (std::map<std::string, ShaderGPU>::iterator it = nameToShaders.begin(); it != nameToShaders.end(); ++it)
@@ -16,6 +14,7 @@ bool ShaderManager::useProgram(const std::string& name) const {
 	std::map<std::string, ShaderGPU>::const_iterator it = nameToShaders.find(name);
 	if (it == nameToShaders.end())
 		return error("ShaderManager", "useProgram", "Shader not found: " + name);
+
 	if (!it->second.linked || it->second.programID == 0)
 		return error("ShaderManager", "useProgram", "Shader not linked, or has invalid id: " + name);
 
@@ -29,7 +28,6 @@ bool ShaderManager::createProgramFromPaths(const std::string& name, const std::s
 		nameToShaders.erase(it);
 	}
 
-	Parser parser;
 	ShaderCPU cpu;
 	if (!parser.loadFile(cpu.vertexSource, basePath + vertPath))
 		return error("ShaderLoader", "createProgramFromPaths", "Failed to load vertex shader source");
@@ -48,7 +46,6 @@ bool ShaderManager::createProgramFromPaths(const std::string& name, const std::s
 	nameToShaders[name] = std::move(gpu);
 	return true;
 }
-
 
 unsigned int ShaderManager::getProgramID(const std::string& name) const {
 	std::map<std::string, ShaderGPU>::const_iterator it = nameToShaders.find(name);

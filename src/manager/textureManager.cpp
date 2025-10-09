@@ -1,9 +1,7 @@
 #include "StarletGraphics/manager/textureManager.hpp"
-#include "StarletGraphics/resource/textureCPU.hpp"
-#include "StarletGraphics/resource/textureGPU.hpp"
-
-#include "StarletSerializer/parser.hpp"
 #include "StarletSerializer/utils/log.hpp"
+
+#include "StarletGraphics/resource/textureCPU.hpp"
 
 TextureManager::~TextureManager() {
   for (std::map<std::string, TextureGPU>::iterator it = nameToGPUTextures.begin(); it != nameToGPUTextures.end(); ++it)
@@ -33,12 +31,9 @@ bool TextureManager::addTexture(const std::string& name, const std::string& path
 bool TextureManager::addTextureCube(const std::string& name, const std::string(&facePaths)[6]) {
   if (exists(name)) return true;
 
-  std::string fullPaths[6];
-  for (int i = 0; i < 6; ++i) fullPaths[i] = basePath + facePaths[i];
-
   TextureCPU faces[6];
   for (int i = 0; i < 6; ++i)
-    if (!parser.parseBMP(fullPaths[i], faces[i]))
+    if (!parser.parseBMP(basePath + facePaths[i], faces[i]))
       return error("TextureLoader", "loadCubeFaces", "Failed to add");
 
   TextureGPU cube;
