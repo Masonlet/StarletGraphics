@@ -34,28 +34,24 @@ bool MeshManager::addMesh(const std::string& path, MeshCPU& meshCPU) {
 	return debugLog("MeshManager", "addMesh", "Added mesh: " + path);
 }
 
-bool MeshManager::getMeshGPU(const std::string& name, MeshGPU*& data) {
+MeshGPU* MeshManager::getMeshGPU(const std::string& name) {
 	std::map<std::string, MeshGPU>::iterator it = pathToGPUMeshes.find(name);
-	if (it == pathToGPUMeshes.end()) return false;
-	data = &it->second;
-	return true;
+	if (it == pathToGPUMeshes.end()) return nullptr;
+	return &it->second;
 }
-bool MeshManager::getMeshGPU(const std::string& name, const MeshGPU*& data) const {
+const MeshGPU* MeshManager::getMeshGPU(const std::string& name) const {
 	std::map<std::string, MeshGPU>::const_iterator it = pathToGPUMeshes.find(name);
-	if (it == pathToGPUMeshes.end()) return false;
-	data = &it->second;
-	return true;
+	if (it == pathToGPUMeshes.end()) return nullptr;
+	return &it->second;
 }
 
-bool MeshManager::getMeshCPU(const std::string& name, MeshCPU*& data) {
+MeshCPU* MeshManager::getMeshCPU(const std::string& name) {
 	std::map<std::string, MeshCPU>::iterator it = pathToCPUMeshes.find(name);
-	if (it == pathToCPUMeshes.end()) return false;
-	data = &it->second;
-	return true;
+	if (it == pathToCPUMeshes.end()) return nullptr;
+	return &it->second;
 }
-bool MeshManager::getMeshCPU(const std::string& name, const MeshCPU*& data) const {
+const MeshCPU* MeshManager::getMeshCPU(const std::string& name) const {
 	std::map<std::string, MeshCPU>::const_iterator it = pathToCPUMeshes.find(name);
-	if (it == pathToCPUMeshes.end()) return false;
-	data = &it->second;
-	return true;
+	if (it == pathToCPUMeshes.end()) return nullptr;
+	return &it->second;
 }

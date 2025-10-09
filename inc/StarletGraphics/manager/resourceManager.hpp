@@ -13,9 +13,6 @@
 struct MeshGPU;
 struct MeshCPU;
 
-struct TextureGPU;
-struct TextureCPU;
-
 class Scene;
 class SceneManager;
 
@@ -25,9 +22,6 @@ public:
 	~ResourceManager() = default;
 
 	void setBasePath(const std::string& path);
-
-	MeshManager& getMeshManager() { return meshManager; }
-	TextureManager& getTextureManager() { return textureManager; }
 
 	ResourceHandle addMesh(const std::string& path);
 	bool hasMesh(const std::string& path) const;

@@ -57,36 +57,31 @@ ResourceHandle ResourceManager::getTextureHandle(const std::string& name) const 
 }
 
 
+
 unsigned int ResourceManager::getTextureID(ResourceHandle handle) const {
   if (!handle.isValid()) return 0;
 
   auto it = textureHandleToName.find(handle.id);
   if (it == textureHandleToName.end()) return 0;
 
-  const std::string& textureName = it->second;
-  return textureManager.getTextureID(textureName);
+  return textureManager.getTextureID(it->second);
 }
-
 
 const MeshGPU* ResourceManager::getMeshGPU(ResourceHandle handle) const {
   if (!handle.isValid()) return nullptr;
 
   auto it = meshHandleToPath.find(handle.id);
   if (it == meshHandleToPath.end()) return nullptr;
-  const std::string& path = it->second;
 
-  const MeshGPU* gpuData = nullptr;
-  return meshManager.getMeshGPU(path, gpuData) ? gpuData : nullptr;
+  return meshManager.getMeshGPU(it->second);
 }
 const MeshCPU* ResourceManager::getMeshCPU(ResourceHandle handle) const {
   if (!handle.isValid()) return nullptr;
 
   auto it = meshHandleToPath.find(handle.id);
   if (it == meshHandleToPath.end()) return nullptr;
-  const std::string& path = it->second;
 
-  const MeshCPU* cpuData = nullptr;
-  return meshManager.getMeshCPU(path, cpuData) ? cpuData : nullptr;
+  return meshManager.getMeshCPU(it->second);
 }
 
 

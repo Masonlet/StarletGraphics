@@ -21,10 +21,10 @@ public:
 	bool loadAndAddMesh(const std::string& path);
 	bool addMesh(const std::string& path, MeshCPU& mesh);
 
-	bool getMeshCPU(const std::string& path, MeshCPU*& dataOut);
-	bool getMeshCPU(const std::string& path, const MeshCPU*& dataOut) const;
-	bool getMeshGPU(const std::string& path, MeshGPU*& dataOut);
-	bool getMeshGPU(const std::string& path, const MeshGPU*& dataOut) const;
+	MeshCPU* getMeshCPU(const std::string& path);
+	const MeshCPU* getMeshCPU(const std::string& path) const;
+	MeshGPU* getMeshGPU(const std::string& path);
+	const MeshGPU* getMeshGPU(const std::string& path) const;
 
 private:
 	Parser parser;
