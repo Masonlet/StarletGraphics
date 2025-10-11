@@ -1,7 +1,7 @@
 #include "StarletGraphics/manager/resourceManager.hpp"
 #include "StarletSerializer/utils/log.hpp"
 
-#include "StarletScene/sceneManager.hpp"
+#include "StarletScene/managers/sceneManager.hpp"
 #include "StarletScene/components/primitive.hpp"
 #include "StarletScene/components/model.hpp"
 #include "StarletScene/components/textureData.hpp"
