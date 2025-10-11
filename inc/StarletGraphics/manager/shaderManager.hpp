@@ -11,8 +11,6 @@ class ShaderManager : public Manager {
 public:
 	~ShaderManager();
 
-	bool useProgram(const std::string& name) const;
-
 	bool exists(const std::string& name) const {
 		return nameToShaders.find(name) != nameToShaders.end();
 	}

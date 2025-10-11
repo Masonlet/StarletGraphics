@@ -10,17 +10,6 @@ ShaderManager::~ShaderManager() {
 		handler.unload(it->second);
 }
 
-bool ShaderManager::useProgram(const std::string& name) const {
-	std::map<std::string, ShaderGPU>::const_iterator it = nameToShaders.find(name);
-	if (it == nameToShaders.end())
-		return error("ShaderManager", "useProgram", "Shader not found: " + name);
-
-	if (!it->second.linked || it->second.programID == 0)
-		return error("ShaderManager", "useProgram", "Shader not linked, or has invalid id: " + name);
-
-	glUseProgram(it->second.programID);
-	return true;
-}
 bool ShaderManager::createProgramFromPaths(const std::string& name, const std::string& vertPath, const std::string& fragPath) {
 	if (exists(name)) {
 		std::map<std::string, ShaderGPU>::iterator it = nameToShaders.find(name);
