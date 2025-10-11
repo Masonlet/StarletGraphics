@@ -1,12 +1,13 @@
-#include "StarletGraphics/manager/shaderManager.hpp"
 #include "StarletGraphics/manager/glStateManager.hpp"
 #include "StarletSerializer/utils/log.hpp"
+
 #include <glad/glad.h>
 
 bool GLStateManager::setProgram(const unsigned int id) {
 	if (id == 0) return error("Renderer", "setProgram", "Program is 0");
-	this->program = id;
+
 	glUseProgram(id);
+	this->program = id;
 	return true;
 }
 

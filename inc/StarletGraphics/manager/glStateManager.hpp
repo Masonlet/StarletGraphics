@@ -1,7 +1,5 @@
 #pragma once
 
-#include "StarletGraphics/manager/shaderManager.hpp"
-
 class GLStateManager {
 public:
 	GLStateManager() = default;
