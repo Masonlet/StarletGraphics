@@ -1,13 +1,13 @@
 #include "StarletGraphics/manager/resourceManager.hpp"
 #include "StarletSerializer/utils/log.hpp"
 
-#include "StarletScene/managers/sceneManager.hpp"
-#include "StarletScene/components/primitive.hpp"
-#include "StarletScene/components/model.hpp"
-#include "StarletScene/components/textureData.hpp"
-#include "StarletScene/components/grid.hpp"
-#include "StarletScene/components/transform.hpp"
-#include "StarletScene/components/colour.hpp"
+#include "StarletScene/manager/sceneManager.hpp"
+#include "StarletScene/component/primitive.hpp"
+#include "StarletScene/component/model.hpp"
+#include "StarletScene/component/textureData.hpp"
+#include "StarletScene/component/grid.hpp"
+#include "StarletScene/component/transform.hpp"
+#include "StarletScene/component/colour.hpp"
 
 ResourceManager::ResourceManager() : meshFactory(meshManager) {}
 

@@ -5,9 +5,9 @@
 #include "StarletSerializer/utils/log.hpp"
 
 #include "StarletScene/scene.hpp"
-#include "StarletScene/components/camera.hpp"
-#include "StarletScene/components/model.hpp"
-#include "StarletScene/components/transform.hpp"
+#include "StarletScene/component/camera.hpp"
+#include "StarletScene/component/model.hpp"
+#include "StarletScene/component/transform.hpp"
 #include "StarletGraphics/renderer/cameraView.hpp"
 #include "StarletMath/mat4.hpp"
 

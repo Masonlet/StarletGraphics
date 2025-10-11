@@ -3,9 +3,9 @@
 #include "StarletSerializer/utils/log.hpp"
 
 #include "StarletScene/scene.hpp"
-#include "StarletScene/components/light.hpp"
-#include "StarletScene/components/transform.hpp"
-#include "StarletScene/components/colour.hpp"
+#include "StarletScene/component/light.hpp"
+#include "StarletScene/component/transform.hpp"
+#include "StarletScene/component/colour.hpp"
 
 #include <glad/glad.h>
 

@@ -4,10 +4,10 @@
 
 #include "StarletGraphics/resource/meshCPU.hpp"
 
-#include "StarletScene/components/primitive.hpp"
-#include "StarletScene/components/grid.hpp"
-#include "StarletScene/components/transform.hpp"
-#include "StarletScene/components/colour.hpp"
+#include "StarletScene/component/primitive.hpp"
+#include "StarletScene/component/grid.hpp"
+#include "StarletScene/component/transform.hpp"
+#include "StarletScene/component/colour.hpp"
 
 bool MeshFactory::createPrimitiveMesh(const Primitive& primitive, const TransformComponent& transform, const ColourComponent& colour) {
   switch (primitive.type) {
