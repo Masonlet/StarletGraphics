@@ -10,6 +10,9 @@
 #include <cstdint>
 #include <string>
 
+struct Model;
+struct TextureData;
+
 struct MeshGPU;
 struct MeshCPU;
 
