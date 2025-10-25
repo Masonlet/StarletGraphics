@@ -4,7 +4,7 @@
 
 #include "StarletGraphics/resource/shaderGPU.hpp"
 #include "StarletGraphics/handler/shaderHandler.hpp"
-#include "StarletSerializer/parser.hpp"
+#include "StarletSerializer/parser/parser.hpp"
 #include <map>
 
 class ShaderManager : public Manager {

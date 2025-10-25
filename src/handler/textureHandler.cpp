@@ -1,9 +1,8 @@
 #include "StarletGraphics/handler/textureHandler.hpp"
+#include "StarletSerializer/utils/log.hpp"
+
 #include "StarletGraphics/resource/textureCPU.hpp"
 #include "StarletGraphics/resource/textureGPU.hpp"
-
-#include "StarletSerializer/parser.hpp"
-#include "StarletSerializer/utils/log.hpp"
 
 #include <glad/glad.h>
 

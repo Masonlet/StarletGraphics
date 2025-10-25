@@ -3,7 +3,7 @@
 #include "StarletGraphics/manager/manager.hpp"
 #include "StarletGraphics/resource/textureGPU.hpp"
 
-#include "StarletSerializer/parser.hpp"
+#include "StarletSerializer/parser/bmpParser.hpp"
 #include "StarletGraphics/handler/textureHandler.hpp"
 
 #include <map>
@@ -22,7 +22,7 @@ public:
 	unsigned int getTextureID(const std::string& name) const;
 
 private:
-	Parser parser;
+	BmpParser parser;
 	TextureHandler handler;
 	std::map<std::string, TextureGPU> nameToGPUTextures;
 };

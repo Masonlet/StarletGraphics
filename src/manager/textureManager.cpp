@@ -17,7 +17,7 @@ bool TextureManager::addTexture(const std::string& name, const std::string& path
   if (exists(name)) return true;
 
   TextureCPU cpuTexture;
-  if (!parser.parseBMP(basePath + path, cpuTexture))
+  if (!parser.parse(basePath + path, cpuTexture))
     return error("TextureManager", "addTexture", "Failed load: " + basePath + path);
 
   TextureGPU gpuTexture;
@@ -33,7 +33,7 @@ bool TextureManager::addTextureCube(const std::string& name, const std::string(&
 
   TextureCPU faces[6];
   for (int i = 0; i < 6; ++i)
-    if (!parser.parseBMP(basePath + facePaths[i], faces[i]))
+    if (!parser.parse(basePath + facePaths[i], faces[i]))
       return error("TextureLoader", "loadCubeFaces", "Failed to add");
 
   TextureGPU cube;
