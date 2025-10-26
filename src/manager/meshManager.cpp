@@ -1,57 +1,59 @@
 #include "StarletGraphics/manager/meshManager.hpp"
 #include "StarletSerializer/utils/log.hpp"
 
-MeshManager::~MeshManager() {
-	for (std::map<std::string, MeshGPU>::iterator it = pathToGPUMeshes.begin(); it != pathToGPUMeshes.end(); ++it)
-		handler.unload(it->second);
-}
+namespace Starlet::Graphics {
+	MeshManager::~MeshManager() {
+		for (std::map<std::string, MeshGPU>::iterator it = pathToGPUMeshes.begin(); it != pathToGPUMeshes.end(); ++it)
+			handler.unload(it->second);
+	}
 
-bool MeshManager::loadAndAddMesh(const std::string& path) {
-	if (exists(path)) return debugLog("MeshManager", "addMesh", "Mesh already exists: " + path);
+	bool MeshManager::loadAndAddMesh(const std::string& path) {
+		if (exists(path)) return Serializer::debugLog("MeshManager", "addMesh", "Mesh already exists: " + path);
 
-	MeshCPU meshCPU;
-	if(!parser.parse(basePath + path, meshCPU))
-		return error("MeshManager", "loadAndAddMesh", "Could not load mesh from " + path);
+		MeshCPU meshCPU;
+		if(!parser.parse(basePath + path, meshCPU))
+			return Serializer::error("MeshManager", "loadAndAddMesh", "Could not load mesh from " + path);
 
-	MeshGPU meshGPU;
-	if (!handler.upload(meshCPU, meshGPU))
-		return error("MeshManager", "loadAndAddMesh", "Could not upload mesh from: " + path);
+		MeshGPU meshGPU;
+		if (!handler.upload(meshCPU, meshGPU))
+			return Serializer::error("MeshManager", "loadAndAddMesh", "Could not upload mesh from: " + path);
 
-	pathToGPUMeshes[path] = std::move(meshGPU);
-	pathToCPUMeshes[path] = std::move(meshCPU);
-	return debugLog("MeshManager", "addMesh", "Added mesh: " + path);
-}
-bool MeshManager::addMesh(const std::string& path, MeshCPU& meshCPU) {
-	if (exists(path)) return true;
-	if (meshCPU.empty()) return error("MeshManager", "addMesh", "Trying to add an empty mesh");
+		pathToGPUMeshes[path] = std::move(meshGPU);
+		pathToCPUMeshes[path] = std::move(meshCPU);
+		return Serializer::debugLog("MeshManager", "addMesh", "Added mesh: " + path);
+	}
+	bool MeshManager::addMesh(const std::string& path, MeshCPU& meshCPU) {
+		if (exists(path)) return true;
+		if (meshCPU.empty()) return Serializer::error("MeshManager", "addMesh", "Trying to add an empty mesh");
 
-	MeshGPU meshGPU;
-	if(!handler.upload(meshCPU, meshGPU))
-		return error("MeshManager", "addMesh", "Could not upload mesh from: " + path);
+		MeshGPU meshGPU;
+		if(!handler.upload(meshCPU, meshGPU))
+			return Serializer::error("MeshManager", "addMesh", "Could not upload mesh from: " + path);
 
-	pathToGPUMeshes[path] = std::move(meshGPU);
-	pathToCPUMeshes[path] = std::move(meshCPU);
-	return debugLog("MeshManager", "addMesh", "Added mesh: " + path);
-}
+		pathToGPUMeshes[path] = std::move(meshGPU);
+		pathToCPUMeshes[path] = std::move(meshCPU);
+		return Serializer::debugLog("MeshManager", "addMesh", "Added mesh: " + path);
+	}
 
-MeshGPU* MeshManager::getMeshGPU(const std::string& name) {
-	std::map<std::string, MeshGPU>::iterator it = pathToGPUMeshes.find(name);
-	if (it == pathToGPUMeshes.end()) return nullptr;
-	return &it->second;
-}
-const MeshGPU* MeshManager::getMeshGPU(const std::string& name) const {
-	std::map<std::string, MeshGPU>::const_iterator it = pathToGPUMeshes.find(name);
-	if (it == pathToGPUMeshes.end()) return nullptr;
-	return &it->second;
-}
+	MeshGPU* MeshManager::getMeshGPU(const std::string& name) {
+		std::map<std::string, MeshGPU>::iterator it = pathToGPUMeshes.find(name);
+		if (it == pathToGPUMeshes.end()) return nullptr;
+		return &it->second;
+	}
+	const MeshGPU* MeshManager::getMeshGPU(const std::string& name) const {
+		std::map<std::string, MeshGPU>::const_iterator it = pathToGPUMeshes.find(name);
+		if (it == pathToGPUMeshes.end()) return nullptr;
+		return &it->second;
+	}
 
-MeshCPU* MeshManager::getMeshCPU(const std::string& name) {
-	std::map<std::string, MeshCPU>::iterator it = pathToCPUMeshes.find(name);
-	if (it == pathToCPUMeshes.end()) return nullptr;
-	return &it->second;
-}
-const MeshCPU* MeshManager::getMeshCPU(const std::string& name) const {
-	std::map<std::string, MeshCPU>::const_iterator it = pathToCPUMeshes.find(name);
-	if (it == pathToCPUMeshes.end()) return nullptr;
-	return &it->second;
+	MeshCPU* MeshManager::getMeshCPU(const std::string& name) {
+		std::map<std::string, MeshCPU>::iterator it = pathToCPUMeshes.find(name);
+		if (it == pathToCPUMeshes.end()) return nullptr;
+		return &it->second;
+	}
+	const MeshCPU* MeshManager::getMeshCPU(const std::string& name) const {
+		std::map<std::string, MeshCPU>::const_iterator it = pathToCPUMeshes.find(name);
+		if (it == pathToCPUMeshes.end()) return nullptr;
+		return &it->second;
+	}
 }

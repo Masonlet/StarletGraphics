@@ -5,51 +5,53 @@
 
 #include <glad/glad.h>
 
-ShaderManager::~ShaderManager() {
-	for (std::map<std::string, ShaderGPU>::iterator it = nameToShaders.begin(); it != nameToShaders.end(); ++it)
-		handler.unload(it->second);
-}
-
-bool ShaderManager::createProgramFromPaths(const std::string& name, const std::string& vertPath, const std::string& fragPath) {
-	if (exists(name)) {
-		std::map<std::string, ShaderGPU>::iterator it = nameToShaders.find(name);
-		handler.unload(it->second);
-		nameToShaders.erase(it);
+namespace Starlet::Graphics {
+	ShaderManager::~ShaderManager() {
+		for (std::map<std::string, ShaderGPU>::iterator it = nameToShaders.begin(); it != nameToShaders.end(); ++it)
+			handler.unload(it->second);
 	}
 
-	ShaderCPU cpu;
-	if (!parser.loadFile(cpu.vertexSource, basePath + vertPath))
-		return error("ShaderLoader", "createProgramFromPaths", "Failed to load vertex shader source");
+	bool ShaderManager::createProgramFromPaths(const std::string& name, const std::string& vertPath, const std::string& fragPath) {
+		if (exists(name)) {
+			std::map<std::string, ShaderGPU>::iterator it = nameToShaders.find(name);
+			handler.unload(it->second);
+			nameToShaders.erase(it);
+		}
 
-	if (!parser.loadFile(cpu.fragmentSource, basePath + fragPath))
-		return error("ShaderLoader", "createProgramFromPaths", "Failed to load fragment shader source");
+		ShaderCPU cpu;
+		if (!parser.loadFile(cpu.vertexSource, basePath + vertPath))
+			return Serializer::error("ShaderLoader", "createProgramFromPaths", "Failed to load vertex shader source");
 
-	cpu.vertexPath = vertPath;
-	cpu.fragmentPath = fragPath;
-	cpu.valid = true;
+		if (!parser.loadFile(cpu.fragmentSource, basePath + fragPath))
+			return Serializer::error("ShaderLoader", "createProgramFromPaths", "Failed to load fragment shader source");
 
-	ShaderGPU gpu;
-	if (!handler.upload(cpu, gpu))
-		return error("ShaderManager", "createProgramFromPaths", "Failed to upload shader");
+		cpu.vertexPath = vertPath;
+		cpu.fragmentPath = fragPath;
+		cpu.valid = true;
 
-	nameToShaders[name] = std::move(gpu);
-	return true;
-}
+		ShaderGPU gpu;
+		if (!handler.upload(cpu, gpu))
+			return Serializer::error("ShaderManager", "createProgramFromPaths", "Failed to upload shader");
 
-unsigned int ShaderManager::getProgramID(const std::string& name) const {
-	std::map<std::string, ShaderGPU>::const_iterator it = nameToShaders.find(name);
-	return (it == nameToShaders.end()) ? 0u : it->second.programID;
-}
+		nameToShaders[name] = std::move(gpu);
+		return true;
+	}
 
-bool ShaderManager::getShader(const std::string& name, ShaderGPU*& dataOut) {
-	std::map<std::string, ShaderGPU>::iterator it = nameToShaders.find(name);
-	if (it == nameToShaders.end()) return error("ShaderManager", "getShader", "Shader not found: " + name);
-	dataOut = &it->second;
-	return true;
-}
-bool ShaderManager::getShader(const std::string& name, const ShaderGPU*& dataOut) const {
-	std::map<std::string, ShaderGPU>::const_iterator it = nameToShaders.find(name);
-	if (it == nameToShaders.end()) return error("ShaderManager", "getShader", "Shader not found: " + name);
-	dataOut = &it->second;
-	return true;
+	unsigned int ShaderManager::getProgramID(const std::string& name) const {
+		std::map<std::string, ShaderGPU>::const_iterator it = nameToShaders.find(name);
+		return (it == nameToShaders.end()) ? 0u : it->second.programID;
+	}
+
+	bool ShaderManager::getShader(const std::string& name, ShaderGPU*& dataOut) {
+		std::map<std::string, ShaderGPU>::iterator it = nameToShaders.find(name);
+		if (it == nameToShaders.end()) return Serializer::error("ShaderManager", "getShader", "Shader not found: " + name);
+		dataOut = &it->second;
+		return true;
+	}
+	bool ShaderManager::getShader(const std::string& name, const ShaderGPU*& dataOut) const {
+		std::map<std::string, ShaderGPU>::const_iterator it = nameToShaders.find(name);
+		if (it == nameToShaders.end()) return Serializer::error("ShaderManager", "getShader", "Shader not found: " + name);
+		dataOut = &it->second;
+		return true;
+	}
 }

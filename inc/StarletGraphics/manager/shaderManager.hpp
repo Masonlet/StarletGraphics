@@ -7,22 +7,24 @@
 #include "StarletSerializer/parser/parser.hpp"
 #include <map>
 
-class ShaderManager : public Manager {
-public:
-	~ShaderManager();
+namespace Starlet::Graphics {
+	class ShaderManager : public Manager {
+	public:
+		~ShaderManager();
 
-	bool exists(const std::string& name) const {
-		return nameToShaders.find(name) != nameToShaders.end();
-	}
+		bool exists(const std::string& name) const {
+			return nameToShaders.find(name) != nameToShaders.end();
+		}
 
-	bool createProgramFromPaths(const std::string& name, const std::string& vertPath, const std::string& fragPath);
+		bool createProgramFromPaths(const std::string& name, const std::string& vertPath, const std::string& fragPath);
 
-	bool getShader(const std::string& name, ShaderGPU*& dataOut);
-	bool getShader(const std::string& name, const ShaderGPU*& dataOut) const;
-	unsigned int getProgramID(const std::string& name) const;
+		bool getShader(const std::string& name, ShaderGPU*& dataOut);
+		bool getShader(const std::string& name, const ShaderGPU*& dataOut) const;
+		unsigned int getProgramID(const std::string& name) const;
 
-private:
-	Parser parser;
-	ShaderHandler handler;
-	std::map<std::string, ShaderGPU> nameToShaders;
-};
+	private:
+		Serializer::Parser parser;
+		ShaderHandler handler;
+		std::map<std::string, ShaderGPU> nameToShaders;
+	};
+}

@@ -1,31 +1,41 @@
 #pragma once
 
-class UniformCache;
-class ResourceManager;
+namespace Starlet {
+	namespace Math {
+		template <typename T> struct Vec3;
+	}
 
-template <typename T> struct Vec3;
-class Scene;
+	namespace Scene {
+		class Scene;
 
-struct MeshCPU;
-struct Model;
+		struct Model;
 
-struct TransformComponent;
-struct ColourComponent;
+		struct TransformComponent;
+		struct ColourComponent;
+	}
 
-class ModelRenderer {
-public:
-	ModelRenderer(const UniformCache& uc, const ResourceManager& rm): uniforms(uc), resourceManager(rm) {}
-	void updateModelUniforms(const Model& instance, const MeshCPU& data, const TransformComponent& transform, const ColourComponent& colour) const;
+	namespace Graphics {
+		class UniformCache;
+		class ResourceManager;
 
-	void bindSkyboxTexture(const unsigned int texture) const;
-	void setModelIsSkybox(const bool isSkybox) const;
+		struct MeshCPU;
 
-	bool drawModel(const Model& instance, const TransformComponent& transform, const ColourComponent& colour) const;
-	bool drawOpaqueModels(const Scene& scene, const Vec3<float>& eye) const;
-	bool drawTransparentModels(const Scene& scene, const Vec3<float>& eye) const;
-	bool drawSkybox(const Model& skybox, const Vec3<float>& skyboxSize, const Vec3<float>& cameraPos) const;
+		class ModelRenderer {
+		public:
+			ModelRenderer(const Graphics::UniformCache& uc, const Graphics::ResourceManager& rm) : uniforms(uc), resourceManager(rm) {}
+			void updateModelUniforms(const Scene::Model& instance, const MeshCPU& data, const Scene::TransformComponent& transform, const Scene::ColourComponent& colour) const;
 
-private:
-	const UniformCache& uniforms;
-	const ResourceManager& resourceManager; 
-};
+			void bindSkyboxTexture(const unsigned int texture) const;
+			void setModelIsSkybox(const bool isSkybox) const;
+
+			bool drawModel(const Scene::Model& instance, const Scene::TransformComponent& transform, const Scene::ColourComponent& colour) const;
+			bool drawOpaqueModels(const Scene::Scene& scene, const Math::Vec3<float>& eye) const;
+			bool drawTransparentModels(const Scene::Scene& scene, const Math::Vec3<float>& eye) const;
+			bool drawSkybox(const Scene::Model& skybox, const Math::Vec3<float>& skyboxSize, const Math::Vec3<float>& cameraPos) const;
+
+		private:
+			const UniformCache& uniforms;
+			const ResourceManager& resourceManager;
+		};
+	}
+}

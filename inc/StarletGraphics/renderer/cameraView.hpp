@@ -2,11 +2,13 @@
 
 #include "StarletMath/vec3.hpp"
 
-struct CameraView {
-	Vec3<float> eye;
-	Vec3<float> front;
-	Vec3<float> right;
-	Vec3<float> up;
+namespace Starlet::Graphics {
+	struct CameraView {
+		Math::Vec3<float> eye;
+		Math::Vec3<float> front;
+		Math::Vec3<float> right;
+		Math::Vec3<float> up;
 
-	static CameraView fromTransform(const Vec3<float>& pos, const Vec3<float>& rot, const Vec3<float>& up);
-};
+		static CameraView fromTransform(const Math::Vec3<float>& pos, const Math::Vec3<float>& rot, const Math::Vec3<float>& up);
+	};
+}

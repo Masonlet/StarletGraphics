@@ -9,246 +9,248 @@
 #include "StarletScene/component/transform.hpp"
 #include "StarletScene/component/colour.hpp"
 
-ResourceManager::ResourceManager() : meshFactory(meshManager) {}
+namespace Starlet::Graphics {
+  ResourceManager::ResourceManager() : meshFactory(meshManager) {}
 
-void ResourceManager::setBasePath(const std::string& path) {
-  meshManager.setBasePath((path + "/models/").c_str());
-  textureManager.setBasePath((path + "/textures/").c_str());
-}
-
-ResourceHandle ResourceManager::addMesh(const std::string& path) {
-  auto it = meshPathToHandle.find(path);
-  if (it != meshPathToHandle.end()) return it->second;
-
-  ResourceHandle handle{ nextMeshId++ };
-  meshPathToHandle[path] = handle;
-  meshHandleToPath[handle.id] = path;
-  return handle;
-}
-bool ResourceManager::hasMesh(const std::string& path) const {
-  return meshPathToHandle.find(path) != meshPathToHandle.end();
-}
-bool ResourceManager::hasMesh(ResourceHandle handle) const {
-  return handle.isValid() && meshHandleToPath.find(handle.id) != meshHandleToPath.end();
-}
-ResourceHandle ResourceManager::getMeshHandle(const std::string& path) const {
-  auto it = meshPathToHandle.find(path);
-  return it != meshPathToHandle.end() ? it->second : ResourceHandle{ 0 };
-}
-
-ResourceHandle ResourceManager::addTexture(const std::string& name, unsigned int textureID) {
-  auto it = textureNameToHandle.find(name);
-  if (it != textureNameToHandle.end()) return it->second;
- 
-  ResourceHandle handle{ nextTextureId++ };
-  textureHandleToName[handle.id] = name;
-  textureNameToHandle[name] = handle;
-  return handle;
-}
-bool ResourceManager::hasTexture(const std::string& name) const {
-  return textureNameToHandle.find(name) != textureNameToHandle.end();
-}
-bool ResourceManager::hasTexture(ResourceHandle handle) const {
-  return handle.isValid() && textureHandleToName.find(handle.id) != textureHandleToName.end();
-}
-ResourceHandle ResourceManager::getTextureHandle(const std::string& name) const {
-  auto it = textureNameToHandle.find(name);
-  return it != textureNameToHandle.end() ? it->second : ResourceHandle{ 0 };
-}
-
-
-
-unsigned int ResourceManager::getTextureID(ResourceHandle handle) const {
-  if (!handle.isValid()) return 0;
-
-  auto it = textureHandleToName.find(handle.id);
-  if (it == textureHandleToName.end()) return 0;
-
-  return textureManager.getTextureID(it->second);
-}
-
-const MeshGPU* ResourceManager::getMeshGPU(ResourceHandle handle) const {
-  if (!handle.isValid()) return nullptr;
-
-  auto it = meshHandleToPath.find(handle.id);
-  if (it == meshHandleToPath.end()) return nullptr;
-
-  return meshManager.getMeshGPU(it->second);
-}
-const MeshCPU* ResourceManager::getMeshCPU(ResourceHandle handle) const {
-  if (!handle.isValid()) return nullptr;
-
-  auto it = meshHandleToPath.find(handle.id);
-  if (it == meshHandleToPath.end()) return nullptr;
-
-  return meshManager.getMeshCPU(it->second);
-}
-
-
-bool ResourceManager::loadMeshes(const std::vector<Model*>& models) {
-  for (Model* model : models) {
-    if (!meshManager.loadAndAddMesh(model->meshPath))
-      return error("ResourceLoader", "loadMeshes", "Failed to load/add mesh: " + model->meshPath);
-
-    model->meshHandle = addMesh(model->meshPath);
-
-    if (!model->meshHandle.isValid())
-      return error("ResourceLoader", "loadMeshes", "Failed to register mesh: " + model->meshPath);
+  void ResourceManager::setBasePath(const std::string& path) {
+    meshManager.setBasePath((path + "/models/").c_str());
+    textureManager.setBasePath((path + "/textures/").c_str());
   }
 
-  return debugLog("ResourceLoader", "loadMeshes", "Loaded and registered " + std::to_string(models.size()) + " meshes");
-}
-bool ResourceManager::loadTextures(const std::vector<TextureData*>& textures) {
-  for (const TextureData* texture : textures) {
-    unsigned int textureID = 0;
+  ResourceHandle ResourceManager::addMesh(const std::string& path) {
+    auto it = meshPathToHandle.find(path);
+    if (it != meshPathToHandle.end()) return it->second;
 
-    if (!texture->isCube) {
-      if (!textureManager.addTexture(texture->name, texture->faces[0]))
-        return error("ResourceLoader", "loadTextures", "Failed to load 2D texture: " + texture->name);
-
-      textureID = textureManager.getTextureID(texture->name);
-    }
-    else {
-      if (!textureManager.addTextureCube(texture->name, texture->faces))
-        return error("ResourceLoader", "loadTextures", "Failed to load cube map: " + texture->name);
-
-      textureID = textureManager.getTextureID(texture->name);
-    }
-
-    if (textureID == 0) return error("ResourceLoader", "loadTextures", "Failed to get texture ID for: " + texture->name);
-
-    ResourceHandle handle = addTexture(texture->name, textureID);
-    if (!handle.isValid())
-      return error("ResourceLoader", "loadTextures", "Failed to add texture: " + texture->name);
+    ResourceHandle handle{ nextMeshId++ };
+    meshPathToHandle[path] = handle;
+    meshHandleToPath[handle.id] = path;
+    return handle;
+  }
+  bool ResourceManager::hasMesh(const std::string& path) const {
+    return meshPathToHandle.find(path) != meshPathToHandle.end();
+  }
+  bool ResourceManager::hasMesh(ResourceHandle handle) const {
+    return handle.isValid() && meshHandleToPath.find(handle.id) != meshHandleToPath.end();
+  }
+  ResourceHandle ResourceManager::getMeshHandle(const std::string& path) const {
+    auto it = meshPathToHandle.find(path);
+    return it != meshPathToHandle.end() ? it->second : ResourceHandle{ 0 };
   }
 
-  return debugLog("ResourceLoader", "loadTextures", "Loaded and added " + std::to_string(textures.size()) + " textures");
-}
+  ResourceHandle ResourceManager::addTexture(const std::string& name, unsigned int textureID) {
+    auto it = textureNameToHandle.find(name);
+    if (it != textureNameToHandle.end()) return it->second;
 
-bool ResourceManager::processTextureConnections(Scene& scene) {
-  for (Model* model : scene.getComponentsOfType<Model>()) {
-    if (model->name == "skybox") {
-      ResourceHandle handle = getTextureHandle("skybox");
-      if (!handle.isValid()) return error("ResourceLoader", "processTextureConnection", "Failed to get skybox texture handle");
-
-      model->textureHandles[0] = handle;
-      continue;
-    }
-
-    if (!model->useTextures) continue;
-
-    for (size_t i = 0; i < Model::NUM_TEXTURES; ++i) {
-      if (model->textureNames[i].empty()) continue;
-      model->textureHandles[i] = getTextureHandle(model->textureNames[i]);
-
-      if (!model->textureHandles[i].isValid())
-        return error("ResourceLoader", "processTextureConnection", "Invalid texture handle for: " + model->textureNames[i]);
-    }
+    ResourceHandle handle{ nextTextureId++ };
+    textureHandleToName[handle.id] = name;
+    textureNameToHandle[name] = handle;
+    return handle;
+  }
+  bool ResourceManager::hasTexture(const std::string& name) const {
+    return textureNameToHandle.find(name) != textureNameToHandle.end();
+  }
+  bool ResourceManager::hasTexture(ResourceHandle handle) const {
+    return handle.isValid() && textureHandleToName.find(handle.id) != textureHandleToName.end();
+  }
+  ResourceHandle ResourceManager::getTextureHandle(const std::string& name) const {
+    auto it = textureNameToHandle.find(name);
+    return it != textureNameToHandle.end() ? it->second : ResourceHandle{ 0 };
   }
 
-  return true;
-}
 
-bool ResourceManager::processPrimitives(SceneManager& sm) {
-  for (Primitive* primitive : sm.getScene().getComponentsOfType<Primitive>()) {
-    const StarEntity entity = primitive->id;
-    if (!sm.getScene().hasComponent<TransformComponent>(entity))
-      return error("Engine", "processPrimitives", "Primitive entity has no transform component.");
 
-    const TransformComponent& transform = sm.getScene().getComponent<TransformComponent>(entity);
+  unsigned int ResourceManager::getTextureID(ResourceHandle handle) const {
+    if (!handle.isValid()) return 0;
 
-    const ColourComponent* colour = nullptr;
-    if (sm.getScene().hasComponent<ColourComponent>(entity)) {
-      colour = &sm.getScene().getComponent<ColourComponent>(entity);
-    }
+    auto it = textureHandleToName.find(handle.id);
+    if (it == textureHandleToName.end()) return 0;
 
-    const ColourComponent defaultColour{};
-    if (!meshFactory.createPrimitiveMesh(*primitive, transform, colour ? *colour : defaultColour))
-      return error("ResourceLoader", "processPrimitives", "Failed to create mesh for primitive: " + primitive->name);
-
-    Model* model = sm.getScene().addComponent<Model>(entity);
-    if (!model) return error("Engine", "processPrimitives", "Failed to create model component for primitive: " + primitive->name);
-
-    model->name = primitive->name;
-    model->meshPath = primitive->name;
-    model->meshHandle = addMesh(primitive->name);
-    model->useTextures = false;
-
-    for (unsigned i = 0; i < Model::NUM_TEXTURES; ++i) {
-      model->textureNames[i].clear();
-      model->textureHandles[i] = ResourceHandle{ 0 };
-      model->textureMixRatio[i] = 0.0f;
-    }
+    return textureManager.getTextureID(it->second);
   }
 
-  return true;
-}
+  const MeshGPU* ResourceManager::getMeshGPU(ResourceHandle handle) const {
+    if (!handle.isValid()) return nullptr;
 
-bool ResourceManager::processGrids(SceneManager& sceneManager) {
-  for (const Grid* grid : sceneManager.getScene().getComponentsOfType<Grid>()) {
-    std::string sharedName = grid->name + (grid->type == GridType::Square ? "_sharedSquare" : "_sharedCube");
+    auto it = meshHandleToPath.find(handle.id);
+    if (it == meshHandleToPath.end()) return nullptr;
 
-    const StarEntity entity = grid->id;
-    if (!sceneManager.getScene().hasComponent<TransformComponent>(entity))
-      return error("Engine", "processGrids", "Grid entity has no transform component.");
+    return meshManager.getMeshGPU(it->second);
+  }
+  const MeshCPU* ResourceManager::getMeshCPU(ResourceHandle handle) const {
+    if (!handle.isValid()) return nullptr;
 
-    const TransformComponent& gridTransform = sceneManager.getScene().getComponent<TransformComponent>(entity);
+    auto it = meshHandleToPath.find(handle.id);
+    if (it == meshHandleToPath.end()) return nullptr;
 
-    const ColourComponent* colour = nullptr;
-    if (sceneManager.getScene().hasComponent<ColourComponent>(entity)) {
-      colour = &sceneManager.getScene().getComponent<ColourComponent>(entity);
+    return meshManager.getMeshCPU(it->second);
+  }
+
+
+  bool ResourceManager::loadMeshes(const std::vector<Scene::Model*>& models) {
+    for (Scene::Model* model : models) {
+      if (!meshManager.loadAndAddMesh(model->meshPath))
+        return Serializer::error("ResourceLoader", "loadMeshes", "Failed to load/add mesh: " + model->meshPath);
+
+      model->meshHandle = addMesh(model->meshPath);
+
+      if (!model->meshHandle.isValid())
+        return Serializer::error("ResourceLoader", "loadMeshes", "Failed to register mesh: " + model->meshPath);
     }
 
-    const ColourComponent defaultColour{};
-    if (!meshFactory.createGridMesh(*grid, sharedName, gridTransform, colour ? *colour : defaultColour))
-      return error("ResourceLoader", "processGrids", "Failed to create mesh for: " + sharedName);
+    return Serializer::debugLog("ResourceLoader", "loadMeshes", "Loaded and registered " + std::to_string(models.size()) + " meshes");
+  }
+  bool ResourceManager::loadTextures(const std::vector<Scene::TextureData*>& textures) {
+    for (const Scene::TextureData* texture : textures) {
+      unsigned int textureID = 0;
 
-    ResourceHandle sharedMeshHandle = addMesh(sharedName);
+      if (!texture->isCube) {
+        if (!textureManager.addTexture(texture->name, texture->faces[0]))
+          return Serializer::error("ResourceLoader", "loadTextures", "Failed to load 2D texture: " + texture->name);
 
-    const int gridSide = (grid->count > 0) ? static_cast<int>(std::ceil(std::sqrt(static_cast<float>(grid->count)))) : 0;
-    for (int i = 0; i < 0 + grid->count; ++i) {
-      const int row = (gridSide > 0) ? (i / gridSide) : 0;
-      const int col = (gridSide > 0) ? (i % gridSide) : 0;
-
-      Vec3<float> pos{};
-      if (grid->type == GridType::Square) {
-        pos = { grid->spacing * static_cast<float>(col),
-                grid->spacing * static_cast<float>(row),
-                0.0f };
+        textureID = textureManager.getTextureID(texture->name);
       }
       else {
-        pos = { grid->spacing * static_cast<float>(col),
-                0.0f,
-                grid->spacing * static_cast<float>(row) };
+        if (!textureManager.addTextureCube(texture->name, texture->faces))
+          return Serializer::error("ResourceLoader", "loadTextures", "Failed to load cube map: " + texture->name);
+
+        textureID = textureManager.getTextureID(texture->name);
       }
 
-      StarEntity e = sceneManager.getScene().createEntity();
+      if (textureID == 0) return Serializer::error("ResourceLoader", "loadTextures", "Failed to get texture ID for: " + texture->name);
 
-      TransformComponent* transform = sceneManager.getScene().addComponent<TransformComponent>(e);
-      if (!transform) return error("ResourceLoader", "processGrids", "Failed to add TransformComponent");
-      transform->pos = pos;
-
-      if (colour) {
-        ColourComponent* instanceColour = sceneManager.getScene().addComponent<ColourComponent>(e);
-        if (!instanceColour) return error("ResourceLoader", "processGrids", "Failed to add ColourComponent");
-        *instanceColour = *colour;
-      }
-
-      Model* model = sceneManager.getScene().addComponent<Model>(e);
-      if (!model) return error("Engine", "processGrids", "Failed to add grid instance model: " + sharedName);
-
-      model->name = grid->name + "_instance_" + std::to_string(i);
-      model->meshPath = sharedName;
-      model->meshHandle = sharedMeshHandle;
-      model->useTextures = false;
-
-      for (unsigned ti = 0; ti < Model::NUM_TEXTURES; ++ti) {
-        model->textureNames[ti].clear();
-        model->textureHandles[ti] = ResourceHandle{ 0 };
-        model->textureMixRatio[ti] = 0.0f;
-      }
+      ResourceHandle handle = addTexture(texture->name, textureID);
+      if (!handle.isValid())
+        return Serializer::error("ResourceLoader", "loadTextures", "Failed to add texture: " + texture->name);
     }
+
+    return Serializer::debugLog("ResourceLoader", "loadTextures", "Loaded and added " + std::to_string(textures.size()) + " textures");
   }
 
-  return true;
+  bool ResourceManager::processTextureConnections(Scene::Scene& scene) {
+    for (Scene::Model* model : scene.getComponentsOfType<Scene::Model>()) {
+      if (model->name == "skybox") {
+        ResourceHandle handle = getTextureHandle("skybox");
+        if (!handle.isValid()) return Serializer::error("ResourceLoader", "processTextureConnection", "Failed to get skybox texture handle");
+
+        model->textureHandles[0] = handle;
+        continue;
+      }
+
+      if (!model->useTextures) continue;
+
+      for (size_t i = 0; i < Scene::Model::NUM_TEXTURES; ++i) {
+        if (model->textureNames[i].empty()) continue;
+        model->textureHandles[i] = getTextureHandle(model->textureNames[i]);
+
+        if (!model->textureHandles[i].isValid())
+          return Serializer::error("ResourceLoader", "processTextureConnection", "Invalid texture handle for: " + model->textureNames[i]);
+      }
+    }
+
+    return true;
+  }
+
+  bool ResourceManager::processPrimitives(Scene::SceneManager& sm) {
+    for (Scene::Primitive* primitive : sm.getScene().getComponentsOfType<Scene::Primitive>()) {
+      const Scene::StarEntity entity = primitive->id;
+      if (!sm.getScene().hasComponent<Scene::TransformComponent>(entity))
+        return Serializer::error("Engine", "processPrimitives", "Primitive entity has no transform component.");
+
+      const Scene::TransformComponent& transform = sm.getScene().getComponent<Scene::TransformComponent>(entity);
+
+      const Scene::ColourComponent* colour = nullptr;
+      if (sm.getScene().hasComponent<Scene::ColourComponent>(entity)) {
+        colour = &sm.getScene().getComponent<Scene::ColourComponent>(entity);
+      }
+
+      const Scene::ColourComponent defaultColour{};
+      if (!meshFactory.createPrimitiveMesh(*primitive, transform, colour ? *colour : defaultColour))
+        return Serializer::error("ResourceLoader", "processPrimitives", "Failed to create mesh for primitive: " + primitive->name);
+
+      Scene::Model* model = sm.getScene().addComponent<Scene::Model>(entity);
+      if (!model) return Serializer::error("Engine", "processPrimitives", "Failed to create model component for primitive: " + primitive->name);
+
+      model->name = primitive->name;
+      model->meshPath = primitive->name;
+      model->meshHandle = addMesh(primitive->name);
+      model->useTextures = false;
+
+      for (unsigned i = 0; i < Scene::Model::NUM_TEXTURES; ++i) {
+        model->textureNames[i].clear();
+        model->textureHandles[i] = ResourceHandle{ 0 };
+        model->textureMixRatio[i] = 0.0f;
+      }
+    }
+
+    return true;
+  }
+
+  bool ResourceManager::processGrids(Scene::SceneManager& sceneManager) {
+    for (const Scene::Grid* grid : sceneManager.getScene().getComponentsOfType<Scene::Grid>()) {
+      std::string sharedName = grid->name + (grid->type == Scene::GridType::Square ? "_sharedSquare" : "_sharedCube");
+
+      const Scene::StarEntity entity = grid->id;
+      if (!sceneManager.getScene().hasComponent<Scene::TransformComponent>(entity))
+        return Serializer::error("Engine", "processGrids", "Grid entity has no transform component.");
+
+      const Scene::TransformComponent& gridTransform = sceneManager.getScene().getComponent<Scene::TransformComponent>(entity);
+
+      const Scene::ColourComponent* colour = nullptr;
+      if (sceneManager.getScene().hasComponent<Scene::ColourComponent>(entity)) {
+        colour = &sceneManager.getScene().getComponent<Scene::ColourComponent>(entity);
+      }
+
+      const Scene::ColourComponent defaultColour{};
+      if (!meshFactory.createGridMesh(*grid, sharedName, gridTransform, colour ? *colour : defaultColour))
+        return Serializer::error("ResourceLoader", "processGrids", "Failed to create mesh for: " + sharedName);
+
+      ResourceHandle sharedMeshHandle = addMesh(sharedName);
+
+      const int gridSide = (grid->count > 0) ? static_cast<int>(std::ceil(std::sqrt(static_cast<float>(grid->count)))) : 0;
+      for (int i = 0; i < 0 + grid->count; ++i) {
+        const int row = (gridSide > 0) ? (i / gridSide) : 0;
+        const int col = (gridSide > 0) ? (i % gridSide) : 0;
+
+        Math::Vec3<float> pos{};
+        if (grid->type == Scene::GridType::Square) {
+          pos = { grid->spacing * static_cast<float>(col),
+                  grid->spacing * static_cast<float>(row),
+                  0.0f };
+        }
+        else {
+          pos = { grid->spacing * static_cast<float>(col),
+                  0.0f,
+                  grid->spacing * static_cast<float>(row) };
+        }
+
+        Scene::StarEntity e = sceneManager.getScene().createEntity();
+
+        Scene::TransformComponent* transform = sceneManager.getScene().addComponent<Scene::TransformComponent>(e);
+        if (!transform) return Serializer::error("ResourceLoader", "processGrids", "Failed to add TransformComponent");
+        transform->pos = pos;
+
+        if (colour) {
+          Scene::ColourComponent* instanceColour = sceneManager.getScene().addComponent<Scene::ColourComponent>(e);
+          if (!instanceColour) return Serializer::error("ResourceLoader", "processGrids", "Failed to add ColourComponent");
+          *instanceColour = *colour;
+        }
+
+        Scene::Model* model = sceneManager.getScene().addComponent<Scene::Model>(e);
+        if (!model) return Serializer::error("Engine", "processGrids", "Failed to add grid instance model: " + sharedName);
+
+        model->name = grid->name + "_instance_" + std::to_string(i);
+        model->meshPath = sharedName;
+        model->meshHandle = sharedMeshHandle;
+        model->useTextures = false;
+
+        for (unsigned ti = 0; ti < Scene::Model::NUM_TEXTURES; ++ti) {
+          model->textureNames[ti].clear();
+          model->textureHandles[ti] = ResourceHandle{ 0 };
+          model->textureMixRatio[ti] = 0.0f;
+        }
+      }
+    }
+
+    return true;
+  }
 }

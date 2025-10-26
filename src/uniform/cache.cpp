@@ -3,8 +3,10 @@
 
 #include <glad/glad.h>
 
-bool Cache::getUniformLocation(int& location, const char* name) const {
-	location = glGetUniformLocation(program, name);
-	if (location < 0) return error("UniformCache", "getUniformLocation", std::string("Could not find uniform: ") + name);
-	return true;
+namespace Starlet::Graphics {
+	bool Cache::getUniformLocation(int& location, const char* name) const {
+		location = glGetUniformLocation(program, name);
+		if (location < 0) return Serializer::error("UniformCache", "getUniformLocation", std::string("Could not find uniform: ") + name);
+		return true;
+	}
 }

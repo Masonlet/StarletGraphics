@@ -1,14 +1,21 @@
 #pragma once
 
-class UniformCache;
-class Scene;
+namespace Starlet {
+	namespace Scene {
+		class Scene;
+	}
 
-class LightRenderer {
-public:
-	LightRenderer(const UniformCache& uc) : uniforms(uc) {}
+	namespace Graphics {
+		class UniformCache;
 
-	void updateLightUniforms(const unsigned int program, const Scene& scene) const;
-	void updateLightCount(const int count) const;
-private:
-	const UniformCache& uniforms;
-};
+		class LightRenderer {
+		public:
+			LightRenderer(const UniformCache& uc) : uniforms(uc) {}
+
+			void updateLightUniforms(const unsigned int program, const Scene::Scene& scene) const;
+			void updateLightCount(const int count) const;
+		private:
+			const UniformCache& uniforms;
+		};
+	}
+}
