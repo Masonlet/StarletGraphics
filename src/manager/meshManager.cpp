@@ -10,9 +10,21 @@ namespace Starlet::Graphics {
 	bool MeshManager::loadAndAddMesh(const std::string& path) {
 		if (exists(path)) return Serializer::debugLog("MeshManager", "addMesh", "Mesh already exists: " + path);
 
-		MeshCPU meshCPU;
-		if(!parser.parse(basePath + path, meshCPU))
+		Serializer::PlyData data;
+		if(!parser.parse(basePath + path, data))
 			return Serializer::error("MeshManager", "loadAndAddMesh", "Could not load mesh from " + path);
+
+		MeshCPU meshCPU;
+		meshCPU.hasColours = data.hasColours;
+		meshCPU.hasNormals = data.hasNormals;
+		meshCPU.hasTexCoords = data.hasTexCoords;
+		meshCPU.numIndices = data.numIndices;
+		meshCPU.numVertices = data.numVertices;
+		meshCPU.numTriangles = data.numTriangles;
+		meshCPU.indices = std::move(data.indices);
+		meshCPU.vertices = std::move(data.vertices);
+		meshCPU.minY = data.minY;
+		meshCPU.maxY = data.maxY;
 
 		MeshGPU meshGPU;
 		if (!handler.upload(meshCPU, meshGPU))
