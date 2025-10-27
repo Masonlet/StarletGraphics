@@ -17,9 +17,16 @@ namespace Starlet::Graphics {
   bool TextureManager::addTexture(const std::string& name, const std::string& path) {
     if (exists(name)) return true;
 
-    TextureCPU cpuTexture;
-    if (!parser.parse(basePath + path, cpuTexture))
+    Serializer::BmpData bmpData;
+    if (!parser.parse(basePath + path, bmpData))
       return Serializer::error("TextureManager", "addTexture", "Failed load: " + basePath + path);
+
+    TextureCPU cpuTexture;
+    cpuTexture.width = bmpData.width;
+    cpuTexture.height = bmpData.height;
+    cpuTexture.pixelSize = bmpData.pixelSize;
+		cpuTexture.byteSize = bmpData.byteSize;
+    cpuTexture.pixels = std::move(bmpData.pixels);
 
     TextureGPU gpuTexture;
     if (!handler.upload(cpuTexture, gpuTexture, true))
@@ -33,9 +40,17 @@ namespace Starlet::Graphics {
     if (exists(name)) return true;
 
     TextureCPU faces[6];
-    for (int i = 0; i < 6; ++i)
-      if (!parser.parse(basePath + facePaths[i], faces[i]))
-        return Serializer::error("TextureLoader", "loadCubeFaces", "Failed to add");
+    for (int i = 0; i < 6; ++i) {
+      Serializer::BmpData bmpData;
+      if (!parser.parse(basePath + facePaths[i], bmpData))
+        return Serializer::error("TextureManager", "addTextureCube", "Failed to load face " + std::to_string(i));
+
+      faces[i].width = bmpData.width;
+      faces[i].height = bmpData.height;
+      faces[i].pixelSize = bmpData.pixelSize;
+      faces[i].byteSize = bmpData.byteSize;
+      faces[i].pixels = std::move(bmpData.pixels);
+    }
 
     TextureGPU cube;
     if (!handler.upload(faces, cube, true))
