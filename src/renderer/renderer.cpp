@@ -45,7 +45,7 @@ namespace Starlet::Graphics {
 
 		modelRenderer.drawOpaqueModels(scene, view.eye);
 		const Scene::Model* skyBoxModel = scene.getComponentByName<Scene::Model>(std::string("skybox"));
-		const Scene::StarEntity skyboxEntity = scene.getEntityByName<Scene::Model>("skybox");
+		const Scene::Entity skyboxEntity = scene.getEntityByName<Scene::Model>("skybox");
 		if (skyBoxModel && skyboxEntity != -1) {
 			const Scene::TransformComponent& skyBoxTransform = scene.getComponent<Scene::TransformComponent>(skyboxEntity);
 			modelRenderer.drawSkybox(*skyBoxModel, skyBoxTransform.size, view.eye);

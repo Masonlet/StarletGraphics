@@ -50,7 +50,7 @@ namespace Starlet {
 			bool loadMeshes(const std::vector<Scene::Model*>& models);
 			bool loadTextures(const std::vector<Scene::TextureData*>& textures);
 
-			bool processTextureConnections(Scene::Scene& scene);
+			bool processTextureConnections(Scene::Scene& scene) const;
 			bool processPrimitives(Scene::SceneManager& sm);
 			bool processGrids(Scene::SceneManager& sm);
 

@@ -126,7 +126,7 @@ namespace Starlet::Graphics {
     return Serializer::debugLog("ResourceLoader", "loadTextures", "Loaded and added " + std::to_string(textures.size()) + " textures");
   }
 
-  bool ResourceManager::processTextureConnections(Scene::Scene& scene) {
+  bool ResourceManager::processTextureConnections(Scene::Scene& scene) const {
     for (Scene::Model* model : scene.getComponentsOfType<Scene::Model>()) {
       if (model->name == "skybox") {
         ResourceHandle handle = getTextureHandle("skybox");
@@ -152,7 +152,7 @@ namespace Starlet::Graphics {
 
   bool ResourceManager::processPrimitives(Scene::SceneManager& sm) {
     for (Scene::Primitive* primitive : sm.getScene().getComponentsOfType<Scene::Primitive>()) {
-      const Scene::StarEntity entity = primitive->id;
+      const Scene::Entity entity = primitive->id;
       if (!sm.getScene().hasComponent<Scene::TransformComponent>(entity))
         return Serializer::error("Engine", "processPrimitives", "Primitive entity has no transform component.");
 
@@ -189,7 +189,7 @@ namespace Starlet::Graphics {
     for (const Scene::Grid* grid : sceneManager.getScene().getComponentsOfType<Scene::Grid>()) {
       std::string sharedName = grid->name + (grid->type == Scene::GridType::Square ? "_sharedSquare" : "_sharedCube");
 
-      const Scene::StarEntity entity = grid->id;
+      const Scene::Entity entity = grid->id;
       if (!sceneManager.getScene().hasComponent<Scene::TransformComponent>(entity))
         return Serializer::error("Engine", "processGrids", "Grid entity has no transform component.");
 
@@ -223,7 +223,7 @@ namespace Starlet::Graphics {
                   grid->spacing * static_cast<float>(row) };
         }
 
-        Scene::StarEntity e = sceneManager.getScene().createEntity();
+        Scene::Entity e = sceneManager.getScene().createEntity();
 
         Scene::TransformComponent* transform = sceneManager.getScene().addComponent<Scene::TransformComponent>(e);
         if (!transform) return Serializer::error("ResourceLoader", "processGrids", "Failed to add TransformComponent");
