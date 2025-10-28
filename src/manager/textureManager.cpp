@@ -1,6 +1,7 @@
 #include "StarletGraphics/manager/textureManager.hpp"
 #include "StarletSerializer/utils/log.hpp"
 
+#include "StarletSerializer/data/bmpData.hpp"
 #include "StarletGraphics/resource/textureCPU.hpp"
 
 namespace Starlet::Graphics {

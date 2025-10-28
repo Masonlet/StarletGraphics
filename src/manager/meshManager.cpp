@@ -1,6 +1,8 @@
 #include "StarletGraphics/manager/meshManager.hpp"
 #include "StarletSerializer/utils/log.hpp"
 
+#include "StarletSerializer/data/plyData.hpp"
+
 namespace Starlet::Graphics {
 	MeshManager::~MeshManager() {
 		for (std::map<std::string, MeshGPU>::iterator it = pathToGPUMeshes.begin(); it != pathToGPUMeshes.end(); ++it)
