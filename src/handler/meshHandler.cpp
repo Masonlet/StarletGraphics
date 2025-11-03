@@ -1,5 +1,5 @@
 #include "StarletGraphics/handler/meshHandler.hpp"
-#include "StarletSerializer/utils/log.hpp"
+#include "StarletLogger/logger.hpp"
 
 #include "StarletGraphics/resource/meshCPU.hpp"
 #include "StarletGraphics/resource/meshGPU.hpp"
@@ -8,7 +8,7 @@
 
 namespace Starlet::Graphics {
   bool MeshHandler::upload(MeshCPU& meshData, MeshGPU& meshOut) {
-    if (meshData.empty()) return Serializer::error("MeshHandler", "upload", "Invalid mesh data");
+    if (meshData.empty()) return Logger::error("MeshHandler", "upload", "Invalid mesh data");
 
     meshOut.numVertices = meshData.numVertices;
     meshOut.numIndices = meshData.numIndices;
@@ -43,7 +43,7 @@ namespace Starlet::Graphics {
     glBindVertexArray(0);
 
     GLenum err = glGetError();
-    if (err != GL_NO_ERROR) return Serializer::error("MeshHandler", "upload", "OpenGL error " + std::to_string(err));
+    if (err != GL_NO_ERROR) return Logger::error("MeshHandler", "upload", "OpenGL error " + std::to_string(err));
 
     meshData.vertices.clear();
     meshData.indices.clear();

@@ -1,5 +1,5 @@
 #include "StarletGraphics/manager/shaderManager.hpp"
-#include "StarletSerializer/utils/log.hpp"
+#include "StarletLogger/logger.hpp"
 
 #include "StarletGraphics/resource/shaderCPU.hpp"
 
@@ -20,10 +20,10 @@ namespace Starlet::Graphics {
 
 		ShaderCPU cpu;
 		if (!parser.loadFile(cpu.vertexSource, basePath + vertPath))
-			return Serializer::error("ShaderLoader", "createProgramFromPaths", "Failed to load vertex shader source");
+			return Logger::error("ShaderLoader", "createProgramFromPaths", "Failed to load vertex shader source");
 
 		if (!parser.loadFile(cpu.fragmentSource, basePath + fragPath))
-			return Serializer::error("ShaderLoader", "createProgramFromPaths", "Failed to load fragment shader source");
+			return Logger::error("ShaderLoader", "createProgramFromPaths", "Failed to load fragment shader source");
 
 		cpu.vertexPath = vertPath;
 		cpu.fragmentPath = fragPath;
@@ -31,7 +31,7 @@ namespace Starlet::Graphics {
 
 		ShaderGPU gpu;
 		if (!handler.upload(cpu, gpu))
-			return Serializer::error("ShaderManager", "createProgramFromPaths", "Failed to upload shader");
+			return Logger::error("ShaderManager", "createProgramFromPaths", "Failed to upload shader");
 
 		nameToShaders[name] = std::move(gpu);
 		return true;
@@ -44,13 +44,13 @@ namespace Starlet::Graphics {
 
 	bool ShaderManager::getShader(const std::string& name, ShaderGPU*& dataOut) {
 		std::map<std::string, ShaderGPU>::iterator it = nameToShaders.find(name);
-		if (it == nameToShaders.end()) return Serializer::error("ShaderManager", "getShader", "Shader not found: " + name);
+		if (it == nameToShaders.end()) return Logger::error("ShaderManager", "getShader", "Shader not found: " + name);
 		dataOut = &it->second;
 		return true;
 	}
 	bool ShaderManager::getShader(const std::string& name, const ShaderGPU*& dataOut) const {
 		std::map<std::string, ShaderGPU>::const_iterator it = nameToShaders.find(name);
-		if (it == nameToShaders.end()) return Serializer::error("ShaderManager", "getShader", "Shader not found: " + name);
+		if (it == nameToShaders.end()) return Logger::error("ShaderManager", "getShader", "Shader not found: " + name);
 		dataOut = &it->second;
 		return true;
 	}

@@ -1,5 +1,5 @@
 #include "StarletGraphics/renderer/modelRenderer.hpp"
-#include "StarletSerializer/utils/log.hpp"
+#include "StarletLogger/logger.hpp"
 
 #include "StarletGraphics/uniform/uniformCache.hpp"
 #include "StarletGraphics/manager/resourceManager.hpp"
@@ -57,11 +57,11 @@ namespace Starlet::Graphics {
 
 		const MeshCPU* cpuMesh = resourceManager.getMeshCPU(instance.meshHandle);
 		if (!cpuMesh) 
-			return Serializer::error("ModelRenderer", "drawModel", "Invalid CPU mesh handle for: " + instance.meshPath);
+			return Logger::error("ModelRenderer", "drawModel", "Invalid CPU mesh handle for: " + instance.meshPath);
 
 		const MeshGPU* gpuMesh = resourceManager.getMeshGPU(instance.meshHandle);
 		if (!gpuMesh) 
-			return Serializer::error("ModelRenderer", "drawModel", "Invalid GPU mesh handle for: " + instance.meshPath);
+			return Logger::error("ModelRenderer", "drawModel", "Invalid GPU mesh handle for: " + instance.meshPath);
 
 		updateModelUniforms(instance, *cpuMesh, transform, colour);
 		const ModelUL& modelUL = uniforms.getModelCache().getModelUL();
@@ -75,7 +75,7 @@ namespace Starlet::Graphics {
 
 				unsigned int textureID = resourceManager.getTextureID(instance.textureHandles[i]);
 				if (textureID == 0) 
-					return Serializer::error("ModelRenderer", "drawModel", "Invalid texture handle for slot " + std::to_string(i) + " in model: " + instance.name);
+					return Logger::error("ModelRenderer", "drawModel", "Invalid texture handle for slot " + std::to_string(i) + " in model: " + instance.name);
 
 				glActiveTexture(GL_TEXTURE0 + static_cast<unsigned int>(i));
 				glBindTexture(GL_TEXTURE_2D, textureID);
@@ -104,10 +104,10 @@ namespace Starlet::Graphics {
 
 				if (colour.colour.w < 1.0f) continue;
 				if (!drawModel(*model, transform, colour))
-					return Serializer::error("Renderer", "drawModels", "Failed to draw opaque model");
+					return Logger::error("Renderer", "drawModels", "Failed to draw opaque model");
 			}
 			else if (!drawModel(*model, transform, {}))
-				return Serializer::error("Renderer", "drawModels", "Failed to draw opaque model");
+				return Logger::error("Renderer", "drawModels", "Failed to draw opaque model");
 		}
 
 		return true;
@@ -146,7 +146,7 @@ namespace Starlet::Graphics {
 
 		for (const auto& [model, transform, colour] : transparentInstances)
 			if (!drawModel(*model, *transform, *colour))
-				return Serializer::error("Renderer", "drawModels", "Failed to draw transparent model");
+				return Logger::error("Renderer", "drawModels", "Failed to draw transparent model");
 
 		return true;
 	}
@@ -160,7 +160,7 @@ namespace Starlet::Graphics {
 
 		if (skybox.textureHandles[0].isValid())
 			bindSkyboxTexture(resourceManager.getTextureID(skybox.textureHandles[0]));
-		else return Serializer::error("ModelRenderer", "drawSkybox", "Skybox has no valid texture handle");
+		else return Logger::error("ModelRenderer", "drawSkybox", "Skybox has no valid texture handle");
 
 		drawModel(tempSkybox, { cameraPos, { 0.0f, 0.0f, 0.0f }, skyboxSize }, {});
 		setModelIsSkybox(false);

@@ -1,9 +1,9 @@
 #include "StarletGraphics/uniform/uniformCache.hpp"
-#include "StarletSerializer/utils/log.hpp"
+#include "StarletLogger/logger.hpp"
 
 namespace Starlet::Graphics {
 	bool UniformCache::setProgram(unsigned int programID) {
-		if (programID == 0) return Serializer::error("UniformCache", "setProgram", "Program ID is 0");
+		if (programID == 0) return Logger::error("UniformCache", "setProgram", "Program ID is 0");
 
 		program = programID;
 		modelCache.setProgram(programID);
@@ -12,7 +12,7 @@ namespace Starlet::Graphics {
 		return true;
 	}
 	bool UniformCache::cacheAllLocations() {
-		if (program == 0) return Serializer::error("UniformCache", "cacheAllLocations", "Program ID is 0");
+		if (program == 0) return Logger::error("UniformCache", "cacheAllLocations", "Program ID is 0");
 
 		bool ok = true;
 		ok &= cameraCache.cacheLocations();

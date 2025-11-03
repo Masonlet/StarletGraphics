@@ -1,5 +1,5 @@
 #include "StarletGraphics/manager/resourceManager.hpp"
-#include "StarletSerializer/utils/log.hpp"
+#include "StarletLogger/logger.hpp"
 
 #include "StarletScene/manager/sceneManager.hpp"
 #include "StarletScene/component/primitive.hpp"
@@ -89,15 +89,15 @@ namespace Starlet::Graphics {
   bool ResourceManager::loadMeshes(const std::vector<Scene::Model*>& models) {
     for (Scene::Model* model : models) {
       if (!meshManager.loadAndAddMesh(model->meshPath))
-        return Serializer::error("ResourceLoader", "loadMeshes", "Failed to load/add mesh: " + model->meshPath);
+        return Logger::error("ResourceLoader", "loadMeshes", "Failed to load/add mesh: " + model->meshPath);
 
       model->meshHandle = addMesh(model->meshPath);
 
       if (!model->meshHandle.isValid())
-        return Serializer::error("ResourceLoader", "loadMeshes", "Failed to register mesh: " + model->meshPath);
+        return Logger::error("ResourceLoader", "loadMeshes", "Failed to register mesh: " + model->meshPath);
     }
 
-    return Serializer::debugLog("ResourceLoader", "loadMeshes", "Loaded and registered " + std::to_string(models.size()) + " meshes");
+    return Logger::debugLog("ResourceLoader", "loadMeshes", "Loaded and registered " + std::to_string(models.size()) + " meshes");
   }
   bool ResourceManager::loadTextures(const std::vector<Scene::TextureData*>& textures) {
     for (const Scene::TextureData* texture : textures) {
@@ -105,32 +105,32 @@ namespace Starlet::Graphics {
 
       if (!texture->isCube) {
         if (!textureManager.addTexture(texture->name, texture->faces[0]))
-          return Serializer::error("ResourceLoader", "loadTextures", "Failed to load 2D texture: " + texture->name);
+          return Logger::error("ResourceLoader", "loadTextures", "Failed to load 2D texture: " + texture->name);
 
         textureID = textureManager.getTextureID(texture->name);
       }
       else {
         if (!textureManager.addTextureCube(texture->name, texture->faces))
-          return Serializer::error("ResourceLoader", "loadTextures", "Failed to load cube map: " + texture->name);
+          return Logger::error("ResourceLoader", "loadTextures", "Failed to load cube map: " + texture->name);
 
         textureID = textureManager.getTextureID(texture->name);
       }
 
-      if (textureID == 0) return Serializer::error("ResourceLoader", "loadTextures", "Failed to get texture ID for: " + texture->name);
+      if (textureID == 0) return Logger::error("ResourceLoader", "loadTextures", "Failed to get texture ID for: " + texture->name);
 
       ResourceHandle handle = addTexture(texture->name, textureID);
       if (!handle.isValid())
-        return Serializer::error("ResourceLoader", "loadTextures", "Failed to add texture: " + texture->name);
+        return Logger::error("ResourceLoader", "loadTextures", "Failed to add texture: " + texture->name);
     }
 
-    return Serializer::debugLog("ResourceLoader", "loadTextures", "Loaded and added " + std::to_string(textures.size()) + " textures");
+    return Logger::debugLog("ResourceLoader", "loadTextures", "Loaded and added " + std::to_string(textures.size()) + " textures");
   }
 
   bool ResourceManager::processTextureConnections(Scene::Scene& scene) const {
     for (Scene::Model* model : scene.getComponentsOfType<Scene::Model>()) {
       if (model->name == "skybox") {
         ResourceHandle handle = getTextureHandle("skybox");
-        if (!handle.isValid()) return Serializer::error("ResourceLoader", "processTextureConnection", "Failed to get skybox texture handle");
+        if (!handle.isValid()) return Logger::error("ResourceLoader", "processTextureConnection", "Failed to get skybox texture handle");
 
         model->textureHandles[0] = handle;
         continue;
@@ -143,7 +143,7 @@ namespace Starlet::Graphics {
         model->textureHandles[i] = getTextureHandle(model->textureNames[i]);
 
         if (!model->textureHandles[i].isValid())
-          return Serializer::error("ResourceLoader", "processTextureConnection", "Invalid texture handle for: " + model->textureNames[i]);
+          return Logger::error("ResourceLoader", "processTextureConnection", "Invalid texture handle for: " + model->textureNames[i]);
       }
     }
 
@@ -154,7 +154,7 @@ namespace Starlet::Graphics {
     for (Scene::Primitive* primitive : sm.getScene().getComponentsOfType<Scene::Primitive>()) {
       const Scene::Entity entity = primitive->id;
       if (!sm.getScene().hasComponent<Scene::TransformComponent>(entity))
-        return Serializer::error("Engine", "processPrimitives", "Primitive entity has no transform component.");
+        return Logger::error("Engine", "processPrimitives", "Primitive entity has no transform component.");
 
       const Scene::TransformComponent& transform = sm.getScene().getComponent<Scene::TransformComponent>(entity);
 
@@ -165,10 +165,10 @@ namespace Starlet::Graphics {
 
       const Scene::ColourComponent defaultColour{};
       if (!meshFactory.createPrimitiveMesh(*primitive, transform, colour ? *colour : defaultColour))
-        return Serializer::error("ResourceLoader", "processPrimitives", "Failed to create mesh for primitive: " + primitive->name);
+        return Logger::error("ResourceLoader", "processPrimitives", "Failed to create mesh for primitive: " + primitive->name);
 
       Scene::Model* model = sm.getScene().addComponent<Scene::Model>(entity);
-      if (!model) return Serializer::error("Engine", "processPrimitives", "Failed to create model component for primitive: " + primitive->name);
+      if (!model) return Logger::error("Engine", "processPrimitives", "Failed to create model component for primitive: " + primitive->name);
 
       model->name = primitive->name;
       model->meshPath = primitive->name;
@@ -191,7 +191,7 @@ namespace Starlet::Graphics {
 
       const Scene::Entity entity = grid->id;
       if (!sceneManager.getScene().hasComponent<Scene::TransformComponent>(entity))
-        return Serializer::error("Engine", "processGrids", "Grid entity has no transform component.");
+        return Logger::error("Engine", "processGrids", "Grid entity has no transform component.");
 
       const Scene::TransformComponent& gridTransform = sceneManager.getScene().getComponent<Scene::TransformComponent>(entity);
 
@@ -202,7 +202,7 @@ namespace Starlet::Graphics {
 
       const Scene::ColourComponent defaultColour{};
       if (!meshFactory.createGridMesh(*grid, sharedName, gridTransform, colour ? *colour : defaultColour))
-        return Serializer::error("ResourceLoader", "processGrids", "Failed to create mesh for: " + sharedName);
+        return Logger::error("ResourceLoader", "processGrids", "Failed to create mesh for: " + sharedName);
 
       ResourceHandle sharedMeshHandle = addMesh(sharedName);
 
@@ -226,17 +226,17 @@ namespace Starlet::Graphics {
         Scene::Entity e = sceneManager.getScene().createEntity();
 
         Scene::TransformComponent* transform = sceneManager.getScene().addComponent<Scene::TransformComponent>(e);
-        if (!transform) return Serializer::error("ResourceLoader", "processGrids", "Failed to add TransformComponent");
+        if (!transform) return Logger::error("ResourceLoader", "processGrids", "Failed to add TransformComponent");
         transform->pos = pos;
 
         if (colour) {
           Scene::ColourComponent* instanceColour = sceneManager.getScene().addComponent<Scene::ColourComponent>(e);
-          if (!instanceColour) return Serializer::error("ResourceLoader", "processGrids", "Failed to add ColourComponent");
+          if (!instanceColour) return Logger::error("ResourceLoader", "processGrids", "Failed to add ColourComponent");
           *instanceColour = *colour;
         }
 
         Scene::Model* model = sceneManager.getScene().addComponent<Scene::Model>(e);
-        if (!model) return Serializer::error("Engine", "processGrids", "Failed to add grid instance model: " + sharedName);
+        if (!model) return Logger::error("Engine", "processGrids", "Failed to add grid instance model: " + sharedName);
 
         model->name = grid->name + "_instance_" + std::to_string(i);
         model->meshPath = sharedName;

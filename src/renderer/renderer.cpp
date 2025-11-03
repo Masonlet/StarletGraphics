@@ -2,7 +2,7 @@
 #include "StarletGraphics/manager/textureManager.hpp"
 #include "StarletGraphics/manager/meshManager.hpp"
 #include "StarletGraphics/manager/shaderManager.hpp"
-#include "StarletSerializer/utils/log.hpp"
+#include "StarletLogger/logger.hpp"
 
 #include "StarletScene/scene.hpp"
 #include "StarletScene/component/camera.hpp"
@@ -16,10 +16,10 @@
 namespace Starlet::Graphics {
 	bool Renderer::init(const unsigned int program) {
 		if (!uniforms.setProgram(program))
-			return Serializer::error("Renderer", "init", "Failed to set UniformCache program");
+			return Logger::error("Renderer", "init", "Failed to set UniformCache program");
 
 		if (!uniforms.cacheAllLocations())
-			return Serializer::error("Renderer", "init", "Failed to cache uniform locations");
+			return Logger::error("Renderer", "init", "Failed to cache uniform locations");
 
 		return true;
 	}

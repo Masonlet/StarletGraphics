@@ -1,5 +1,5 @@
 #include "StarletGraphics/manager/meshManager.hpp"
-#include "StarletSerializer/utils/log.hpp"
+#include "StarletLogger/logger.hpp"
 
 #include "StarletSerializer/data/plyData.hpp"
 
@@ -10,11 +10,11 @@ namespace Starlet::Graphics {
 	}
 
 	bool MeshManager::loadAndAddMesh(const std::string& path) {
-		if (exists(path)) return Serializer::debugLog("MeshManager", "addMesh", "Mesh already exists: " + path);
+		if (exists(path)) return Logger::debugLog("MeshManager", "addMesh", "Mesh already exists: " + path);
 
 		Serializer::PlyData data;
 		if(!parser.parse(basePath + path, data))
-			return Serializer::error("MeshManager", "loadAndAddMesh", "Could not load mesh from " + path);
+			return Logger::error("MeshManager", "loadAndAddMesh", "Could not load mesh from " + path);
 
 		MeshCPU meshCPU;
 		meshCPU.hasColours = data.hasColours;
@@ -30,23 +30,23 @@ namespace Starlet::Graphics {
 
 		MeshGPU meshGPU;
 		if (!handler.upload(meshCPU, meshGPU))
-			return Serializer::error("MeshManager", "loadAndAddMesh", "Could not upload mesh from: " + path);
+			return Logger::error("MeshManager", "loadAndAddMesh", "Could not upload mesh from: " + path);
 
 		pathToGPUMeshes[path] = std::move(meshGPU);
 		pathToCPUMeshes[path] = std::move(meshCPU);
-		return Serializer::debugLog("MeshManager", "addMesh", "Added mesh: " + path);
+		return Logger::debugLog("MeshManager", "addMesh", "Added mesh: " + path);
 	}
 	bool MeshManager::addMesh(const std::string& path, MeshCPU& meshCPU) {
 		if (exists(path)) return true;
-		if (meshCPU.empty()) return Serializer::error("MeshManager", "addMesh", "Trying to add an empty mesh");
+		if (meshCPU.empty()) return Logger::error("MeshManager", "addMesh", "Trying to add an empty mesh");
 
 		MeshGPU meshGPU;
 		if(!handler.upload(meshCPU, meshGPU))
-			return Serializer::error("MeshManager", "addMesh", "Could not upload mesh from: " + path);
+			return Logger::error("MeshManager", "addMesh", "Could not upload mesh from: " + path);
 
 		pathToGPUMeshes[path] = std::move(meshGPU);
 		pathToCPUMeshes[path] = std::move(meshCPU);
-		return Serializer::debugLog("MeshManager", "addMesh", "Added mesh: " + path);
+		return Logger::debugLog("MeshManager", "addMesh", "Added mesh: " + path);
 	}
 
 	MeshGPU* MeshManager::getMeshGPU(const std::string& name) {

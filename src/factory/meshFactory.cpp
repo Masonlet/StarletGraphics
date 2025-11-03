@@ -1,6 +1,6 @@
 #include "StarletGraphics/factory/meshFactory.hpp"
 #include "StarletGraphics/manager/meshManager.hpp"
-#include "StarletSerializer/utils/log.hpp"
+#include "StarletLogger/logger.hpp"
 
 #include "StarletGraphics/resource/meshCPU.hpp"
 
@@ -19,7 +19,7 @@ namespace Starlet::Graphics {
     case Scene::PrimitiveType::Cube:
       return createCube(primitive.name, transform.size, colour.colour);
     default:
-      return Serializer::error("Renderer", "createPrimitiveMesh", "Invalid primitive: " + primitive.name);
+      return Logger::error("Renderer", "createPrimitiveMesh", "Invalid primitive: " + primitive.name);
     }
   }
 
@@ -30,7 +30,7 @@ namespace Starlet::Graphics {
     case Scene::GridType::Cube:
       return createCube(meshName, transform.size, colour.colour);
     default:
-      return Serializer::error("Renderer", "createGridMesh", "Invalid grid: " + grid.name + ", mesh: " + meshName);
+      return Logger::error("Renderer", "createGridMesh", "Invalid grid: " + grid.name + ", mesh: " + meshName);
     }
   }
 
@@ -52,8 +52,8 @@ namespace Starlet::Graphics {
     info.indices[2] = 2;
 
     return meshManager.addMesh(name, info)
-      ? Serializer::debugLog("Primitive", "createTriangle", "Added triangle: " + name)
-      : Serializer::error("Primitive", "createTriangle", "Failed to create triangle " + name);
+      ? Logger::debugLog("Primitive", "createTriangle", "Added triangle: " + name)
+      : Logger::error("Primitive", "createTriangle", "Failed to create triangle " + name);
   }
 
   bool MeshFactory::createSquare(const std::string& name, const Math::Vec2<float>& size, const Math::Vec4<float>& vertexColour) {
@@ -84,8 +84,8 @@ namespace Starlet::Graphics {
     }
 
     return meshManager.addMesh(name, info)
-      ? Serializer::debugLog("Primitive", "createSquare", "Added square: " + name)
-      : Serializer::error("Primitive", "createSquare", "Failed to create square " + name);
+      ? Logger::debugLog("Primitive", "createSquare", "Added square: " + name)
+      : Logger::error("Primitive", "createSquare", "Failed to create square " + name);
   }
 
   bool MeshFactory::createCube(const std::string& name, const Math::Vec3<float>& size, const Math::Vec4<float>& vertexColour) {
@@ -128,7 +128,7 @@ namespace Starlet::Graphics {
     }
 
     return meshManager.addMesh(name, info)
-      ? Serializer::debugLog("Primitive", "createCube", "Added cube: " + name)
-      : Serializer::error("Primitive", "createCube", "Failed to create cube " + name);
+      ? Logger::debugLog("Primitive", "createCube", "Added cube: " + name)
+      : Logger::error("Primitive", "createCube", "Failed to create cube " + name);
   }
 }

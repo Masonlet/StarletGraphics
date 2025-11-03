@@ -1,5 +1,5 @@
 #include "StarletGraphics/handler/textureHandler.hpp"
-#include "StarletSerializer/utils/log.hpp"
+#include "StarletLogger/logger.hpp"
 
 #include "StarletGraphics/resource/textureCPU.hpp"
 #include "StarletGraphics/resource/textureGPU.hpp"
@@ -12,7 +12,7 @@ namespace Starlet::Graphics {
   }
   bool TextureHandler::upload(TextureCPU& cpuTexture, TextureGPU& gpuTexture, bool generateMIPMap) {
     if (cpuTexture.empty()) 
-      return Serializer::error("TextureHandler", "upload", "Attempting to upload empty Texture");
+      return Logger::error("TextureHandler", "upload", "Attempting to upload empty Texture");
 
     glGenTextures(1, &gpuTexture.id);
     glBindTexture(GL_TEXTURE_2D, gpuTexture.id);
@@ -32,7 +32,7 @@ namespace Starlet::Graphics {
     GLenum err = glGetError();
     if (err != GL_NO_ERROR) {
       if (gpuTexture.id) glDeleteTextures(1, &gpuTexture.id);
-      return Serializer::error("TextureHandler", "upload", "OpenGL error " + std::to_string(err));
+      return Logger::error("TextureHandler", "upload", "OpenGL error " + std::to_string(err));
     }
 
     cpuTexture.freePixels();
@@ -46,7 +46,7 @@ namespace Starlet::Graphics {
     const uint8_t bpp = faces[0].pixelSize;
     for (int i = 0; i < 6; ++i)
       if (faces[i].pixels.empty() || faces[i].width != w || faces[i].height != h || faces[i].pixelSize != bpp)
-        return Serializer::error("TextureHandler", "upload", "Inconsistent cube faces");
+        return Logger::error("TextureHandler", "upload", "Inconsistent cube faces");
 
     glGenTextures(1, &cubeOut.id);
     glBindTexture(GL_TEXTURE_CUBE_MAP, cubeOut.id);
@@ -74,7 +74,7 @@ namespace Starlet::Graphics {
     GLenum err = glGetError();
     if (err != GL_NO_ERROR) {
       if (cubeOut.id) glDeleteTextures(1, &cubeOut.id);
-      return Serializer::error("TextureHandler", "upload", "OpenGL error " + std::to_string(err));
+      return Logger::error("TextureHandler", "upload", "OpenGL error " + std::to_string(err));
     }
 
     for (int i = 0; i < 6; ++i)

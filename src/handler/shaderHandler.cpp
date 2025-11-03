@@ -1,5 +1,5 @@
 #include "StarletGraphics/handler/shaderHandler.hpp"
-#include "StarletSerializer/utils/log.hpp"
+#include "StarletLogger/logger.hpp"
 
 #include "StarletGraphics/resource/shaderGPU.hpp"
 #include "StarletGraphics/resource/shaderCPU.hpp"
@@ -8,7 +8,7 @@
 
 namespace Starlet::Graphics {
 	bool ShaderHandler::upload(ShaderCPU& cpu, ShaderGPU& gpu) {
-		if (cpu.empty()) return Serializer::error("ShaderHandler", "upload", "Attempting to upload empty Shader");
+		if (cpu.empty()) return Logger::error("ShaderHandler", "upload", "Attempting to upload empty Shader");
 
 		if (!compileShader(gpu.vertexID, GL_VERTEX_SHADER, cpu.vertexSource)) return false;
 		if (!compileShader(gpu.fragmentID, GL_FRAGMENT_SHADER, cpu.fragmentSource)) {
@@ -28,7 +28,7 @@ namespace Starlet::Graphics {
 
 	bool ShaderHandler::compileShader(unsigned int& outShaderID, int glShaderType, const std::string& source) {
 		outShaderID = glCreateShader(static_cast<GLenum>(glShaderType));
-		if (!outShaderID) return Serializer::error("ShaderHandler", "compileShader", "glCreateShader failed");
+		if (!outShaderID) return Logger::error("ShaderHandler", "compileShader", "glCreateShader failed");
 
 		const char* src = source.c_str();
 		glShaderSource(outShaderID, 1, &src, nullptr);
@@ -56,12 +56,12 @@ namespace Starlet::Graphics {
 			(glShaderType == GL_VERTEX_SHADER ? "VERTEX"
 				: glShaderType == GL_FRAGMENT_SHADER ? "FRAGMENT"
 				: "UNKNOWN");
-		return Serializer::error("ShaderHandler", "compileShader", "Shader compilation failed (type=" + shaderType + "):\n" + log);
+		return Logger::error("ShaderHandler", "compileShader", "Shader compilation failed (type=" + shaderType + "):\n" + log);
 	}
 
 	bool ShaderHandler::linkProgram(unsigned int& outProgramID, unsigned int vertID, unsigned int fragID) {
 		outProgramID = glCreateProgram();
-		if (!outProgramID) return Serializer::error("ShaderHandler", "linkProgram", "glCreateProgram failed");
+		if (!outProgramID) return Logger::error("ShaderHandler", "linkProgram", "glCreateProgram failed");
 
 		glAttachShader(outProgramID, vertID);
 		glAttachShader(outProgramID, fragID);
@@ -88,7 +88,7 @@ namespace Starlet::Graphics {
 
 		glDeleteProgram(outProgramID);
 		outProgramID = 0;
-		return Serializer::error("ShaderHandler", "linkProgram", std::string("Program link failed:\n") + log);
+		return Logger::error("ShaderHandler", "linkProgram", std::string("Program link failed:\n") + log);
 	}
 
 	void ShaderHandler::unload(ShaderGPU& shader) {

@@ -1,5 +1,5 @@
 #include "StarletGraphics/manager/textureManager.hpp"
-#include "StarletSerializer/utils/log.hpp"
+#include "StarletLogger/logger.hpp"
 
 #include "StarletSerializer/data/bmpData.hpp"
 #include "StarletGraphics/resource/textureCPU.hpp"
@@ -20,7 +20,7 @@ namespace Starlet::Graphics {
 
     Serializer::BmpData bmpData;
     if (!parser.parse(basePath + path, bmpData))
-      return Serializer::error("TextureManager", "addTexture", "Failed load: " + basePath + path);
+      return Logger::error("TextureManager", "addTexture", "Failed load: " + basePath + path);
 
     TextureCPU cpuTexture;
     cpuTexture.width = bmpData.width;
@@ -31,10 +31,10 @@ namespace Starlet::Graphics {
 
     TextureGPU gpuTexture;
     if (!handler.upload(cpuTexture, gpuTexture, true))
-      return Serializer::error("TextureManager", "addTexture", "Failed upload: " + name);
+      return Logger::error("TextureManager", "addTexture", "Failed upload: " + name);
 
     nameToGPUTextures[name] = std::move(gpuTexture);
-    return Serializer::debugLog("TextureManager", "addTexture", "Added texture: " + name + " at: " + path);
+    return Logger::debugLog("TextureManager", "addTexture", "Added texture: " + name + " at: " + path);
   }
 
   bool TextureManager::addTextureCube(const std::string& name, const std::string(&facePaths)[6]) {
@@ -44,7 +44,7 @@ namespace Starlet::Graphics {
     for (int i = 0; i < 6; ++i) {
       Serializer::BmpData bmpData;
       if (!parser.parse(basePath + facePaths[i], bmpData))
-        return Serializer::error("TextureManager", "addTextureCube", "Failed to load face " + std::to_string(i));
+        return Logger::error("TextureManager", "addTextureCube", "Failed to load face " + std::to_string(i));
 
       faces[i].width = bmpData.width;
       faces[i].height = bmpData.height;
@@ -55,9 +55,9 @@ namespace Starlet::Graphics {
 
     TextureGPU cube;
     if (!handler.upload(faces, cube, true))
-      return Serializer::error("TextureManager", "addCubeTexture", "Failed to upload: " + name);
+      return Logger::error("TextureManager", "addCubeTexture", "Failed to upload: " + name);
 
     nameToGPUTextures[name] = std::move(cube);
-    return Serializer::debugLog("TextureManager", "addTextureCube", "Added texture cube: " + name);
+    return Logger::debugLog("TextureManager", "addTextureCube", "Added texture cube: " + name);
   }
 }
