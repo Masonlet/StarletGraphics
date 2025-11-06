@@ -3,7 +3,7 @@
 #include "StarletGraphics/manager/manager.hpp"
 #include "StarletGraphics/resource/textureGPU.hpp"
 
-#include "StarletSerializer/parser/bmpParser.hpp"
+#include "StarletSerializer/parser/image/bmpParser.hpp"
 #include "StarletGraphics/handler/textureHandler.hpp"
 
 #include <map>

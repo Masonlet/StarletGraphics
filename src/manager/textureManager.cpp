@@ -1,7 +1,7 @@
 #include "StarletGraphics/manager/textureManager.hpp"
 #include "StarletLogger/logger.hpp"
 
-#include "StarletSerializer/data/bmpData.hpp"
+#include "StarletSerializer/data/imageData.hpp"
 #include "StarletGraphics/resource/textureCPU.hpp"
 
 namespace Starlet::Graphics {
@@ -18,7 +18,7 @@ namespace Starlet::Graphics {
   bool TextureManager::addTexture(const std::string& name, const std::string& path) {
     if (exists(name)) return true;
 
-    Serializer::BmpData bmpData;
+    Serializer::ImageData bmpData;
     if (!parser.parse(basePath + path, bmpData))
       return Logger::error("TextureManager", "addTexture", "Failed load: " + basePath + path);
 
@@ -42,7 +42,7 @@ namespace Starlet::Graphics {
 
     TextureCPU faces[6];
     for (int i = 0; i < 6; ++i) {
-      Serializer::BmpData bmpData;
+      Serializer::ImageData bmpData;
       if (!parser.parse(basePath + facePaths[i], bmpData))
         return Logger::error("TextureManager", "addTextureCube", "Failed to load face " + std::to_string(i));
 
