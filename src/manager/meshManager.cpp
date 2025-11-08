@@ -1,7 +1,7 @@
 #include "StarletGraphics/manager/meshManager.hpp"
 #include "StarletLogger/logger.hpp"
 
-#include "StarletSerializer/data/plyData.hpp"
+#include "StarletSerializer/data/meshData.hpp"
 
 namespace Starlet::Graphics {
 	MeshManager::~MeshManager() {
@@ -12,7 +12,7 @@ namespace Starlet::Graphics {
 	bool MeshManager::loadAndAddMesh(const std::string& path) {
 		if (exists(path)) return Logger::debugLog("MeshManager", "addMesh", "Mesh already exists: " + path);
 
-		Serializer::PlyData data;
+		Serializer::MeshData data;
 		if(!parser.parse(basePath + path, data))
 			return Logger::error("MeshManager", "loadAndAddMesh", "Could not load mesh from " + path);
 

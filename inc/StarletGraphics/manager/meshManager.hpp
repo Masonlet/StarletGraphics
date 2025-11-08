@@ -5,7 +5,7 @@
 #include "StarletGraphics/resource/meshCPU.hpp"
 #include "StarletGraphics/resource/meshGPU.hpp"
 
-#include "StarletSerializer/parser/plyParser.hpp"
+#include "StarletSerializer/parser/meshParser.hpp"
 
 #include <map>
 
@@ -28,7 +28,7 @@ namespace Starlet::Graphics {
 		const MeshGPU* getMeshGPU(const std::string& path) const;
 
 	private:
-		Serializer::PlyParser parser;
+		Serializer::MeshParser parser;
 		MeshHandler handler;
 		std::map<std::string, MeshCPU> pathToCPUMeshes;
 		std::map<std::string, MeshGPU> pathToGPUMeshes;
