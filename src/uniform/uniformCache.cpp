@@ -1,5 +1,5 @@
-#include "StarletGraphics/uniform/uniformCache.hpp"
-#include "StarletLogger/logger.hpp"
+#include "starlet-graphics/uniform/uniformCache.hpp"
+#include "starlet-logger/logger.hpp"
 
 namespace Starlet::Graphics {
 	bool UniformCache::setProgram(unsigned int programID) {

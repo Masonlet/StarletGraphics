@@ -1,8 +1,8 @@
-#include "StarletGraphics/manager/textureManager.hpp"
-#include "StarletLogger/logger.hpp"
+#include "starlet-graphics/manager/textureManager.hpp"
+#include "starlet-logger/logger.hpp"
 
-#include "StarletSerializer/data/imageData.hpp"
-#include "StarletGraphics/resource/textureCPU.hpp"
+#include "starlet-serializer/data/imageData.hpp"
+#include "starlet-graphics/resource/textureCPU.hpp"
 
 namespace Starlet::Graphics {
   TextureManager::~TextureManager() {

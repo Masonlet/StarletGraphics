@@ -1,6 +1,6 @@
 #pragma once
 
-#include "StarletGraphics/uniform/cache.hpp"
+#include "starlet-graphics/uniform/cache.hpp"
 
 namespace Starlet::Graphics {
 	class CameraCache : public Cache {

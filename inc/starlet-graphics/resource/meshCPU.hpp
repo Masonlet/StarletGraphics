@@ -1,8 +1,8 @@
 #pragma once
 
-#include "StarletGraphics/resource/resourceCPU.hpp"
+#include "starlet-graphics/resource/resourceCPU.hpp"
 
-#include "StarletMath/vertex.hpp"
+#include "starlet-math/vertex.hpp"
 #include <vector>
 
 namespace Starlet::Graphics {

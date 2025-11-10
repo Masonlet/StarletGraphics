@@ -1,6 +1,6 @@
 #pragma once
 
-#include "StarletGraphics/handler/resourceHandler.hpp"
+#include "starlet-graphics/handler/resourceHandler.hpp"
 
 namespace Starlet::Graphics {
 	struct MeshCPU;

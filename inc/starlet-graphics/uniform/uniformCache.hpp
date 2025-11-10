@@ -1,8 +1,8 @@
 #pragma once
 
-#include "StarletGraphics/uniform/modelCache.hpp"
-#include "StarletGraphics/uniform/lightCache.hpp"
-#include "StarletGraphics/uniform/cameraCache.hpp"
+#include "starlet-graphics/uniform/modelCache.hpp"
+#include "starlet-graphics/uniform/lightCache.hpp"
+#include "starlet-graphics/uniform/cameraCache.hpp"
 
 namespace Starlet::Graphics {
 	class UniformCache {

@@ -1,8 +1,8 @@
-#include "StarletGraphics/handler/meshHandler.hpp"
-#include "StarletLogger/logger.hpp"
+#include "starlet-graphics/handler/meshHandler.hpp"
+#include "starlet-logger/logger.hpp"
 
-#include "StarletGraphics/resource/meshCPU.hpp"
-#include "StarletGraphics/resource/meshGPU.hpp"
+#include "starlet-graphics/resource/meshCPU.hpp"
+#include "starlet-graphics/resource/meshGPU.hpp"
 
 #include <glad/glad.h>
 

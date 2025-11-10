@@ -1,7 +1,7 @@
-#include "StarletGraphics/manager/meshManager.hpp"
-#include "StarletLogger/logger.hpp"
+#include "starlet-graphics/manager/meshManager.hpp"
+#include "starlet-logger/logger.hpp"
 
-#include "StarletSerializer/data/meshData.hpp"
+#include "starlet-serializer/data/meshData.hpp"
 
 namespace Starlet::Graphics {
 	MeshManager::~MeshManager() {

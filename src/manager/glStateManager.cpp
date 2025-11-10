@@ -1,5 +1,5 @@
-#include "StarletGraphics/manager/glStateManager.hpp"
-#include "StarletLogger/logger.hpp"
+#include "starlet-graphics/manager/glStateManager.hpp"
+#include "starlet-logger/logger.hpp"
 
 #include <glad/glad.h>
 

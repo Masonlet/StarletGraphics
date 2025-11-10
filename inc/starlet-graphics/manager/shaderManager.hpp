@@ -1,10 +1,10 @@
 #pragma once
 
-#include "StarletGraphics/manager/manager.hpp"
+#include "starlet-graphics/manager/manager.hpp"
 
-#include "StarletGraphics/resource/shaderGPU.hpp"
-#include "StarletGraphics/handler/shaderHandler.hpp"
-#include "StarletSerializer/parser/parser.hpp"
+#include "starlet-graphics/resource/shaderGPU.hpp"
+#include "starlet-graphics/handler/shaderHandler.hpp"
+#include "starlet-serializer/parser/parser.hpp"
 #include <map>
 
 namespace Starlet::Graphics {

@@ -1,5 +1,5 @@
-#include "StarletGraphics/renderer/cameraView.hpp"
-#include "StarletMath/constants.hpp"
+#include "starlet-graphics/renderer/cameraView.hpp"
+#include "starlet-math/constants.hpp"
 
 namespace Starlet::Graphics {
   CameraView CameraView::fromTransform(const Math::Vec3<float>& position, const Math::Vec3<float>& rotation, const Math::Vec3<float>& worldUp) {

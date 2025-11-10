@@ -1,9 +1,9 @@
 #pragma once
 
-#include "StarletGraphics/uniform/uniformCache.hpp"
-#include "StarletGraphics/renderer/lightRenderer.hpp"
-#include "StarletGraphics/renderer/modelRenderer.hpp"
-#include "StarletGraphics/renderer/cameraRenderer.hpp"
+#include "starlet-graphics/uniform/uniformCache.hpp"
+#include "starlet-graphics/renderer/lightRenderer.hpp"
+#include "starlet-graphics/renderer/modelRenderer.hpp"
+#include "starlet-graphics/renderer/cameraRenderer.hpp"
 
 namespace Starlet {
 	namespace Scene {

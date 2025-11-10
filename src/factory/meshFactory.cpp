@@ -1,13 +1,13 @@
-#include "StarletGraphics/factory/meshFactory.hpp"
-#include "StarletGraphics/manager/meshManager.hpp"
-#include "StarletLogger/logger.hpp"
+#include "starlet-graphics/factory/meshFactory.hpp"
+#include "starlet-graphics/manager/meshManager.hpp"
+#include "starlet-logger/logger.hpp"
 
-#include "StarletGraphics/resource/meshCPU.hpp"
+#include "starlet-graphics/resource/meshCPU.hpp"
 
-#include "StarletScene/component/primitive.hpp"
-#include "StarletScene/component/grid.hpp"
-#include "StarletScene/component/transform.hpp"
-#include "StarletScene/component/colour.hpp"
+#include "starlet-scene/component/primitive.hpp"
+#include "starlet-scene/component/grid.hpp"
+#include "starlet-scene/component/transform.hpp"
+#include "starlet-scene/component/colour.hpp"
 
 namespace Starlet::Graphics {
   bool MeshFactory::createPrimitiveMesh(const Scene::Primitive& primitive, const Scene::TransformComponent& transform, const Scene::ColourComponent& colour) {

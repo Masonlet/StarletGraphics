@@ -1,15 +1,15 @@
-#include "StarletGraphics/renderer/modelRenderer.hpp"
-#include "StarletLogger/logger.hpp"
+#include "starlet-graphics/renderer/modelRenderer.hpp"
+#include "starlet-logger/logger.hpp"
 
-#include "StarletGraphics/uniform/uniformCache.hpp"
-#include "StarletGraphics/manager/resourceManager.hpp"
+#include "starlet-graphics/uniform/uniformCache.hpp"
+#include "starlet-graphics/manager/resourceManager.hpp"
 
-#include "StarletScene/scene.hpp"
-#include "StarletScene/component/model.hpp"
-#include "StarletScene/component/transform.hpp"
-#include "StarletScene/component/colour.hpp"
+#include "starlet-scene/scene.hpp"
+#include "starlet-scene/component/model.hpp"
+#include "starlet-scene/component/transform.hpp"
+#include "starlet-scene/component/colour.hpp"
 
-#include "StarletMath/mat4.hpp"
+#include "starlet-math/mat4.hpp"
 
 #include <glad/glad.h>
 

@@ -1,10 +1,10 @@
-#include "StarletGraphics/renderer/lightRenderer.hpp"
-#include "StarletGraphics/uniform/uniformCache.hpp"
+#include "starlet-graphics/renderer/lightRenderer.hpp"
+#include "starlet-graphics/uniform/uniformCache.hpp"
 
-#include "StarletScene/scene.hpp"
-#include "StarletScene/component/light.hpp"
-#include "StarletScene/component/transform.hpp"
-#include "StarletScene/component/colour.hpp"
+#include "starlet-scene/scene.hpp"
+#include "starlet-scene/component/light.hpp"
+#include "starlet-scene/component/transform.hpp"
+#include "starlet-scene/component/colour.hpp"
 
 #include <glad/glad.h>
 

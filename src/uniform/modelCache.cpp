@@ -1,4 +1,4 @@
-#include "StarletGraphics/uniform/uniformCache.hpp"
+#include "starlet-graphics/uniform/uniformCache.hpp"
 #include <glad/glad.h>
 
 namespace Starlet::Graphics {

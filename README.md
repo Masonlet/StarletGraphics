@@ -1,4 +1,4 @@
-# StarletGraphics
+# Starlet Graphics
 A lightweight graphics loading &amp; management library for Starlet projects with Vulkan and OpenGL engines in mind.
 
 ## Features
@@ -28,8 +28,11 @@ A lightweight graphics loading &amp; management library for Starlet projects wit
 ```cmake
 include(FetchContent)
 
-FetchContent_Declare(StarletGraphics GIT_REPOSITORY https://github.com/Masonlet/StarletGraphics.git GIT_TAG main)
-FetchContent_MakeAvailable(StarletGraphics)
+FetchContent_Declare(starlet_graphics
+  GIT_REPOSITORY https://github.com/masonlet/starlet-graphics.git 
+  GIT_TAG main
+)
+FetchContent_MakeAvailable(starlet_graphics)
 
-target_link_libraries(YourAppName PRIVATE StarletGraphics)
+target_link_libraries(app_name PRIVATE starlet_graphics)
 ```

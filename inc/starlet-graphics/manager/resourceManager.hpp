@@ -1,10 +1,10 @@
 #pragma once
 
-#include "StarletGraphics/manager/meshManager.hpp"
-#include "StarletGraphics/factory/meshFactory.hpp"
-#include "StarletGraphics/manager/textureManager.hpp"
+#include "starlet-graphics/manager/meshManager.hpp"
+#include "starlet-graphics/factory/meshFactory.hpp"
+#include "starlet-graphics/manager/textureManager.hpp"
 
-#include "StarletGraphics/resource/resourceHandle.hpp"
+#include "starlet-graphics/resource/resourceHandle.hpp"
 
 #include <unordered_map>
 #include <cstdint>
