@@ -1,10 +1,10 @@
 #pragma once
 
 #include "starlet-graphics/manager/manager.hpp"
-#include "starlet-graphics/resource/textureGPU.hpp"
+#include "starlet-graphics/resource/texture_gpu.hpp"
 
-#include "starlet-serializer/parser/imageParser.hpp"
-#include "starlet-graphics/handler/textureHandler.hpp"
+#include "starlet-serializer/parser/image_parser.hpp"
+#include "starlet-graphics/handler/texture_handler.hpp"
 
 #include <map>
 

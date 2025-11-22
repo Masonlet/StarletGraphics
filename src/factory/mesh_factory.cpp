@@ -1,8 +1,8 @@
-#include "starlet-graphics/factory/meshFactory.hpp"
-#include "starlet-graphics/manager/meshManager.hpp"
+#include "starlet-graphics/factory/mesh_factory.hpp"
+#include "starlet-graphics/manager/mesh_manager.hpp"
 #include "starlet-logger/logger.hpp"
 
-#include "starlet-graphics/resource/meshCPU.hpp"
+#include "starlet-graphics/resource/mesh_cpu.hpp"
 
 #include "starlet-scene/component/primitive.hpp"
 #include "starlet-scene/component/grid.hpp"
@@ -52,7 +52,7 @@ namespace Starlet::Graphics {
     info.indices[2] = 2;
 
     return meshManager.addMesh(name, info)
-      ? Logger::debugLog("Primitive", "createTriangle", "Added triangle: " + name)
+      ? Logger::debug("Primitive", "createTriangle", "Added triangle: " + name)
       : Logger::error("Primitive", "createTriangle", "Failed to create triangle " + name);
   }
 
@@ -84,7 +84,7 @@ namespace Starlet::Graphics {
     }
 
     return meshManager.addMesh(name, info)
-      ? Logger::debugLog("Primitive", "createSquare", "Added square: " + name)
+      ? Logger::debug("Primitive", "createSquare", "Added square: " + name)
       : Logger::error("Primitive", "createSquare", "Failed to create square " + name);
   }
 
@@ -128,7 +128,7 @@ namespace Starlet::Graphics {
     }
 
     return meshManager.addMesh(name, info)
-      ? Logger::debugLog("Primitive", "createCube", "Added cube: " + name)
+      ? Logger::debug("Primitive", "createCube", "Added cube: " + name)
       : Logger::error("Primitive", "createCube", "Failed to create cube " + name);
   }
 }

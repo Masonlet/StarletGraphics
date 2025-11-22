@@ -1,10 +1,10 @@
-#include "starlet-graphics/manager/resourceManager.hpp"
+#include "starlet-graphics/manager/resource_manager.hpp"
 #include "starlet-logger/logger.hpp"
 
-#include "starlet-scene/manager/sceneManager.hpp"
+#include "starlet-scene/manager/scene_manager.hpp"
 #include "starlet-scene/component/primitive.hpp"
 #include "starlet-scene/component/model.hpp"
-#include "starlet-scene/component/textureData.hpp"
+#include "starlet-scene/component/texture_data.hpp"
 #include "starlet-scene/component/grid.hpp"
 #include "starlet-scene/component/transform.hpp"
 #include "starlet-scene/component/colour.hpp"
@@ -97,7 +97,7 @@ namespace Starlet::Graphics {
         return Logger::error("ResourceLoader", "loadMeshes", "Failed to register mesh: " + model->meshPath);
     }
 
-    return Logger::debugLog("ResourceLoader", "loadMeshes", "Loaded and registered " + std::to_string(models.size()) + " meshes");
+    return Logger::debug("ResourceLoader", "loadMeshes", "Loaded and registered " + std::to_string(models.size()) + " meshes");
   }
   bool ResourceManager::loadTextures(const std::vector<Scene::TextureData*>& textures) {
     for (const Scene::TextureData* texture : textures) {
@@ -123,7 +123,7 @@ namespace Starlet::Graphics {
         return Logger::error("ResourceLoader", "loadTextures", "Failed to add texture: " + texture->name);
     }
 
-    return Logger::debugLog("ResourceLoader", "loadTextures", "Loaded and added " + std::to_string(textures.size()) + " textures");
+    return Logger::debug("ResourceLoader", "loadTextures", "Loaded and added " + std::to_string(textures.size()) + " textures");
   }
 
   bool ResourceManager::processTextureConnections(Scene::Scene& scene) const {

@@ -1,7 +1,7 @@
-#include "starlet-graphics/manager/meshManager.hpp"
+#include "starlet-graphics/manager/mesh_manager.hpp"
 #include "starlet-logger/logger.hpp"
 
-#include "starlet-serializer/data/meshData.hpp"
+#include "starlet-serializer/data/mesh_data.hpp"
 
 namespace Starlet::Graphics {
 	MeshManager::~MeshManager() {
@@ -10,7 +10,7 @@ namespace Starlet::Graphics {
 	}
 
 	bool MeshManager::loadAndAddMesh(const std::string& path) {
-		if (exists(path)) return Logger::debugLog("MeshManager", "addMesh", "Mesh already exists: " + path);
+		if (exists(path)) return Logger::debug("MeshManager", "addMesh", "Mesh already exists: " + path);
 
 		Serializer::MeshData data;
 		if(!parser.parse(basePath + path, data))
@@ -34,7 +34,7 @@ namespace Starlet::Graphics {
 
 		pathToGPUMeshes[path] = std::move(meshGPU);
 		pathToCPUMeshes[path] = std::move(meshCPU);
-		return Logger::debugLog("MeshManager", "addMesh", "Added mesh: " + path);
+		return Logger::debug("MeshManager", "addMesh", "Added mesh: " + path);
 	}
 	bool MeshManager::addMesh(const std::string& path, MeshCPU& meshCPU) {
 		if (exists(path)) return true;
@@ -46,7 +46,7 @@ namespace Starlet::Graphics {
 
 		pathToGPUMeshes[path] = std::move(meshGPU);
 		pathToCPUMeshes[path] = std::move(meshCPU);
-		return Logger::debugLog("MeshManager", "addMesh", "Added mesh: " + path);
+		return Logger::debug("MeshManager", "addMesh", "Added mesh: " + path);
 	}
 
 	MeshGPU* MeshManager::getMeshGPU(const std::string& name) {

@@ -1,5 +1,5 @@
-#include "starlet-graphics/renderer/cameraRenderer.hpp"
-#include "starlet-graphics/uniform/uniformCache.hpp"
+#include "starlet-graphics/renderer/camera_renderer.hpp"
+#include "starlet-graphics/uniform/uniform_cache.hpp"
 
 #include "starlet-math/mat4.hpp"
 

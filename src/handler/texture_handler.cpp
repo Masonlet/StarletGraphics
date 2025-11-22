@@ -1,8 +1,8 @@
-#include "starlet-graphics/handler/textureHandler.hpp"
+#include "starlet-graphics/handler/texture_handler.hpp"
 #include "starlet-logger/logger.hpp"
 
-#include "starlet-graphics/resource/textureCPU.hpp"
-#include "starlet-graphics/resource/textureGPU.hpp"
+#include "starlet-graphics/resource/texture_cpu.hpp"
+#include "starlet-graphics/resource/texture_gpu.hpp"
 
 #include <glad/glad.h>
 

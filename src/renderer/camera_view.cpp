@@ -1,4 +1,4 @@
-#include "starlet-graphics/renderer/cameraView.hpp"
+#include "starlet-graphics/renderer/camera_view.hpp"
 #include "starlet-math/constants.hpp"
 
 namespace Starlet::Graphics {

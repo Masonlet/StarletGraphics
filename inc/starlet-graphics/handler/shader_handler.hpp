@@ -1,6 +1,6 @@
 #pragma once
 
-#include "starlet-graphics/handler/resourceHandler.hpp"
+#include "starlet-graphics/handler/resource_handler.hpp"
 
 #include <string>
 

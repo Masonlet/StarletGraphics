@@ -1,8 +1,8 @@
-#include "starlet-graphics/manager/textureManager.hpp"
+#include "starlet-graphics/manager/texture_manager.hpp"
 #include "starlet-logger/logger.hpp"
 
-#include "starlet-serializer/data/imageData.hpp"
-#include "starlet-graphics/resource/textureCPU.hpp"
+#include "starlet-serializer/data/image_data.hpp"
+#include "starlet-graphics/resource/texture_cpu.hpp"
 
 namespace Starlet::Graphics {
   TextureManager::~TextureManager() {
@@ -34,7 +34,7 @@ namespace Starlet::Graphics {
       return Logger::error("TextureManager", "addTexture", "Failed upload: " + name);
 
     nameToGPUTextures[name] = std::move(gpuTexture);
-    return Logger::debugLog("TextureManager", "addTexture", "Added texture: " + name + " at: " + path);
+    return Logger::debug("TextureManager", "addTexture", "Added texture: " + name + " at: " + path);
   }
 
   bool TextureManager::addTextureCube(const std::string& name, const std::string(&facePaths)[6]) {
@@ -58,6 +58,6 @@ namespace Starlet::Graphics {
       return Logger::error("TextureManager", "addCubeTexture", "Failed to upload: " + name);
 
     nameToGPUTextures[name] = std::move(cube);
-    return Logger::debugLog("TextureManager", "addTextureCube", "Added texture cube: " + name);
+    return Logger::debug("TextureManager", "addTextureCube", "Added texture cube: " + name);
   }
 }

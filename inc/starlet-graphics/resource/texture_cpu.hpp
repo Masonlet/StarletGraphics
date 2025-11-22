@@ -1,6 +1,6 @@
 #pragma once
 
-#include "starlet-graphics/resource/resourceCPU.hpp"
+#include "starlet-graphics/resource/resource_cpu.hpp"
 
 #include <vector>
 

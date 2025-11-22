@@ -1,8 +1,8 @@
-#include "starlet-graphics/renderer/modelRenderer.hpp"
+#include "starlet-graphics/renderer/model_renderer.hpp"
 #include "starlet-logger/logger.hpp"
 
-#include "starlet-graphics/uniform/uniformCache.hpp"
-#include "starlet-graphics/manager/resourceManager.hpp"
+#include "starlet-graphics/uniform/uniform_cache.hpp"
+#include "starlet-graphics/manager/resource_manager.hpp"
 
 #include "starlet-scene/scene.hpp"
 #include "starlet-scene/component/model.hpp"

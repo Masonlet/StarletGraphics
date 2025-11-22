@@ -1,14 +1,14 @@
 #include "starlet-graphics/renderer/renderer.hpp"
-#include "starlet-graphics/manager/textureManager.hpp"
-#include "starlet-graphics/manager/meshManager.hpp"
-#include "starlet-graphics/manager/shaderManager.hpp"
+#include "starlet-graphics/manager/texture_manager.hpp"
+#include "starlet-graphics/manager/mesh_manager.hpp"
+#include "starlet-graphics/manager/shader_manager.hpp"
 #include "starlet-logger/logger.hpp"
 
 #include "starlet-scene/scene.hpp"
 #include "starlet-scene/component/camera.hpp"
 #include "starlet-scene/component/model.hpp"
 #include "starlet-scene/component/transform.hpp"
-#include "starlet-graphics/renderer/cameraView.hpp"
+#include "starlet-graphics/renderer/camera_view.hpp"
 #include "starlet-math/mat4.hpp"
 
 #include <glad/glad.h>

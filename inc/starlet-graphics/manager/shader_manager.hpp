@@ -2,8 +2,8 @@
 
 #include "starlet-graphics/manager/manager.hpp"
 
-#include "starlet-graphics/resource/shaderGPU.hpp"
-#include "starlet-graphics/handler/shaderHandler.hpp"
+#include "starlet-graphics/resource/shader_gpu.hpp"
+#include "starlet-graphics/handler/shader_handler.hpp"
 #include "starlet-serializer/parser/parser.hpp"
 #include <map>
 
