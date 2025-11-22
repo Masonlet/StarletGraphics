@@ -1,7 +1,7 @@
-#include "starlet-graphics/manager/shaderManager.hpp"
+#include "starlet-graphics/manager/shader_manager.hpp"
 #include "starlet-logger/logger.hpp"
 
-#include "starlet-graphics/resource/shaderCPU.hpp"
+#include "starlet-graphics/resource/shader_cpu.hpp"
 
 #include <glad/glad.h>
 

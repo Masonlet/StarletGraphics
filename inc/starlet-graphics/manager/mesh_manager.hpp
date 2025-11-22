@@ -1,11 +1,11 @@
 #pragma once
 
 #include "starlet-graphics/manager/manager.hpp"
-#include "starlet-graphics/handler/meshHandler.hpp"
-#include "starlet-graphics/resource/meshCPU.hpp"
-#include "starlet-graphics/resource/meshGPU.hpp"
+#include "starlet-graphics/handler/mesh_handler.hpp"
+#include "starlet-graphics/resource/mesh_cpu.hpp"
+#include "starlet-graphics/resource/mesh_gpu.hpp"
 
-#include "starlet-serializer/parser/meshParser.hpp"
+#include "starlet-serializer/parser/mesh_parser.hpp"
 
 #include <map>
 

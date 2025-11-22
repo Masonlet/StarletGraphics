@@ -1,4 +1,4 @@
-#include "starlet-graphics/manager/glStateManager.hpp"
+#include "starlet-graphics/manager/gl_state_manager.hpp"
 #include "starlet-logger/logger.hpp"
 
 #include <glad/glad.h>

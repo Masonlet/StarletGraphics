@@ -1,5 +1,5 @@
-#include "starlet-graphics/renderer/lightRenderer.hpp"
-#include "starlet-graphics/uniform/uniformCache.hpp"
+#include "starlet-graphics/renderer/light_renderer.hpp"
+#include "starlet-graphics/uniform/uniform_cache.hpp"
 
 #include "starlet-scene/scene.hpp"
 #include "starlet-scene/component/light.hpp"
